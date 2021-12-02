@@ -10,6 +10,7 @@ abstract class GraphtonBaseQuery {
     protected availableFields: Set<string> = new Set([]);
     protected queryName = '';
     protected queryFields: Set<string> = new Set([]);
+    protected arguments = {};
 
     /**
      * Add all known fields - this is defaultly set.
@@ -87,7 +88,18 @@ abstract class GraphtonBaseQuery {
      * Execute the query
      */
     public async get(requestOptions: RequestOptions = {}) {
-        const query = `query ${this.queryName} { ${this.queryName} { ${[...this.queryFields].join(' ')} } }`;
+        const queryArgs = Object.entries(this.arguments);
+        let queryArgString: string = '';
+        if(queryArgs.length > 0) {
+            let queryArgItems: string[] = [];
+            for(const [name, value] of queryArgs) {
+                queryArgItems.push(`${name}: ${JSON.stringify(value)}`);
+            }
+
+            queryArgString = `(${queryArgItems.join(', ')})`;
+        }
+
+        const query = `query ${this.queryName} { ${this.queryName}${queryArgString} { ${[...this.queryFields].join(' ')} } }`;
 
         const options = {
             method: "post",

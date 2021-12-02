@@ -3,7 +3,7 @@ import axios from "axios";
 import {introspectQuery} from "../graphql/query/introspect.js";
 import * as fs from "fs";
 import {pascalCase} from "change-case";
-import {Field, ReturnType, Schema, Type} from "../types/GraphQL";
+import {Arg, Field, ReturnType, Schema, Type} from "../types/GraphQL";
 import {GenerateCommandOptions} from "../types/Generator";
 
 type OutContentSection = string[];
@@ -101,15 +101,10 @@ export default class Generator {
         yield `class GraphtonQueryBuilder {`;
 
         for(const query of queries) {
-            const args: string[] = [];
-            const argNames: string[] = [];
-            for(const arg of query.args) {
-                args.push(`${arg.name}${Generator.toTypeAppend(arg.type)}${arg.defaultValue ? ` = ${JSON.stringify(arg.defaultValue)}` : ''}`);
-                argNames.push(arg.name);
-            }
+            const {typed, untyped} = this.argsToMethodParameters(query.args);
 
-            yield `  public static ${query.name}(${args.join(', ')}) {`;
-            yield `    return new ${pascalCase(query.name)}Query(${argNames.join(', ')});`;
+            yield `  public static ${query.name}(${typed.join(', ')}) {`;
+            yield `    return new ${pascalCase(query.name)}Query(${untyped.join(', ')});`;
             yield `  }`;
         }
 
@@ -123,16 +118,29 @@ export default class Generator {
         }
     }
 
+    private argsToMethodParameters(args: Arg[]) {
+        const typed: string[] = [];
+        const untyped: string[] = [];
+        for (const arg of args) {
+            typed.push(`${arg.name}${Generator.toTypeAppend(arg.type)}${arg.defaultValue ? ` = ${JSON.stringify(arg.defaultValue)}` : ''}`);
+            untyped.push(arg.name);
+        }
+        return {typed, untyped};
+    }
+
     private generateQueryClass(query: Field): string {
         const returnType = Generator.findReturnType(query.type);
 
         const fieldNames = this.gqlSchema?.types.find(t=>t.name==returnType)?.fields.map(f=>f.name) || [];
+        const params = this.argsToMethodParameters(query.args);
 
         return fillStub('Query', {
             "QUERYCLASSNAME": `${pascalCase(query.name)}Query`,
             "FIELDS": JSON.stringify(fieldNames),
             "FIELDSTUPLE": fieldNames.map(f => JSON.stringify(f)).join('|'),
             "QUERYNAME": query.name,
+            "TYPEDPARAMS": params.typed.join(', '),
+            "PARAMS": params.untyped.join(', '),
         });
     }
 

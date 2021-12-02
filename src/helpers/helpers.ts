@@ -24,5 +24,9 @@ export function fillStub(stub: string, substitutions: Record<string, string> = {
             .replaceAll(`__${searchValue}__`, replaceValue);
     }
 
+    stubContent = stubContent.replaceAll(/\/\*.*?\*\//g, '')
+        .replaceAll(/'\/\*\*.*?\*\*\/'/g, '')
+        .replaceAll(/__.*?__/g, '');
+
     return stubContent;
 }

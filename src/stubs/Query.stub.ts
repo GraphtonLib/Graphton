@@ -7,8 +7,9 @@ class __QUERYCLASSNAME__ extends GraphtonBaseQuery {
     protected queryFields: Set<string> = new Set(/*FIELDS*/);
     protected arguments = {};
 
-    constructor(/*ARGUMENTS*/) {
+    constructor(/*TYPEDPARAMS*/) {
         super();
+        this.arguments = {/*PARAMS*/};
     }
 
     withFields(...fieldNames: (__QUERYCLASSNAME__AvailableFields|__QUERYCLASSNAME__AvailableFields[])[]): this {

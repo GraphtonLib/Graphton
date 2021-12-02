@@ -5,6 +5,7 @@ export default class Generator {
     private generateTypes;
     private generateFields;
     private generateQueries;
+    private argsToMethodParameters;
     private generateQueryClass;
     private static findReturnType;
     private static toTypeAppend;

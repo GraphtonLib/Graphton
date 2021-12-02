@@ -18,5 +18,8 @@ export function fillStub(stub, substitutions = {}) {
             .replaceAll(`'/**${searchValue}**/'`, replaceValue)
             .replaceAll(`__${searchValue}__`, replaceValue);
     }
+    stubContent = stubContent.replaceAll(/\/\*.*?\*\//g, '')
+        .replaceAll(/'\/\*\*.*?\*\*\/'/g, '')
+        .replaceAll(/__.*?__/g, '');
     return stubContent;
 }
