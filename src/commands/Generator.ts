@@ -25,6 +25,11 @@ export default class Generator {
     async generate(schemaUri: string, options: GenerateCommandOptions) {
         const outContentSections: OutContentSection = [];
 
+        if(options.outputFile.endsWith('.js')) {
+            console.error('Graphton can - for now - only generate an .ts file, which will be compiled to .js in a later version of Graphton.');
+            process.exit(1);
+        }
+
         try {
             if(isUrl(schemaUri)) {
                 this.gqlSchema = (await axios.post(schemaUri, {query: introspectQuery}))?.data?.data?.__schema;
