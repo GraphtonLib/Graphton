@@ -1,6 +1,7 @@
 export interface User {
     id?: number;
     name?: string;
+    age?: number | null;
 }
 export declare const grapthtonSettings: {
     setDefaultHeaders(headers: Record<string, string>): void;
@@ -68,7 +69,7 @@ declare class GraphtonQueryBuilderFactory {
     static user(id?: number | null): UserQuery;
 }
 export declare const query: GraphtonQueryBuilderFactory;
-declare type UsersQueryAvailableFields = "id" | "name";
+declare type UsersQueryAvailableFields = "id" | "name" | "age";
 interface UsersQueryResponse {
     data: User[];
     response: AxiosResponse;
@@ -88,7 +89,7 @@ declare class UsersQuery extends GraphtonBaseQuery {
     only(...fieldNames: (UsersQueryAvailableFields | UsersQueryAvailableFields[])[]): this;
     get(requestOptions?: RequestOptions): Promise<UsersQueryResponse>;
 }
-declare type UserQueryAvailableFields = "id" | "name";
+declare type UserQueryAvailableFields = "id" | "name" | "age";
 interface UserQueryResponse {
     data?: User | null;
     response: AxiosResponse;
@@ -109,12 +110,12 @@ declare class UserQuery extends GraphtonBaseQuery {
     get(requestOptions?: RequestOptions): Promise<UserQueryResponse>;
 }
 declare class GraphtonMutationBuilderFactory {
-    static createUser(name: string, pin: string): CreateUserMutation;
-    static updateUser(id: number, name?: string | null, pin?: string | null): UpdateUserMutation;
+    static createUser(name: string, age?: number | null): CreateUserMutation;
+    static updateUser(id: number, name?: string | null, age?: number | null): UpdateUserMutation;
     static deleteUser(id: number): DeleteUserMutation;
 }
 export declare const mutation: GraphtonMutationBuilderFactory;
-declare type CreateUserMutationAvailableFields = "id" | "name";
+declare type CreateUserMutationAvailableFields = "id" | "name" | "age";
 interface CreateUserMutationResponse {
     data: User;
     response: AxiosResponse;
@@ -125,7 +126,7 @@ declare class CreateUserMutation extends GraphtonBaseQuery {
     protected queryFields: Set<string>;
     protected arguments: Record<string, any>;
     protected rootType: 'query' | 'mutation';
-    constructor(name: string, pin: string);
+    constructor(name: string, age?: number | null);
     withFields(...fieldNames: (CreateUserMutationAvailableFields | CreateUserMutationAvailableFields[])[]): this;
     withField(fieldName: CreateUserMutationAvailableFields): this;
     withoutFields(...fieldNames: (CreateUserMutationAvailableFields | CreateUserMutationAvailableFields[])[]): this;
@@ -134,7 +135,7 @@ declare class CreateUserMutation extends GraphtonBaseQuery {
     only(...fieldNames: (CreateUserMutationAvailableFields | CreateUserMutationAvailableFields[])[]): this;
     do(requestOptions?: RequestOptions): Promise<CreateUserMutationResponse>;
 }
-declare type UpdateUserMutationAvailableFields = "id" | "name";
+declare type UpdateUserMutationAvailableFields = "id" | "name" | "age";
 interface UpdateUserMutationResponse {
     data: User;
     response: AxiosResponse;
@@ -145,7 +146,7 @@ declare class UpdateUserMutation extends GraphtonBaseQuery {
     protected queryFields: Set<string>;
     protected arguments: Record<string, any>;
     protected rootType: 'query' | 'mutation';
-    constructor(id: number, name?: string | null, pin?: string | null);
+    constructor(id: number, name?: string | null, age?: number | null);
     withFields(...fieldNames: (UpdateUserMutationAvailableFields | UpdateUserMutationAvailableFields[])[]): this;
     withField(fieldName: UpdateUserMutationAvailableFields): this;
     withoutFields(...fieldNames: (UpdateUserMutationAvailableFields | UpdateUserMutationAvailableFields[])[]): this;
@@ -154,7 +155,7 @@ declare class UpdateUserMutation extends GraphtonBaseQuery {
     only(...fieldNames: (UpdateUserMutationAvailableFields | UpdateUserMutationAvailableFields[])[]): this;
     do(requestOptions?: RequestOptions): Promise<UpdateUserMutationResponse>;
 }
-declare type DeleteUserMutationAvailableFields = "id" | "name";
+declare type DeleteUserMutationAvailableFields = "id" | "name" | "age";
 interface DeleteUserMutationResponse {
     data: User;
     response: AxiosResponse;

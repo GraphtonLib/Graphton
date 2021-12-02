@@ -147,7 +147,7 @@ export default class Generator {
             "PARAMS": params.untyped.join(', '),
             "ROOTTYPE": 'query',
             "RETURNTYPE": Generator.toTypeAppend(query.type, false),
-        }, ["USEGET"]);
+        });
     }
     generateMutationClass(query) {
         const returnType = Generator.findReturnType(query.type);
@@ -162,7 +162,7 @@ export default class Generator {
             "PARAMS": params.untyped.join(', '),
             "ROOTTYPE": 'mutation',
             "RETURNTYPE": Generator.toTypeAppend(query.type, false),
-        }, ["USEDO"]);
+        });
     }
     static findReturnType(type) {
         if (type?.kind === 'OBJECT') {

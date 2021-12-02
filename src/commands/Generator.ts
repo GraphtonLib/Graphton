@@ -186,7 +186,7 @@ export default class Generator {
             "PARAMS": params.untyped.join(', '),
             "ROOTTYPE": 'query',
             "RETURNTYPE": Generator.toTypeAppend(query.type, false),
-        }, ["USEGET"]);
+        });
     }
 
     private generateMutationClass(query: Field): string {
@@ -204,7 +204,7 @@ export default class Generator {
             "PARAMS": params.untyped.join(', '),
             "ROOTTYPE": 'mutation',
             "RETURNTYPE": Generator.toTypeAppend(query.type, false),
-        }, ["USEDO"]);
+        });
     }
 
     private static findReturnType(type: ReturnType): string|null {

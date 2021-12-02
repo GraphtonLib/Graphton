@@ -124,7 +124,7 @@ class GraphtonQueryBuilderFactory {
 }
 export const query = new GraphtonQueryBuilderFactory();
 class UsersQuery extends GraphtonBaseQuery {
-    availableFields = new Set(["id", "name"]);
+    availableFields = new Set(["id", "name", "age"]);
     queryName = 'users';
     // Builder essentials
     queryFields = new Set([]);
@@ -158,7 +158,7 @@ class UsersQuery extends GraphtonBaseQuery {
     }
 }
 class UserQuery extends GraphtonBaseQuery {
-    availableFields = new Set(["id", "name"]);
+    availableFields = new Set(["id", "name", "age"]);
     queryName = 'user';
     // Builder essentials
     queryFields = new Set([]);
@@ -193,11 +193,11 @@ class UserQuery extends GraphtonBaseQuery {
 }
 // REGION: Mutations
 class GraphtonMutationBuilderFactory {
-    static createUser(name, pin) {
-        return new CreateUserMutation(name, pin);
+    static createUser(name, age) {
+        return new CreateUserMutation(name, age);
     }
-    static updateUser(id, name, pin) {
-        return new UpdateUserMutation(id, name, pin);
+    static updateUser(id, name, age) {
+        return new UpdateUserMutation(id, name, age);
     }
     static deleteUser(id) {
         return new DeleteUserMutation(id);
@@ -205,15 +205,15 @@ class GraphtonMutationBuilderFactory {
 }
 export const mutation = new GraphtonMutationBuilderFactory();
 class CreateUserMutation extends GraphtonBaseQuery {
-    availableFields = new Set(["id", "name"]);
+    availableFields = new Set(["id", "name", "age"]);
     queryName = 'createUser';
     // Builder essentials
     queryFields = new Set([]);
     arguments = {};
     rootType = 'mutation';
-    constructor(name, pin) {
+    constructor(name, age) {
         super();
-        this.arguments = { name, pin };
+        this.arguments = { name, age };
         Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
     }
     withFields(...fieldNames) {
@@ -239,15 +239,15 @@ class CreateUserMutation extends GraphtonBaseQuery {
     }
 }
 class UpdateUserMutation extends GraphtonBaseQuery {
-    availableFields = new Set(["id", "name"]);
+    availableFields = new Set(["id", "name", "age"]);
     queryName = 'updateUser';
     // Builder essentials
     queryFields = new Set([]);
     arguments = {};
     rootType = 'mutation';
-    constructor(id, name, pin) {
+    constructor(id, name, age) {
         super();
-        this.arguments = { id, name, pin };
+        this.arguments = { id, name, age };
         Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
     }
     withFields(...fieldNames) {
@@ -273,7 +273,7 @@ class UpdateUserMutation extends GraphtonBaseQuery {
     }
 }
 class DeleteUserMutation extends GraphtonBaseQuery {
-    availableFields = new Set(["id", "name"]);
+    availableFields = new Set(["id", "name", "age"]);
     queryName = 'deleteUser';
     // Builder essentials
     queryFields = new Set([]);

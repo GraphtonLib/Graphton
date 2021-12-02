@@ -33,10 +33,10 @@ class __QUERYCLASSNAME__ extends GraphtonBaseQuery {
     only(...fieldNames: (__QUERYCLASSNAME__AvailableFields|__QUERYCLASSNAME__AvailableFields[])[]): this {
         return super.only(...fieldNames);
     }
-    /*IF:USEGET*/async get(requestOptions: RequestOptions = {}): Promise<__QUERYCLASSNAME__Response> {
+    async get(requestOptions: RequestOptions = {}): Promise<__QUERYCLASSNAME__Response> {
         return <__QUERYCLASSNAME__Response>(await super.execute());
-    }/*ENDIF:USEGET*/
-    /*IF:USEDO*/async do(requestOptions: RequestOptions = {}): Promise<__QUERYCLASSNAME__Response> {
+    }
+    async do(requestOptions: RequestOptions = {}): Promise<__QUERYCLASSNAME__Response> {
         return <__QUERYCLASSNAME__Response>(await super.execute());
-    }/*ENDIF:USEDO*/
+    }
 }

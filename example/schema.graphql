@@ -9,9 +9,10 @@ type Query {
 type User {
   id: ID!
   name: String!
+  age: Int
 }
 type Mutation {
-  createUser(name: String!, pin: String!): User!
-  updateUser(id: ID!, name: String, pin: String): User!
+  createUser(name: String!, age: Int): User!
+  updateUser(id: ID!, name: String, age: Int): User!
   deleteUser(id: ID!): User!
 }

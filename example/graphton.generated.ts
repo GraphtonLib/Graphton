@@ -5,6 +5,7 @@
 export interface User {
   id?: number,
   name?: string,
+  age?: number | null,
 }
 
 // REGION: Base classes
@@ -164,13 +165,13 @@ class GraphtonQueryBuilderFactory {
 }
 export const query = new GraphtonQueryBuilderFactory();
 
-type UsersQueryAvailableFields = "id"|"name";
+type UsersQueryAvailableFields = "id"|"name"|"age";
 interface UsersQueryResponse {
     data: User[],
     response: AxiosResponse
 }
 class UsersQuery extends GraphtonBaseQuery {
-    protected availableFields: Set<string> = new Set(["id","name"]);
+    protected availableFields: Set<string> = new Set(["id","name","age"]);
     protected queryName: string = 'users';
     // Builder essentials
     protected queryFields: Set<string> = new Set([]);
@@ -206,13 +207,13 @@ class UsersQuery extends GraphtonBaseQuery {
 }
 
 
-type UserQueryAvailableFields = "id"|"name";
+type UserQueryAvailableFields = "id"|"name"|"age";
 interface UserQueryResponse {
     data?: User | null,
     response: AxiosResponse
 }
 class UserQuery extends GraphtonBaseQuery {
-    protected availableFields: Set<string> = new Set(["id","name"]);
+    protected availableFields: Set<string> = new Set(["id","name","age"]);
     protected queryName: string = 'user';
     // Builder essentials
     protected queryFields: Set<string> = new Set([]);
@@ -251,11 +252,11 @@ class UserQuery extends GraphtonBaseQuery {
 
 // REGION: Mutations
 class GraphtonMutationBuilderFactory {
-  public static createUser(name: string, pin: string) {
-    return new CreateUserMutation(name, pin);
+  public static createUser(name: string, age?: number | null) {
+    return new CreateUserMutation(name, age);
   }
-  public static updateUser(id: number, name?: string | null, pin?: string | null) {
-    return new UpdateUserMutation(id, name, pin);
+  public static updateUser(id: number, name?: string | null, age?: number | null) {
+    return new UpdateUserMutation(id, name, age);
   }
   public static deleteUser(id: number) {
     return new DeleteUserMutation(id);
@@ -263,21 +264,21 @@ class GraphtonMutationBuilderFactory {
 }
 export const mutation = new GraphtonMutationBuilderFactory();
 
-type CreateUserMutationAvailableFields = "id"|"name";
+type CreateUserMutationAvailableFields = "id"|"name"|"age";
 interface CreateUserMutationResponse {
     data: User,
     response: AxiosResponse
 }
 class CreateUserMutation extends GraphtonBaseQuery {
-    protected availableFields: Set<string> = new Set(["id","name"]);
+    protected availableFields: Set<string> = new Set(["id","name","age"]);
     protected queryName: string = 'createUser';
     // Builder essentials
     protected queryFields: Set<string> = new Set([]);
     protected arguments: Record<string, any> = {};
     protected rootType: 'query'|'mutation' = 'mutation';
-    constructor(name: string, pin: string) {
+    constructor(name: string, age?: number | null) {
         super();
-        this.arguments = {name, pin};
+        this.arguments = {name, age};
         Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
     }
     withFields(...fieldNames: (CreateUserMutationAvailableFields|CreateUserMutationAvailableFields[])[]): this {
@@ -305,21 +306,21 @@ class CreateUserMutation extends GraphtonBaseQuery {
 }
 
 
-type UpdateUserMutationAvailableFields = "id"|"name";
+type UpdateUserMutationAvailableFields = "id"|"name"|"age";
 interface UpdateUserMutationResponse {
     data: User,
     response: AxiosResponse
 }
 class UpdateUserMutation extends GraphtonBaseQuery {
-    protected availableFields: Set<string> = new Set(["id","name"]);
+    protected availableFields: Set<string> = new Set(["id","name","age"]);
     protected queryName: string = 'updateUser';
     // Builder essentials
     protected queryFields: Set<string> = new Set([]);
     protected arguments: Record<string, any> = {};
     protected rootType: 'query'|'mutation' = 'mutation';
-    constructor(id: number, name?: string | null, pin?: string | null) {
+    constructor(id: number, name?: string | null, age?: number | null) {
         super();
-        this.arguments = {id, name, pin};
+        this.arguments = {id, name, age};
         Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
     }
     withFields(...fieldNames: (UpdateUserMutationAvailableFields|UpdateUserMutationAvailableFields[])[]): this {
@@ -347,13 +348,13 @@ class UpdateUserMutation extends GraphtonBaseQuery {
 }
 
 
-type DeleteUserMutationAvailableFields = "id"|"name";
+type DeleteUserMutationAvailableFields = "id"|"name"|"age";
 interface DeleteUserMutationResponse {
     data: User,
     response: AxiosResponse
 }
 class DeleteUserMutation extends GraphtonBaseQuery {
-    protected availableFields: Set<string> = new Set(["id","name"]);
+    protected availableFields: Set<string> = new Set(["id","name","age"]);
     protected queryName: string = 'deleteUser';
     // Builder essentials
     protected queryFields: Set<string> = new Set([]);
