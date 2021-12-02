@@ -1,17 +1,20 @@
 type __QUERYCLASSNAME__AvailableFields = '/**FIELDSTUPLE**/';
+interface __QUERYCLASSNAME__Response {
+    data/*RETURNTYPE*/,
+    response: AxiosResponse
+}
 class __QUERYCLASSNAME__ extends GraphtonBaseQuery {
     protected availableFields: Set<string> = new Set(/*FIELDS*/);
-    protected queryName = '/*QUERYNAME*/';
-
+    protected queryName: string = '/*QUERYNAME*/';
     // Builder essentials
-    protected queryFields: Set<string> = new Set(/*FIELDS*/);
-    protected arguments = {};
-
+    protected queryFields: Set<string> = new Set([]);
+    protected arguments: Record<string, any> = {};
+    protected rootType: 'query'|'mutation' = '/*ROOTTYPE*/';
     constructor(/*TYPEDPARAMS*/) {
         super();
         this.arguments = {/*PARAMS*/};
+        Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
     }
-
     withFields(...fieldNames: (__QUERYCLASSNAME__AvailableFields|__QUERYCLASSNAME__AvailableFields[])[]): this {
         return super.withFields(...fieldNames);
     }
@@ -30,4 +33,10 @@ class __QUERYCLASSNAME__ extends GraphtonBaseQuery {
     only(...fieldNames: (__QUERYCLASSNAME__AvailableFields|__QUERYCLASSNAME__AvailableFields[])[]): this {
         return super.only(...fieldNames);
     }
+    /*IF:USEGET*/async get(requestOptions: RequestOptions = {}): Promise<__QUERYCLASSNAME__Response> {
+        return <__QUERYCLASSNAME__Response>(await super.execute());
+    }/*ENDIF:USEGET*/
+    /*IF:USEDO*/async do(requestOptions: RequestOptions = {}): Promise<__QUERYCLASSNAME__Response> {
+        return <__QUERYCLASSNAME__Response>(await super.execute());
+    }/*ENDIF:USEDO*/
 }

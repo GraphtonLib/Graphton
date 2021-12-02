@@ -1,0 +1,17 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+type Query {
+  users: [User!]!
+  user(id: ID): User
+}
+type User {
+  id: ID!
+  name: String!
+}
+type Mutation {
+  createUser(name: String!, pin: String!): User!
+  updateUser(id: ID!, name: String, pin: String): User!
+  deleteUser(id: ID!): User!
+}

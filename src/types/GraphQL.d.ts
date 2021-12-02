@@ -67,3 +67,9 @@ export interface Schema {
     types: Type[];
     directives: Directive[];
 }
+
+export interface RetrospectionResponse {
+    data: {
+        __schema: Schema
+    }
+}

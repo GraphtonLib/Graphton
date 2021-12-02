@@ -1,3 +1,5 @@
+import axios, {AxiosResponse} from "axios";
+
 type GraphQLServerEndpoint = string;
 type Headers = Record<string, string>;
 
@@ -5,15 +7,20 @@ interface RequestOptions {
     headers?: Headers,
     url?: GraphQLServerEndpoint
 }
+interface QueryResponse {
+    data: Record<string, any>,
+    response: AxiosResponse
+}
 
 abstract class GraphtonBaseQuery {
     protected availableFields: Set<string> = new Set([]);
-    protected queryName = '';
+    protected queryName: string = '';
     protected queryFields: Set<string> = new Set([]);
-    protected arguments = {};
+    protected arguments: Record<string, any> = {};
+    protected rootType: 'query'|'mutation'|'' = '';
 
     /**
-     * Add all known fields - this is defaultly set.
+     * Add all known fields.
      */
     public allFields(): this {
         this.queryFields = new Set(this.availableFields);
@@ -85,32 +92,38 @@ abstract class GraphtonBaseQuery {
     }
 
     /**
-     * Execute the query
+     * Transform builder to graphql query string
      */
-    public async get(requestOptions: RequestOptions = {}) {
+    public toQuery() {
         const queryArgs = Object.entries(this.arguments);
         let queryArgString: string = '';
-        if(queryArgs.length > 0) {
+        if (queryArgs.length > 0) {
             let queryArgItems: string[] = [];
-            for(const [name, value] of queryArgs) {
+            for (const [name, value] of queryArgs) {
                 queryArgItems.push(`${name}: ${JSON.stringify(value)}`);
             }
 
             queryArgString = `(${queryArgItems.join(', ')})`;
         }
 
-        const query = `query ${this.queryName} { ${this.queryName}${queryArgString} { ${[...this.queryFields].join(' ')} } }`;
+        return `${this.rootType} ${this.queryName} { ${this.queryName}${queryArgString} { ${[...this.queryFields].join(' ')} } }`;
+    }
 
-        const options = {
-            method: "post",
+    /**
+     * Execute the query
+     */
+    protected async execute(requestOptions: RequestOptions = {}) {
+        let response = await axios.post(requestOptions?.url || settings.defaultUrl, {query: this.toQuery()}, {
             headers: {
                 "Content-Type": "application/json",
                 ...settings.defaultHeaders,
                 ...requestOptions?.headers
             },
-            body: JSON.stringify({query})
-        };
+        });
 
-        return (await fetch(requestOptions?.url || settings.defaultUrl, options)).json();
+        return {
+            data: response.data.data,
+            response
+        }
     }
 }

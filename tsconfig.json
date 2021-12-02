@@ -11,6 +11,7 @@
   },
   "include": [
     "src",
+    "example"
   ],
   "exclude": [
     "**/*.stub.ts",
