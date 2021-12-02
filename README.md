@@ -3,21 +3,9 @@ A JS/TS generator that builds a GraphQL query builder for your API
 
 > Note: this package is still in beta. There is still features missing.
 
-## How to run
+## Installing
 
-There is a lot of way to use Graphton. Installing is optional, even, with the help of npx.
-
-### Using npx
-
-No installing needed! Just run it through npx to run without installing.
-
-```bash
-npx @graphtopnlib/graphton generate https://example.com/graphql
-```
-
-### Installing locally
-
-You can add a local copy of Graphton to your dev-dependencies.
+You can install Graphton to your dev-dependencies using a package manager.
 
 #### Yarn (recommended)
 
