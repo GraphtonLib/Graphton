@@ -1,0 +1,31 @@
+{
+  "name": "@graphtonlib/graphton",
+  "version": "0.0.1",
+  "repository": "github:GraphtonLib/Graphton",
+  "packageManager": "yarn@3.1.1",
+  "type": "module",
+  "bin": "src/graphton.js",
+  "scripts": {
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix"
+  },
+  "devDependencies": {
+    "@types/eslint": "^8",
+    "@types/inquirer": "^8",
+    "@types/node": "^16.11.11",
+    "@typescript-eslint/eslint-plugin": "^5.5.0",
+    "@typescript-eslint/parser": "^5.5.0",
+    "eslint": "^8.3.0",
+    "graphql": "^16.0.1",
+    "graphql-tag": "^2.12.6",
+    "standard-version": "^9.3.2",
+    "typescript": "next"
+  },
+  "dependencies": {
+    "axios": "^0.24.0",
+    "change-case": "^4.1.2",
+    "colors": "^1.4.0",
+    "commander": "^8.3.0",
+    "inquirer": "^8.2.0"
+  }
+}
