@@ -5,82 +5,16 @@ const settings = {
     defaultHeaders: {},
     defaultUrl: ''
 };
-export const grapthtonSettings = {
-    setDefaultHeaders(headers) {
+export class GraphtonSettings {
+    static setDefaultHeaders(headers) {
         settings.defaultHeaders = headers;
-    },
-    setDefaultUrl(defaultUrl) {
+    }
+    static setDefaultUrl(defaultUrl) {
         settings.defaultUrl = defaultUrl;
     }
-};
+}
 import axios from "axios";
 class GraphtonBaseQuery {
-    availableFields = new Set([]);
-    queryName = '';
-    queryFields = new Set([]);
-    arguments = {};
-    rootType = '';
-    /**
-     * Add all known fields.
-     */
-    allFields() {
-        this.queryFields = new Set(this.availableFields);
-        return this;
-    }
-    /**
-     * Remove all fields.
-     */
-    clearFields() {
-        this.queryFields.clear();
-        return this;
-    }
-    /**
-     * Add multiple fields to the query.
-     */
-    withFields(...fieldNames) {
-        const flatFieldNames = fieldNames.flat();
-        for (const fieldName of flatFieldNames) {
-            if (!this.availableFields.has(fieldName)) {
-                console.warn(`You are trying to query ${this.queryName} with a field named ${fieldName}, which might not exist!`);
-            }
-            this.queryFields.add(fieldName);
-        }
-        return this;
-    }
-    /**
-     * Add a field to the query.
-     */
-    withField(fieldName) {
-        return this.withFields(fieldName);
-    }
-    /**
-     * Remove multiple fields from the query.
-     */
-    withoutFields(...fieldNames) {
-        const flatFieldNames = fieldNames.flat();
-        for (const fieldName of flatFieldNames) {
-            this.queryFields.delete(fieldName);
-        }
-        return this;
-    }
-    /**
-     * Remove a field from the query.
-     */
-    withoutField(fieldName) {
-        return this.withoutFields(fieldName);
-    }
-    /**
-     * All of the fields, except these.
-     */
-    except(...fieldNames) {
-        return this.allFields().withoutFields(...fieldNames);
-    }
-    /**
-     * Only the following fields, ignoring previously set fields.
-     */
-    only(...fieldNames) {
-        return this.clearFields().withFields(...fieldNames);
-    }
     /**
      * Transform builder to graphql query string
      */
@@ -94,7 +28,7 @@ class GraphtonBaseQuery {
             }
             queryArgString = `(${queryArgItems.join(', ')})`;
         }
-        return `${this.rootType} ${this.queryName} { ${this.queryName}${queryArgString} { ${[...this.queryFields].join(' ')} } }`;
+        return `${this.rootType} ${this.queryName} { ${this.queryName}${queryArgString} { ${this.returnType.toReturnTypeString()} } }`;
     }
     /**
      * Execute the query
@@ -113,194 +47,179 @@ class GraphtonBaseQuery {
         };
     }
 }
+class GraphtonBaseReturnTypeBuilder {
+    querySimpleFields = new Set([]);
+    queryObjectFields = {};
+    /**
+     * Select all known fields
+     */
+    all() {
+        this.querySimpleFields = new Set(this.availableSimpleFields);
+        return this;
+    }
+    /**
+     * Clear field selection
+     */
+    clear() {
+        this.querySimpleFields.clear();
+        return this;
+    }
+    /**
+     * Select fields
+     */
+    with(...fieldNames) {
+        const flatFieldNames = fieldNames.flat();
+        for (const fieldName of flatFieldNames) {
+            if (!this.availableSimpleFields.has(fieldName)) {
+                console.warn(`Field "${fieldName}" might not exist in type "${this.typeName}"!`);
+            }
+            this.querySimpleFields.add(fieldName);
+        }
+        return this;
+    }
+    /**
+     * Remove fields
+     */
+    without(...fieldNames) {
+        const flatFieldNames = fieldNames.flat();
+        for (const fieldName of flatFieldNames) {
+            this.querySimpleFields.delete(fieldName);
+        }
+        return this;
+    }
+    /**
+     * Alias for .all().without(...fieldNames)
+     */
+    except(...fieldNames) {
+        return this.all().without(...fieldNames);
+    }
+    /**
+     * Alias for .clear().with(...fieldNames)
+     */
+    only(...fieldNames) {
+        return this.clear().with(...fieldNames);
+    }
+    withRelated(relatedType, buildFields) {
+        const relatedReturnTypeClass = this.availableObjectFields[relatedType];
+        if (!relatedReturnTypeClass) {
+            console.warn(`Trying to add related field ${relatedType} to type ${this.typeName} which does not exist. Ignoring!`);
+            return;
+        }
+        const relatedReturnType = new relatedReturnTypeClass();
+        buildFields(relatedReturnType);
+        this.queryObjectFields[relatedType] = relatedReturnType;
+    }
+    withoutRelated(relatedType) {
+        delete this.queryObjectFields[relatedType];
+    }
+    toReturnTypeString() {
+        if (this.querySimpleFields.size < 1 && Object.values(this.queryObjectFields).length < 1) {
+            return ``;
+        }
+        let returnTypeString = ['{', ...this.querySimpleFields];
+        for (const [objectType, objectField] of Object.entries(this.queryObjectFields)) {
+            let objectFieldReturnTypeString = objectField.toReturnTypeString();
+            if (objectFieldReturnTypeString.length > 0) {
+                returnTypeString.push(objectType, objectFieldReturnTypeString);
+            }
+        }
+        returnTypeString.push('}');
+        return returnTypeString.join(' ');
+    }
+}
+class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
+    availableSimpleFields = new Set(["id", "name", "age"]);
+    availableObjectFields = { "posts": PostReturnTypeBuilder };
+    typeName = 'User';
+    with(...fieldNames) {
+        return super.with(...fieldNames);
+    }
+    without(...fieldNames) {
+        return super.without(...fieldNames);
+    }
+    except(...fieldNames) {
+        return super.except(...fieldNames);
+    }
+    only(...fieldNames) {
+        return super.only(...fieldNames);
+    }
+    withRelated(relatedType, buildFields) {
+        return super.withRelated(relatedType, buildFields);
+    }
+    withoutRelated(relatedType) {
+        return super.withoutRelated(relatedType);
+    }
+}
+class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
+    availableSimpleFields = new Set(["id", "text"]);
+    availableObjectFields = { "author": UserReturnTypeBuilder };
+    typeName = 'Post';
+    with(...fieldNames) {
+        return super.with(...fieldNames);
+    }
+    without(...fieldNames) {
+        return super.without(...fieldNames);
+    }
+    except(...fieldNames) {
+        return super.except(...fieldNames);
+    }
+    only(...fieldNames) {
+        return super.only(...fieldNames);
+    }
+    withRelated(relatedType, buildFields) {
+        return super.withRelated(relatedType, buildFields);
+    }
+    withoutRelated(relatedType) {
+        return super.withoutRelated(relatedType);
+    }
+}
 // REGION: Queries
 class GraphtonQueryBuilderFactory {
-    static users() {
+    users() {
         return new UsersQuery();
     }
-    static user(id) {
+    user(id) {
         return new UserQuery(id);
     }
 }
 export const query = new GraphtonQueryBuilderFactory();
 class UsersQuery extends GraphtonBaseQuery {
-    availableFields = new Set(["id", "name", "age"]);
-    queryName = 'users';
-    // Builder essentials
-    queryFields = new Set([]);
+    queryName = "users";
     arguments = {};
-    rootType = 'query';
+    rootType = "query";
+    returnType = new UserReturnTypeBuilder();
     constructor() {
         super();
         this.arguments = {};
         Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
     }
-    withFields(...fieldNames) {
-        return super.withFields(...fieldNames);
-    }
-    withField(fieldName) {
-        return super.withField(fieldName);
-    }
-    withoutFields(...fieldNames) {
-        return super.withoutFields(...fieldNames);
-    }
-    withoutField(fieldName) {
-        return super.withoutField(fieldName);
-    }
-    except(...fieldNames) {
-        return super.except(...fieldNames);
-    }
-    only(...fieldNames) {
-        return super.only(...fieldNames);
+    returnFields(returnFieldsClosure) {
+        returnFieldsClosure(this.returnType);
+        return this;
     }
     async get(requestOptions = {}) {
+        return (await super.execute());
+    }
+    async do(requestOptions = {}) {
         return (await super.execute());
     }
 }
 class UserQuery extends GraphtonBaseQuery {
-    availableFields = new Set(["id", "name", "age"]);
-    queryName = 'user';
-    // Builder essentials
-    queryFields = new Set([]);
+    queryName = "user";
     arguments = {};
-    rootType = 'query';
+    rootType = "query";
+    returnType = new UserReturnTypeBuilder();
     constructor(id) {
         super();
         this.arguments = { id };
         Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
     }
-    withFields(...fieldNames) {
-        return super.withFields(...fieldNames);
-    }
-    withField(fieldName) {
-        return super.withField(fieldName);
-    }
-    withoutFields(...fieldNames) {
-        return super.withoutFields(...fieldNames);
-    }
-    withoutField(fieldName) {
-        return super.withoutField(fieldName);
-    }
-    except(...fieldNames) {
-        return super.except(...fieldNames);
-    }
-    only(...fieldNames) {
-        return super.only(...fieldNames);
+    returnFields(returnFieldsClosure) {
+        returnFieldsClosure(this.returnType);
+        return this;
     }
     async get(requestOptions = {}) {
         return (await super.execute());
-    }
-}
-// REGION: Mutations
-class GraphtonMutationBuilderFactory {
-    static createUser(name, age) {
-        return new CreateUserMutation(name, age);
-    }
-    static updateUser(id, name, age) {
-        return new UpdateUserMutation(id, name, age);
-    }
-    static deleteUser(id) {
-        return new DeleteUserMutation(id);
-    }
-}
-export const mutation = new GraphtonMutationBuilderFactory();
-class CreateUserMutation extends GraphtonBaseQuery {
-    availableFields = new Set(["id", "name", "age"]);
-    queryName = 'createUser';
-    // Builder essentials
-    queryFields = new Set([]);
-    arguments = {};
-    rootType = 'mutation';
-    constructor(name, age) {
-        super();
-        this.arguments = { name, age };
-        Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
-    }
-    withFields(...fieldNames) {
-        return super.withFields(...fieldNames);
-    }
-    withField(fieldName) {
-        return super.withField(fieldName);
-    }
-    withoutFields(...fieldNames) {
-        return super.withoutFields(...fieldNames);
-    }
-    withoutField(fieldName) {
-        return super.withoutField(fieldName);
-    }
-    except(...fieldNames) {
-        return super.except(...fieldNames);
-    }
-    only(...fieldNames) {
-        return super.only(...fieldNames);
-    }
-    async do(requestOptions = {}) {
-        return (await super.execute());
-    }
-}
-class UpdateUserMutation extends GraphtonBaseQuery {
-    availableFields = new Set(["id", "name", "age"]);
-    queryName = 'updateUser';
-    // Builder essentials
-    queryFields = new Set([]);
-    arguments = {};
-    rootType = 'mutation';
-    constructor(id, name, age) {
-        super();
-        this.arguments = { id, name, age };
-        Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
-    }
-    withFields(...fieldNames) {
-        return super.withFields(...fieldNames);
-    }
-    withField(fieldName) {
-        return super.withField(fieldName);
-    }
-    withoutFields(...fieldNames) {
-        return super.withoutFields(...fieldNames);
-    }
-    withoutField(fieldName) {
-        return super.withoutField(fieldName);
-    }
-    except(...fieldNames) {
-        return super.except(...fieldNames);
-    }
-    only(...fieldNames) {
-        return super.only(...fieldNames);
-    }
-    async do(requestOptions = {}) {
-        return (await super.execute());
-    }
-}
-class DeleteUserMutation extends GraphtonBaseQuery {
-    availableFields = new Set(["id", "name", "age"]);
-    queryName = 'deleteUser';
-    // Builder essentials
-    queryFields = new Set([]);
-    arguments = {};
-    rootType = 'mutation';
-    constructor(id) {
-        super();
-        this.arguments = { id };
-        Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
-    }
-    withFields(...fieldNames) {
-        return super.withFields(...fieldNames);
-    }
-    withField(fieldName) {
-        return super.withField(fieldName);
-    }
-    withoutFields(...fieldNames) {
-        return super.withoutFields(...fieldNames);
-    }
-    withoutField(fieldName) {
-        return super.withoutField(fieldName);
-    }
-    except(...fieldNames) {
-        return super.except(...fieldNames);
-    }
-    only(...fieldNames) {
-        return super.only(...fieldNames);
     }
     async do(requestOptions = {}) {
         return (await super.execute());

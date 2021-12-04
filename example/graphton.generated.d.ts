@@ -1,12 +1,7 @@
-export interface User {
-    id?: number;
-    name?: string;
-    age?: number | null;
+export declare class GraphtonSettings {
+    static setDefaultHeaders(headers: Record<string, string>): void;
+    static setDefaultUrl(defaultUrl: string): void;
 }
-export declare const grapthtonSettings: {
-    setDefaultHeaders(headers: Record<string, string>): void;
-    setDefaultUrl(defaultUrl: string): void;
-};
 import { AxiosResponse } from "axios";
 declare type GraphQLServerEndpoint = string;
 declare type Headers = Record<string, string>;
@@ -14,44 +9,20 @@ interface RequestOptions {
     headers?: Headers;
     url?: GraphQLServerEndpoint;
 }
+interface QueryResponse {
+    data: Record<string, any>;
+    response: AxiosResponse;
+}
+declare type RootType = 'query' | 'mutation';
 declare abstract class GraphtonBaseQuery {
-    protected availableFields: Set<string>;
-    protected queryName: string;
-    protected queryFields: Set<string>;
-    protected arguments: Record<string, any>;
-    protected rootType: 'query' | 'mutation' | '';
+    protected abstract queryName: string;
+    protected abstract arguments: Record<string, any>;
+    protected abstract rootType: RootType;
+    protected abstract returnType: GraphtonBaseReturnTypeBuilder;
     /**
-     * Add all known fields.
+     * Function to build the required fields for that query
      */
-    allFields(): this;
-    /**
-     * Remove all fields.
-     */
-    clearFields(): this;
-    /**
-     * Add multiple fields to the query.
-     */
-    withFields(...fieldNames: (string | string[])[]): this;
-    /**
-     * Add a field to the query.
-     */
-    withField(fieldName: string): this;
-    /**
-     * Remove multiple fields from the query.
-     */
-    withoutFields(...fieldNames: (string | string[])[]): this;
-    /**
-     * Remove a field from the query.
-     */
-    withoutField(fieldName: string): this;
-    /**
-     * All of the fields, except these.
-     */
-    except(...fieldNames: (string | string[])[]): this;
-    /**
-     * Only the following fields, ignoring previously set fields.
-     */
-    only(...fieldNames: (string | string[])[]): this;
+    abstract returnFields(returnFieldsClosure: (r: GraphtonBaseReturnTypeBuilder) => void): this;
     /**
      * Transform builder to graphql query string
      */
@@ -59,120 +30,118 @@ declare abstract class GraphtonBaseQuery {
     /**
      * Execute the query
      */
-    protected execute(requestOptions?: RequestOptions): Promise<{
-        data: any;
-        response: AxiosResponse<any, any>;
-    }>;
+    protected execute(requestOptions?: RequestOptions): Promise<QueryResponse>;
+}
+declare abstract class GraphtonBaseReturnTypeBuilder {
+    protected abstract availableSimpleFields: Set<string>;
+    protected abstract availableObjectFields: Record<string, new () => GraphtonBaseReturnTypeBuilder>;
+    protected querySimpleFields: Set<string>;
+    protected queryObjectFields: Record<string, GraphtonBaseReturnTypeBuilder>;
+    protected abstract typeName: string;
+    /**
+     * Select all known fields
+     */
+    all(): this;
+    /**
+     * Clear field selection
+     */
+    clear(): this;
+    /**
+     * Select fields
+     */
+    with(...fieldNames: (string | string[])[]): this;
+    /**
+     * Remove fields
+     */
+    without(...fieldNames: (string | string[])[]): this;
+    /**
+     * Alias for .all().without(...fieldNames)
+     */
+    except(...fieldNames: (string | string[])[]): this;
+    /**
+     * Alias for .clear().with(...fieldNames)
+     */
+    only(...fieldNames: (string | string[])[]): this;
+    withRelated(relatedType: string, buildFields: (type: GraphtonBaseReturnTypeBuilder) => void): void;
+    withoutRelated(relatedType: string): void;
+    toReturnTypeString(): string;
+}
+export interface User {
+    id?: number;
+    name?: string;
+    age?: number | null;
+    posts?: Post[];
+}
+export interface Post {
+    id?: number;
+    author?: User;
+    text?: string;
+}
+declare type UserReturnTypeSimpleField = "id" | "name" | "age";
+declare type UserReturnTypeObjectField = "posts";
+declare class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
+    protected availableSimpleFields: Set<string>;
+    protected availableObjectFields: {
+        posts: typeof PostReturnTypeBuilder;
+    };
+    protected typeName: string;
+    with(...fieldNames: (UserReturnTypeSimpleField | UserReturnTypeSimpleField[])[]): this;
+    without(...fieldNames: (UserReturnTypeSimpleField | UserReturnTypeSimpleField[])[]): this;
+    except(...fieldNames: (UserReturnTypeSimpleField | UserReturnTypeSimpleField[])[]): this;
+    only(...fieldNames: (UserReturnTypeSimpleField | UserReturnTypeSimpleField[])[]): this;
+    withRelated(relatedType: UserReturnTypeObjectField, buildFields: (type: GraphtonBaseReturnTypeBuilder) => void): void;
+    withoutRelated(relatedType: UserReturnTypeObjectField): void;
+}
+declare type PostReturnTypeSimpleField = "id" | "text";
+declare type PostReturnTypeObjectField = "author";
+declare class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
+    protected availableSimpleFields: Set<string>;
+    protected availableObjectFields: {
+        author: typeof UserReturnTypeBuilder;
+    };
+    protected typeName: string;
+    with(...fieldNames: (PostReturnTypeSimpleField | PostReturnTypeSimpleField[])[]): this;
+    without(...fieldNames: (PostReturnTypeSimpleField | PostReturnTypeSimpleField[])[]): this;
+    except(...fieldNames: (PostReturnTypeSimpleField | PostReturnTypeSimpleField[])[]): this;
+    only(...fieldNames: (PostReturnTypeSimpleField | PostReturnTypeSimpleField[])[]): this;
+    withRelated(relatedType: PostReturnTypeObjectField, buildFields: (type: GraphtonBaseReturnTypeBuilder) => void): void;
+    withoutRelated(relatedType: PostReturnTypeObjectField): void;
 }
 declare class GraphtonQueryBuilderFactory {
-    static users(): UsersQuery;
-    static user(id?: number | null): UserQuery;
+    users(): UsersQuery;
+    user(id?: number | null): UserQuery;
 }
 export declare const query: GraphtonQueryBuilderFactory;
-declare type UsersQueryAvailableFields = "id" | "name" | "age";
 interface UsersQueryResponse {
-    data: User[];
+    data: {
+        users: User[];
+    };
     response: AxiosResponse;
 }
 declare class UsersQuery extends GraphtonBaseQuery {
-    protected availableFields: Set<string>;
     protected queryName: string;
-    protected queryFields: Set<string>;
     protected arguments: Record<string, any>;
-    protected rootType: 'query' | 'mutation';
+    protected rootType: RootType;
+    protected returnType: UserReturnTypeBuilder;
     constructor();
-    withFields(...fieldNames: (UsersQueryAvailableFields | UsersQueryAvailableFields[])[]): this;
-    withField(fieldName: UsersQueryAvailableFields): this;
-    withoutFields(...fieldNames: (UsersQueryAvailableFields | UsersQueryAvailableFields[])[]): this;
-    withoutField(fieldName: UsersQueryAvailableFields): this;
-    except(...fieldNames: (UsersQueryAvailableFields | UsersQueryAvailableFields[])[]): this;
-    only(...fieldNames: (UsersQueryAvailableFields | UsersQueryAvailableFields[])[]): this;
+    returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this;
     get(requestOptions?: RequestOptions): Promise<UsersQueryResponse>;
+    do(requestOptions?: RequestOptions): Promise<UsersQueryResponse>;
 }
-declare type UserQueryAvailableFields = "id" | "name" | "age";
 interface UserQueryResponse {
-    data?: User | null;
+    data: {
+        user?: User | null;
+    };
     response: AxiosResponse;
 }
 declare class UserQuery extends GraphtonBaseQuery {
-    protected availableFields: Set<string>;
     protected queryName: string;
-    protected queryFields: Set<string>;
     protected arguments: Record<string, any>;
-    protected rootType: 'query' | 'mutation';
+    protected rootType: RootType;
+    protected returnType: UserReturnTypeBuilder;
     constructor(id?: number | null);
-    withFields(...fieldNames: (UserQueryAvailableFields | UserQueryAvailableFields[])[]): this;
-    withField(fieldName: UserQueryAvailableFields): this;
-    withoutFields(...fieldNames: (UserQueryAvailableFields | UserQueryAvailableFields[])[]): this;
-    withoutField(fieldName: UserQueryAvailableFields): this;
-    except(...fieldNames: (UserQueryAvailableFields | UserQueryAvailableFields[])[]): this;
-    only(...fieldNames: (UserQueryAvailableFields | UserQueryAvailableFields[])[]): this;
+    returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this;
     get(requestOptions?: RequestOptions): Promise<UserQueryResponse>;
-}
-declare class GraphtonMutationBuilderFactory {
-    static createUser(name: string, age?: number | null): CreateUserMutation;
-    static updateUser(id: number, name?: string | null, age?: number | null): UpdateUserMutation;
-    static deleteUser(id: number): DeleteUserMutation;
-}
-export declare const mutation: GraphtonMutationBuilderFactory;
-declare type CreateUserMutationAvailableFields = "id" | "name" | "age";
-interface CreateUserMutationResponse {
-    data: User;
-    response: AxiosResponse;
-}
-declare class CreateUserMutation extends GraphtonBaseQuery {
-    protected availableFields: Set<string>;
-    protected queryName: string;
-    protected queryFields: Set<string>;
-    protected arguments: Record<string, any>;
-    protected rootType: 'query' | 'mutation';
-    constructor(name: string, age?: number | null);
-    withFields(...fieldNames: (CreateUserMutationAvailableFields | CreateUserMutationAvailableFields[])[]): this;
-    withField(fieldName: CreateUserMutationAvailableFields): this;
-    withoutFields(...fieldNames: (CreateUserMutationAvailableFields | CreateUserMutationAvailableFields[])[]): this;
-    withoutField(fieldName: CreateUserMutationAvailableFields): this;
-    except(...fieldNames: (CreateUserMutationAvailableFields | CreateUserMutationAvailableFields[])[]): this;
-    only(...fieldNames: (CreateUserMutationAvailableFields | CreateUserMutationAvailableFields[])[]): this;
-    do(requestOptions?: RequestOptions): Promise<CreateUserMutationResponse>;
-}
-declare type UpdateUserMutationAvailableFields = "id" | "name" | "age";
-interface UpdateUserMutationResponse {
-    data: User;
-    response: AxiosResponse;
-}
-declare class UpdateUserMutation extends GraphtonBaseQuery {
-    protected availableFields: Set<string>;
-    protected queryName: string;
-    protected queryFields: Set<string>;
-    protected arguments: Record<string, any>;
-    protected rootType: 'query' | 'mutation';
-    constructor(id: number, name?: string | null, age?: number | null);
-    withFields(...fieldNames: (UpdateUserMutationAvailableFields | UpdateUserMutationAvailableFields[])[]): this;
-    withField(fieldName: UpdateUserMutationAvailableFields): this;
-    withoutFields(...fieldNames: (UpdateUserMutationAvailableFields | UpdateUserMutationAvailableFields[])[]): this;
-    withoutField(fieldName: UpdateUserMutationAvailableFields): this;
-    except(...fieldNames: (UpdateUserMutationAvailableFields | UpdateUserMutationAvailableFields[])[]): this;
-    only(...fieldNames: (UpdateUserMutationAvailableFields | UpdateUserMutationAvailableFields[])[]): this;
-    do(requestOptions?: RequestOptions): Promise<UpdateUserMutationResponse>;
-}
-declare type DeleteUserMutationAvailableFields = "id" | "name" | "age";
-interface DeleteUserMutationResponse {
-    data: User;
-    response: AxiosResponse;
-}
-declare class DeleteUserMutation extends GraphtonBaseQuery {
-    protected availableFields: Set<string>;
-    protected queryName: string;
-    protected queryFields: Set<string>;
-    protected arguments: Record<string, any>;
-    protected rootType: 'query' | 'mutation';
-    constructor(id: number);
-    withFields(...fieldNames: (DeleteUserMutationAvailableFields | DeleteUserMutationAvailableFields[])[]): this;
-    withField(fieldName: DeleteUserMutationAvailableFields): this;
-    withoutFields(...fieldNames: (DeleteUserMutationAvailableFields | DeleteUserMutationAvailableFields[])[]): this;
-    withoutField(fieldName: DeleteUserMutationAvailableFields): this;
-    except(...fieldNames: (DeleteUserMutationAvailableFields | DeleteUserMutationAvailableFields[])[]): this;
-    only(...fieldNames: (DeleteUserMutationAvailableFields | DeleteUserMutationAvailableFields[])[]): this;
-    do(requestOptions?: RequestOptions): Promise<DeleteUserMutationResponse>;
+    do(requestOptions?: RequestOptions): Promise<UserQueryResponse>;
 }
 export {};
