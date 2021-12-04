@@ -1,7 +1,7 @@
 {
   "name": "@graphtonlib/graphton",
   "description": "Generate a JS/TS query builder library from an (external) GraphQL introspection schema.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/GraphtonLib/Graphton.git"
@@ -26,6 +26,7 @@
     "generate": "node src/graphton.js generate ./example/schema.json -o ./example/graphton.generated.ts",
     "dev": "tsc --watch",
     "prod": "tsc",
+    "release": "yarn generate; tsc; standard-version -a",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
