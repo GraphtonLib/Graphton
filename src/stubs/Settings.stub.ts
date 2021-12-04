@@ -3,11 +3,12 @@ const settings = {
     defaultUrl: '/*DEFAULTPOSTURL*/'
 }
 
-export const grapthtonSettings = {
-    setDefaultHeaders(headers: Record<string, string>) {
+export class GraphtonSettings {
+    public static setDefaultHeaders(headers: Record<string, string>): void {
         settings.defaultHeaders = headers;
-    },
-    setDefaultUrl(defaultUrl: string) {
+    }
+
+    public static setDefaultUrl(defaultUrl: string): void {
         settings.defaultUrl = defaultUrl;
     }
 }

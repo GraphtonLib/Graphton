@@ -21,7 +21,7 @@ export function fillStub(stub: string, substitutions: Record<string, string> = {
     let stubContent = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '..', 'stubs', `${stub}.stub.ts`), {encoding: "utf8"});
     for(const [searchValue, replaceValue] of Object.entries(substitutions)) {
         stubContent = stubContent.replaceAll(`/*${searchValue}*/`, replaceValue)
-            .replaceAll(`'/**${searchValue}**/'`, replaceValue)
+            .replaceAll(RegExp(`.\\/\\*\\*${searchValue}\\*\\*\\/.`, 'g'), replaceValue)
             .replaceAll(`__${searchValue}__`, replaceValue);
     }
 
@@ -30,7 +30,8 @@ export function fillStub(stub: string, substitutions: Record<string, string> = {
             .replaceAll(`/*ENDIF:${condition}*/`, '');
     }
 
-    stubContent = stubContent.replaceAll(/\/\*IF:[A-Z]+?\*\/[^]*?\/\*ENDIF:[A-Z]+?\*\//g, '');
+    stubContent = stubContent.replaceAll(/\/\*IF:[A-Z]+?\*\/[^]*?\/\*ENDIF:[A-Z]+?\*\//g, '')
+        .replaceAll(/\/\*IGNORE\*\/[^]*?\/\*ENDIGNORE\*\//g, '');
 
     stubContent = stubContent.replaceAll(/\/\*.*?\*\//g, '')
         .replaceAll(/'\/\*\*.*?\*\*\/'/g, '')

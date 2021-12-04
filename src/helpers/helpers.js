@@ -15,14 +15,15 @@ export function fillStub(stub, substitutions = {}, conditions = []) {
     let stubContent = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '..', 'stubs', `${stub}.stub.ts`), { encoding: "utf8" });
     for (const [searchValue, replaceValue] of Object.entries(substitutions)) {
         stubContent = stubContent.replaceAll(`/*${searchValue}*/`, replaceValue)
-            .replaceAll(`'/**${searchValue}**/'`, replaceValue)
+            .replaceAll(RegExp(`.\\/\\*\\*${searchValue}\\*\\*\\/.`, 'g'), replaceValue)
             .replaceAll(`__${searchValue}__`, replaceValue);
     }
     for (const condition of conditions) {
         stubContent = stubContent.replaceAll(`/*IF:${condition}*/`, '')
             .replaceAll(`/*ENDIF:${condition}*/`, '');
     }
-    stubContent = stubContent.replaceAll(/\/\*IF:[A-Z]+?\*\/[^]*?\/\*ENDIF:[A-Z]+?\*\//g, '');
+    stubContent = stubContent.replaceAll(/\/\*IF:[A-Z]+?\*\/[^]*?\/\*ENDIF:[A-Z]+?\*\//g, '')
+        .replaceAll(/\/\*IGNORE\*\/[^]*?\/\*ENDIGNORE\*\//g, '');
     stubContent = stubContent.replaceAll(/\/\*.*?\*\//g, '')
         .replaceAll(/'\/\*\*.*?\*\*\/'/g, '')
         .replaceAll(/__.*?__/g, '');

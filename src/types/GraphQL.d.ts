@@ -6,6 +6,8 @@ export interface MutationType {
     name: string;
 }
 
+export type RootType = "mutation"|"query";
+
 export interface ReturnType {
     kind: string;
     name: string;

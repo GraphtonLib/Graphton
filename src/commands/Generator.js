@@ -49,25 +49,24 @@ export default class Generator {
             '// DO NOT EDIT - CHANGES WILL BE OVERWRITTEN',
             ''
         ]);
-        console.log('Generating types...');
-        outContentSections.push(...[
-            '// REGION: Types',
-            ...this.generateObjectTypes(objectTypes),
-            ...this.generateEnumTypes(enumTypes),
-            ``,
-        ]);
         console.log('Adding base classes...');
         outContentSections.push(...[
             '// REGION: Base classes',
             fillStub('Settings', { "DEFAULTPOSTURL": isUrl(schemaUri) ? schemaUri : '' }),
             fillStub('GraphtonBaseQuery'),
-            ``,
+            fillStub('GraphtonBaseReturnTypeBuilder'),
+        ]);
+        console.log('Generating types & return type builders...');
+        outContentSections.push(...[
+            '// REGION: Types',
+            ...this.generateObjectTypes(objectTypes),
+            ...this.generateEnumTypes(enumTypes),
+            ...this.generateReturnTypeBuilders(objectTypes),
         ]);
         console.log('Generating query classes...');
         outContentSections.push(...[
             '// REGION: Queries',
             ...this.generateQueries(this.gqlSchema.types.find(t => t.name === this.gqlSchema?.queryType?.name)?.fields || [], options.exportQueryFactoryAs),
-            ``,
         ]);
         console.log('Generating mutation classes...');
         outContentSections.push(...[
@@ -75,8 +74,13 @@ export default class Generator {
             ...this.generateMutations(this.gqlSchema.types.find(t => t.name === this.gqlSchema?.mutationType?.name)?.fields || [], options.exportMutationFactoryAs),
             ``,
         ]);
+        console.log(`Trimming output...`);
+        const outContent = outContentSections.join("\n")
+            .replaceAll(/^\n+/g, '')
+            .replaceAll(/\n+$/g, '')
+            .replaceAll(/\n{3,}/g, "\n\n");
         console.log(`Writing it all to ${options.outputFile}...`);
-        fs.writeFileSync(options.outputFile, outContentSections.join("\n"), { encoding: "utf8" });
+        fs.writeFileSync(options.outputFile, outContent, { encoding: "utf8" });
         console.log('');
         console.log(`Generated ${options.outputFile}`);
     }
@@ -87,6 +91,25 @@ export default class Generator {
             yield `}`;
         }
     }
+    *generateReturnTypeBuilders(types) {
+        for (const type of types) {
+            const returnTypes = type.fields
+                .map(f => ({ name: f.name, info: this.returnTypeInfo(f.type) }))
+                .filter(f => !!f.info);
+            yield fillStub('ReturnTypeBuilder', {
+                "SIMPLEFIELDTUPLE": returnTypes.filter(t => t.info.kind == "simple").map(t => JSON.stringify(t.name)).join("|") || 'never',
+                "OBJECTFIELDTUPLE": returnTypes.filter(t => t.info.kind == "object").map(t => JSON.stringify(t.name)).join("|") || 'never',
+                "SIMPLEFIELDARRAY": JSON.stringify(returnTypes.filter(t => t.info.kind == "simple").map(t => t.name)),
+                "OBJECTFIELDOBJECT": JSON.stringify(returnTypes.filter(t => t.info.kind == "object")
+                    .reduce((obj, t) => {
+                    obj[t.name] = `${t.info.type}ReturnTypeBuilder`;
+                    return obj;
+                }, {}))
+                    .replaceAll(/"([^"]*?ReturnTypeBuilder)"/g, '$1'),
+                "TYPENAME": type.name,
+            });
+        }
+    }
     *generateEnumTypes(enumTypes) {
         for (const enumType of enumTypes) {
             yield `export type ${enumType.name} = ${enumType.enumValues.map(t => JSON.stringify(t.name)).join('|')};`;
@@ -94,11 +117,11 @@ export default class Generator {
     }
     *generateFields(fields) {
         for (const field of fields) {
-            yield `  ${field.name}${Generator.toTypeAppend(field.type)},`;
+            yield `  ${field.name}${this.toTypeAppend(field.type)},`;
         }
     }
-    *generateQueries(queries, exportQueryAs = 'query') {
-        yield `class GraphtonQueryBuilderFactory {`;
+    *generateQueries(queries, exportQueryAs = 'Query') {
+        yield `export class ${exportQueryAs} {`;
         for (const query of queries) {
             const { typed, untyped } = this.argsToMethodParameters(query.args);
             yield `  public static ${query.name}(${typed.join(', ')}) {`;
@@ -106,15 +129,14 @@ export default class Generator {
             yield `  }`;
         }
         yield `}`;
-        yield `export const ${exportQueryAs} = new GraphtonQueryBuilderFactory();`;
         yield ``;
         for (const query of queries) {
-            yield this.generateQueryClass(query);
+            yield this.generateQueryClass(query, 'query');
             yield ``;
         }
     }
-    *generateMutations(queries, exportMutationAs = 'mutation') {
-        yield `class GraphtonMutationBuilderFactory {`;
+    *generateMutations(queries, exportMutationAs = 'Mutation') {
+        yield `export class ${exportMutationAs} {`;
         for (const query of queries) {
             const { typed, untyped } = this.argsToMethodParameters(query.args);
             yield `  public static ${query.name}(${typed.join(', ')}) {`;
@@ -122,10 +144,9 @@ export default class Generator {
             yield `  }`;
         }
         yield `}`;
-        yield `export const ${exportMutationAs} = new GraphtonMutationBuilderFactory();`;
         yield ``;
         for (const query of queries) {
-            yield this.generateMutationClass(query);
+            yield this.generateQueryClass(query, "mutation");
             yield ``;
         }
     }
@@ -133,84 +154,77 @@ export default class Generator {
         const typed = [];
         const untyped = [];
         for (const arg of args) {
-            typed.push(`${arg.name}${Generator.toTypeAppend(arg.type, false)}${arg.defaultValue ? ` = ${JSON.stringify(arg.defaultValue)}` : ''}`);
+            typed.push(`${arg.name}${this.toTypeAppend(arg.type, false)}${arg.defaultValue ? ` = ${JSON.stringify(arg.defaultValue)}` : ''}`);
             untyped.push(arg.name);
         }
         return { typed, untyped };
     }
-    generateQueryClass(query) {
-        const returnType = Generator.findReturnType(query.type);
+    generateQueryClass(query, rootType) {
+        const returnType = this.returnTypeInfo(query.type)?.type;
         const fieldNames = this.gqlSchema?.types.find(t => t.name == returnType)?.fields.map(f => f.name) || [];
         const params = this.argsToMethodParameters(query.args);
         return fillStub('Query', {
-            "QUERYCLASSNAME": `${pascalCase(query.name)}Query`,
+            "QUERYCLASSNAME": `${pascalCase(query.name)}${pascalCase(rootType)}`,
             "FIELDS": JSON.stringify(fieldNames),
             "FIELDSTUPLE": fieldNames.map(f => JSON.stringify(f)).join('|') || 'string',
             "QUERYNAME": query.name,
             "TYPEDPARAMS": params.typed.join(', '),
             "PARAMS": params.untyped.join(', '),
-            "ROOTTYPE": 'query',
-            "RETURNTYPE": Generator.toTypeAppend(query.type, false),
+            "ROOTTYPE": rootType,
+            "RETURNTYPE": this.toTypeAppend(query.type, false),
+            "RETURNTYPEBUILDER": `${this.returnTypeInfo(query.type)?.type}ReturnTypeBuilder`,
         });
     }
-    generateMutationClass(query) {
-        const returnType = Generator.findReturnType(query.type);
-        const fieldNames = this.gqlSchema?.types.find(t => t.name == returnType)?.fields.map(f => f.name) || [];
-        const params = this.argsToMethodParameters(query.args);
-        return fillStub('Query', {
-            "QUERYCLASSNAME": `${pascalCase(query.name)}Mutation`,
-            "FIELDS": JSON.stringify(fieldNames),
-            "FIELDSTUPLE": fieldNames.map(f => JSON.stringify(f)).join('|') || 'string',
-            "QUERYNAME": query.name,
-            "TYPEDPARAMS": params.typed.join(', '),
-            "PARAMS": params.untyped.join(', '),
-            "ROOTTYPE": 'mutation',
-            "RETURNTYPE": Generator.toTypeAppend(query.type, false),
-        });
-    }
-    static findReturnType(type) {
-        if (type?.kind === 'OBJECT') {
-            return type.name;
+    toTypeAppend(type, includeOptional = true) {
+        const typeInfo = this.returnTypeInfo(type);
+        if (!typeInfo) {
+            return '?: unknown';
         }
-        if (type?.ofType?.kind === 'OBJECT') {
-            return type.ofType.name;
+        let typeAppend = '';
+        if (!typeInfo.notNull) {
+            typeAppend += `?: (${scalarMap(typeInfo.type)} | null)`;
         }
-        if (type?.ofType?.ofType?.kind === 'OBJECT') {
-            return type.ofType.ofType.name;
+        else {
+            typeAppend += `${includeOptional ? '?' : ''}: ${scalarMap(typeInfo.type)}`;
         }
-        if (type?.ofType?.ofType?.ofType?.kind === 'OBJECT') {
-            return type.ofType.ofType.ofType.name;
-        }
-        return null;
-    }
-    static toTypeAppend(type, includeOptional = true) {
-        let currentType = type || null;
-        if (!currentType) {
-            return ``;
-        }
-        const directTypes = ['OBJECT', 'SCALAR', 'ENUM'];
-        const nonNullTypes = ['NON_NULL'];
-        const listTypes = ['LIST'];
-        const optional = includeOptional ? '?' : '';
-        if (directTypes.indexOf(currentType.kind) > -1) {
-            return `?: ${scalarMap(currentType.name)} | null`;
-        }
-        if (nonNullTypes.indexOf(currentType.kind) > -1 && currentType.ofType) {
-            currentType = currentType.ofType;
-            if (directTypes.indexOf(currentType.kind) > -1) {
-                return `${optional}: ${scalarMap(currentType.name)}`;
-            }
-            if (listTypes.indexOf(currentType.kind) > -1 && currentType.ofType) {
-                currentType = currentType.ofType;
-                if (directTypes.indexOf(currentType.kind) > -1) {
-                    return `?: (${scalarMap(currentType.name)}|null)[]`;
-                }
-                if (nonNullTypes.indexOf(currentType.kind) > -1 && currentType.ofType) {
-                    currentType = currentType.ofType;
-                    return `${optional}: ${scalarMap(currentType.name)}[]`;
-                }
+        if (typeInfo.isListOf) {
+            typeAppend += '[]';
+            if (!typeInfo.listNotNull) {
+                typeAppend += ' | null';
             }
         }
-        return ``;
+        return typeAppend;
+    }
+    returnTypeInfo(type, returnTypeInfo) {
+        returnTypeInfo = returnTypeInfo || {
+            isListOf: false,
+            kind: 'simple',
+            notNull: false,
+            type: ""
+        };
+        switch (type?.kind || '') {
+            case 'OBJECT':
+                returnTypeInfo.type = type.name;
+                returnTypeInfo.kind = "object";
+                return returnTypeInfo;
+            case 'SCALAR':
+            case 'ENUM':
+                returnTypeInfo.type = type.name;
+                returnTypeInfo.kind = "simple";
+                return returnTypeInfo;
+            case 'NON_NULL':
+                if (returnTypeInfo.isListOf) {
+                    returnTypeInfo.listNotNull = true;
+                }
+                else {
+                    returnTypeInfo.notNull = true;
+                }
+                return type.ofType ? this.returnTypeInfo(type.ofType, returnTypeInfo) : null;
+            case 'LIST':
+                returnTypeInfo.isListOf = true;
+                return type.ofType ? this.returnTypeInfo(type.ofType, returnTypeInfo) : null;
+            default:
+                return null;
+        }
     }
 }

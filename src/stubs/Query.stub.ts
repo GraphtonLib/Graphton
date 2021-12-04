@@ -1,38 +1,39 @@
-type __QUERYCLASSNAME__AvailableFields = '/**FIELDSTUPLE**/';
+/*IGNORE*/
+import {GraphtonBaseQuery, RootType} from "./GraphtonBaseQuery.stub.js";
+import {__TYPENAME__ReturnTypeBuilder as __RETURNTYPEBUILDER__} from "./ReturnTypeBuilder.stub.js"
+
+type GraphQLServerEndpoint = string;
+type Headers = Record<string, string>;
+import {AxiosResponse} from "axios";
+interface RequestOptions {
+    headers?: Headers,
+    url?: GraphQLServerEndpoint
+}
+/*ENDIGNORE*/
+
 interface __QUERYCLASSNAME__Response {
-    data/*RETURNTYPE*/,
+    data: {
+        /*QUERYNAME*//*RETURNTYPE*/
+    },
     response: AxiosResponse
 }
 class __QUERYCLASSNAME__ extends GraphtonBaseQuery {
-    protected availableFields: Set<string> = new Set(/*FIELDS*/);
-    protected queryName: string = '/*QUERYNAME*/';
-    // Builder essentials
-    protected queryFields: Set<string> = new Set([]);
+    protected queryName = "/*QUERYNAME*/";
     protected arguments: Record<string, any> = {};
-    protected rootType: 'query'|'mutation' = '/*ROOTTYPE*/';
+    protected rootType: RootType = "/*ROOTTYPE*/";
+    protected returnType = new __RETURNTYPEBUILDER__();
+
     constructor(/*TYPEDPARAMS*/) {
         super();
         this.arguments = {/*PARAMS*/};
         Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
     }
-    withFields(...fieldNames: (__QUERYCLASSNAME__AvailableFields|__QUERYCLASSNAME__AvailableFields[])[]): this {
-        return super.withFields(...fieldNames);
+
+    public returnFields(returnFieldsClosure: (r: __RETURNTYPEBUILDER__) => void) {
+        returnFieldsClosure(this.returnType);
+        return this;
     }
-    withField(fieldName: __QUERYCLASSNAME__AvailableFields): this {
-        return super.withField(fieldName);
-    }
-    withoutFields(...fieldNames: (__QUERYCLASSNAME__AvailableFields|__QUERYCLASSNAME__AvailableFields[])[]): this {
-        return super.withoutFields(...fieldNames);
-    }
-    withoutField(fieldName: __QUERYCLASSNAME__AvailableFields): this {
-        return super.withoutField(fieldName);
-    }
-    except(...fieldNames: (__QUERYCLASSNAME__AvailableFields|__QUERYCLASSNAME__AvailableFields[])[]): this {
-        return super.except(...fieldNames);
-    }
-    only(...fieldNames: (__QUERYCLASSNAME__AvailableFields|__QUERYCLASSNAME__AvailableFields[])[]): this {
-        return super.only(...fieldNames);
-    }
+
     async get(requestOptions: RequestOptions = {}): Promise<__QUERYCLASSNAME__Response> {
         return <__QUERYCLASSNAME__Response>(await super.execute());
     }

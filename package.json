@@ -23,6 +23,9 @@
   "scripts": {
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
+    "generate": "node src/graphton.js generate ./example/schema.json -o ./example/graphton.generated.ts",
+    "dev": "tsc --watch",
+    "prod": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
