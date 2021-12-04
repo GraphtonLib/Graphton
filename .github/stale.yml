@@ -1,0 +1,17 @@
+daysUntilStale: 30
+daysUntilClose: 30
+exemptLabels:
+  - "notice"
+  - "keep active"
+staleLabel: stale
+markComment: >
+  This issue has been automatically marked as stale because it has not had recent activity. 
+  This means nobody has this issue or feature request (anymore) and/or we have no intention of implementing/fixing this ourselves. 
+  It will be closed if no further activity occurs within 30 days, so if this is still relevant, please let us know!
+  
+  _And if it is, consider submitting a PR, pretty please?_
+closeComment: >
+  This issue has had 60 days of no activity. 
+  Since we assume nobody has this issue or feature request (anymore) and/or we have no intention of implementing/fixing this ourselves we will close this issue now. 
+  
+  You may reopen this issue if it's still a thing to be looked at, but please also consider submitting a PR if you do!
