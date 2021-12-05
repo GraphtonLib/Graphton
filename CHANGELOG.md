@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.1](https://github.com/GraphtonLib/Graphton/compare/v0.1.0...v0.1.1) (2021-12-05)
+
+
+### Features
+
+* Adds function overloads to better type nested returns ([d4477df](https://github.com/GraphtonLib/Graphton/commit/d4477df19fbac70a444c5c77369dbb20a4259a77))
+
 ## [0.1.0](https://github.com/GraphtonLib/Graphton/compare/v0.0.3...v0.1.0) (2021-12-05)
 
 
