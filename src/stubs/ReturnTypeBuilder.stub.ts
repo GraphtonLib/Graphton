@@ -23,10 +23,11 @@ type __TYPENAME__ReturnTypeObjectField = '/**OBJECTFIELDTUPLE**/';
     public only(...fieldNames: (__TYPENAME__ReturnTypeSimpleField|__TYPENAME__ReturnTypeSimpleField[])[]): this {
         return super.only(...fieldNames);
     }
-    public withRelated(relatedType: __TYPENAME__ReturnTypeObjectField, buildFields: (type: GraphtonBaseReturnTypeBuilder) => void) {
+    /*WITHRELATEDOVERLOADS*/
+    public withRelated(relatedType: __TYPENAME__ReturnTypeObjectField, buildFields: <T extends GraphtonBaseReturnTypeBuilder>(r: T) => void): this {
         return super.withRelated(relatedType, buildFields);
     }
-    public withoutRelated(relatedType: __TYPENAME__ReturnTypeObjectField) {
+    public withoutRelated(relatedType: __TYPENAME__ReturnTypeObjectField): this {
         return super.withoutRelated(relatedType);
     }
 }

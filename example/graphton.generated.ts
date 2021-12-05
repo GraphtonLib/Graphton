@@ -39,14 +39,6 @@ interface QueryResponse {
     protected abstract rootType: RootType;
     protected abstract returnType: GraphtonBaseReturnTypeBuilder | null;
 
-    private toReturnTypeString(): string {
-        if(this.returnType) {
-            return `{ ${this.returnType.toReturnTypeString()} }`;
-        }
-
-        return '';
-    }
-
     /**
      * Transform builder to graphql query string
      */
@@ -62,7 +54,7 @@ interface QueryResponse {
             queryArgString = `(${queryArgItems.join(', ')})`;
         }
 
-        return `${this.rootType} ${this.queryName} { ${this.queryName}${queryArgString} ${this.toReturnTypeString()} }`;
+        return `${this.rootType} ${this.queryName} { ${this.queryName}${queryArgString} ${this.returnType?.toReturnTypeString()||''} }`;
     }
 
     /**
@@ -152,24 +144,28 @@ abstract class GraphtonBaseReturnTypeBuilder {
     /**
      * Add the `relatedType` OBJECT field, selecting the fields for that type using the `buildFields` closure
      */
-    public withRelated(relatedType: string, buildFields: (r: GraphtonBaseReturnTypeBuilder) => void) {
+    public withRelated(relatedType: string, buildFields: <T extends GraphtonBaseReturnTypeBuilder>(r: T) => void): this {
         const relatedReturnTypeClass = this.availableObjectFields[relatedType];
         if(!relatedReturnTypeClass) {
             console.warn(`Trying to add related field ${relatedType} to type ${this.typeName} which does not exist. Ignoring!`);
-            return;
+            return this;
         }
 
         const relatedReturnType = new relatedReturnTypeClass();
         buildFields(relatedReturnType);
         this.queryObjectFields[relatedType] = relatedReturnType;
+
+        return this;
     }
 
     /**
      * Remove the `relatedType` OBJECT field
      * Selected fields for `relatedType` will be removed!
      */
-    public withoutRelated(relatedType: string): void {
+    public withoutRelated(relatedType: string): this {
         delete this.queryObjectFields[relatedType];
+
+        return this;
     }
 
     /**
@@ -228,10 +224,11 @@ class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
     public only(...fieldNames: (UserReturnTypeSimpleField|UserReturnTypeSimpleField[])[]): this {
         return super.only(...fieldNames);
     }
-    public withRelated(relatedType: UserReturnTypeObjectField, buildFields: (type: GraphtonBaseReturnTypeBuilder) => void) {
+    public withRelated(relatedType: "posts", buildFields: (r: PostReturnTypeBuilder) => void): this;
+    public withRelated(relatedType: UserReturnTypeObjectField, buildFields: <T extends GraphtonBaseReturnTypeBuilder>(r: T) => void): this {
         return super.withRelated(relatedType, buildFields);
     }
-    public withoutRelated(relatedType: UserReturnTypeObjectField) {
+    public withoutRelated(relatedType: UserReturnTypeObjectField): this {
         return super.withoutRelated(relatedType);
     }
 }
@@ -256,10 +253,11 @@ class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
     public only(...fieldNames: (PostReturnTypeSimpleField|PostReturnTypeSimpleField[])[]): this {
         return super.only(...fieldNames);
     }
-    public withRelated(relatedType: PostReturnTypeObjectField, buildFields: (type: GraphtonBaseReturnTypeBuilder) => void) {
+    public withRelated(relatedType: "author", buildFields: (r: UserReturnTypeBuilder) => void): this;
+    public withRelated(relatedType: PostReturnTypeObjectField, buildFields: <T extends GraphtonBaseReturnTypeBuilder>(r: T) => void): this {
         return super.withRelated(relatedType, buildFields);
     }
-    public withoutRelated(relatedType: PostReturnTypeObjectField) {
+    public withoutRelated(relatedType: PostReturnTypeObjectField): this {
         return super.withoutRelated(relatedType);
     }
 }

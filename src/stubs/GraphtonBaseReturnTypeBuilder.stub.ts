@@ -66,24 +66,28 @@
     /**
      * Add the `relatedType` OBJECT field, selecting the fields for that type using the `buildFields` closure
      */
-    public withRelated(relatedType: string, buildFields: (r: GraphtonBaseReturnTypeBuilder) => void) {
+    public withRelated(relatedType: string, buildFields: <T extends GraphtonBaseReturnTypeBuilder>(r: T) => void): this {
         const relatedReturnTypeClass = this.availableObjectFields[relatedType];
         if(!relatedReturnTypeClass) {
             console.warn(`Trying to add related field ${relatedType} to type ${this.typeName} which does not exist. Ignoring!`);
-            return;
+            return this;
         }
 
         const relatedReturnType = new relatedReturnTypeClass();
         buildFields(relatedReturnType);
         this.queryObjectFields[relatedType] = relatedReturnType;
+
+        return this;
     }
 
     /**
      * Remove the `relatedType` OBJECT field
      * Selected fields for `relatedType` will be removed!
      */
-    public withoutRelated(relatedType: string): void {
+    public withoutRelated(relatedType: string): this {
         delete this.queryObjectFields[relatedType];
+
+        return this;
     }
 
     /**

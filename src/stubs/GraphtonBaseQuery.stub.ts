@@ -29,14 +29,6 @@ interface QueryResponse {
     protected abstract rootType: RootType;
     protected abstract returnType: GraphtonBaseReturnTypeBuilder | null;
 
-    private toReturnTypeString(): string {
-        if(this.returnType) {
-            return `{ ${this.returnType.toReturnTypeString()} }`;
-        }
-
-        return '';
-    }
-
     /**
      * Transform builder to graphql query string
      */
@@ -52,7 +44,7 @@ interface QueryResponse {
             queryArgString = `(${queryArgItems.join(', ')})`;
         }
 
-        return `${this.rootType} ${this.queryName} { ${this.queryName}${queryArgString} ${this.toReturnTypeString()} }`;
+        return `${this.rootType} ${this.queryName} { ${this.queryName}${queryArgString} ${this.returnType?.toReturnTypeString()||''} }`;
     }
 
     /**

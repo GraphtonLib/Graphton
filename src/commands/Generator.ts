@@ -136,6 +136,12 @@ export default class Generator {
                             return obj;
                         }, {}))
                     .replaceAll(/"([^"]*?ReturnTypeBuilder)"/g, '$1'),
+                "WITHRELATEDOVERLOADS": returnTypes.filter(t=>t.info!.kind=="object")
+                    .reduce((overloads: string[], t) => {
+                        overloads.push(`public withRelated(relatedType: "${t.name}", buildFields: (r: ${t.info!.type}ReturnTypeBuilder) => void): this;`);
+                        return overloads;
+                    }, [])
+                    .join("\n    ") || '',
                 "TYPENAME": type.name,
             });
         }

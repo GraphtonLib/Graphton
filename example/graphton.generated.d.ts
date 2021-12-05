@@ -19,7 +19,6 @@ declare abstract class GraphtonBaseQuery {
     protected abstract arguments: Record<string, any>;
     protected abstract rootType: RootType;
     protected abstract returnType: GraphtonBaseReturnTypeBuilder | null;
-    private toReturnTypeString;
     /**
      * Transform builder to graphql query string
      */
@@ -62,12 +61,12 @@ declare abstract class GraphtonBaseReturnTypeBuilder {
     /**
      * Add the `relatedType` OBJECT field, selecting the fields for that type using the `buildFields` closure
      */
-    withRelated(relatedType: string, buildFields: (r: GraphtonBaseReturnTypeBuilder) => void): void;
+    withRelated(relatedType: string, buildFields: <T extends GraphtonBaseReturnTypeBuilder>(r: T) => void): this;
     /**
      * Remove the `relatedType` OBJECT field
      * Selected fields for `relatedType` will be removed!
      */
-    withoutRelated(relatedType: string): void;
+    withoutRelated(relatedType: string): this;
     /**
      * Compile the selected fields to a GraphQL selection.
      */
@@ -96,8 +95,8 @@ declare class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
     without(...fieldNames: (UserReturnTypeSimpleField | UserReturnTypeSimpleField[])[]): this;
     except(...fieldNames: (UserReturnTypeSimpleField | UserReturnTypeSimpleField[])[]): this;
     only(...fieldNames: (UserReturnTypeSimpleField | UserReturnTypeSimpleField[])[]): this;
-    withRelated(relatedType: UserReturnTypeObjectField, buildFields: (type: GraphtonBaseReturnTypeBuilder) => void): void;
-    withoutRelated(relatedType: UserReturnTypeObjectField): void;
+    withRelated(relatedType: "posts", buildFields: (r: PostReturnTypeBuilder) => void): this;
+    withoutRelated(relatedType: UserReturnTypeObjectField): this;
 }
 declare type PostReturnTypeSimpleField = "id" | "text";
 declare type PostReturnTypeObjectField = "author";
@@ -111,8 +110,8 @@ declare class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
     without(...fieldNames: (PostReturnTypeSimpleField | PostReturnTypeSimpleField[])[]): this;
     except(...fieldNames: (PostReturnTypeSimpleField | PostReturnTypeSimpleField[])[]): this;
     only(...fieldNames: (PostReturnTypeSimpleField | PostReturnTypeSimpleField[])[]): this;
-    withRelated(relatedType: PostReturnTypeObjectField, buildFields: (type: GraphtonBaseReturnTypeBuilder) => void): void;
-    withoutRelated(relatedType: PostReturnTypeObjectField): void;
+    withRelated(relatedType: "author", buildFields: (r: UserReturnTypeBuilder) => void): this;
+    withoutRelated(relatedType: PostReturnTypeObjectField): this;
 }
 export declare class Query {
     static users(): UsersQuery;

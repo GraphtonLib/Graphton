@@ -15,12 +15,6 @@ export class GraphtonSettings {
 }
 import axios from "axios";
 class GraphtonBaseQuery {
-    toReturnTypeString() {
-        if (this.returnType) {
-            return `{ ${this.returnType.toReturnTypeString()} }`;
-        }
-        return '';
-    }
     /**
      * Transform builder to graphql query string
      */
@@ -34,7 +28,7 @@ class GraphtonBaseQuery {
             }
             queryArgString = `(${queryArgItems.join(', ')})`;
         }
-        return `${this.rootType} ${this.queryName} { ${this.queryName}${queryArgString} ${this.toReturnTypeString()} }`;
+        return `${this.rootType} ${this.queryName} { ${this.queryName}${queryArgString} ${this.returnType?.toReturnTypeString() || ''} }`;
     }
     /**
      * Execute the query
@@ -112,11 +106,12 @@ class GraphtonBaseReturnTypeBuilder {
         const relatedReturnTypeClass = this.availableObjectFields[relatedType];
         if (!relatedReturnTypeClass) {
             console.warn(`Trying to add related field ${relatedType} to type ${this.typeName} which does not exist. Ignoring!`);
-            return;
+            return this;
         }
         const relatedReturnType = new relatedReturnTypeClass();
         buildFields(relatedReturnType);
         this.queryObjectFields[relatedType] = relatedReturnType;
+        return this;
     }
     /**
      * Remove the `relatedType` OBJECT field
@@ -124,6 +119,7 @@ class GraphtonBaseReturnTypeBuilder {
      */
     withoutRelated(relatedType) {
         delete this.queryObjectFields[relatedType];
+        return this;
     }
     /**
      * Compile the selected fields to a GraphQL selection.
