@@ -26,7 +26,7 @@
     "generate": "node src/graphton.js generate ./example/schema.json -o ./example/graphton.generated.ts",
     "dev": "tsc --watch",
     "prod": "tsc",
-    "release": "yarn generate; tsc; standard-version -a",
+    "release": "yarn generate; tsc; standard-version -a; git push --follow-tags origin main; yarn npm publish --access public",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {

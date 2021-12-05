@@ -100,6 +100,7 @@ export default class Generator {
 
         console.log(`Trimming output...`);
         const outContent = outContentSections.join("\n")
+            .replaceAll(/^\s*[\r\n]/gm, "\n")
             .replaceAll(/^\n+/g, '')
             .replaceAll(/\n+$/g, '')
             .replaceAll(/\n{3,}/g, "\n\n");
@@ -203,22 +204,31 @@ export default class Generator {
     }
 
     private generateQueryClass(query: Field, rootType: RootType): string {
-        const returnType = this.returnTypeInfo(query.type)?.type;
-
-        const fieldNames = this.gqlSchema?.types.find(t=>t.name==returnType)?.fields.map(f=>f.name) || [];
+        const returnTypeInfo = this.returnTypeInfo(query.type);
         const params = this.argsToMethodParameters(query.args);
+
+        const includeInStub: string[] = [];
+        if(returnTypeInfo?.kind == "object") {
+            includeInStub.push("RETURNTYPEOBJECT");
+        }
+        if(rootType == "query") {
+            includeInStub.push("ADDGET");
+        }
+        if(rootType == "mutation") {
+            includeInStub.push("ADDDO");
+        }
 
         return fillStub('Query', {
             "QUERYCLASSNAME": `${pascalCase(query.name)}${pascalCase(rootType)}`,
-            "FIELDS": JSON.stringify(fieldNames),
-            "FIELDSTUPLE": fieldNames.map(f => JSON.stringify(f)).join('|') || 'string',
             "QUERYNAME": query.name,
             "TYPEDPARAMS": params.typed.join(', '),
             "PARAMS": params.untyped.join(', '),
             "ROOTTYPE": rootType,
             "RETURNTYPE": this.toTypeAppend(query.type, false),
-            "RETURNTYPEBUILDER": `${this.returnTypeInfo(query.type)?.type}ReturnTypeBuilder`,
-        });
+            "RETURNTYPEBUILDER": returnTypeInfo?.kind == "object"
+                ? `${this.returnTypeInfo(query.type)?.type}ReturnTypeBuilder`
+                : 'null',
+        }, includeInStub);
     }
 
     private toTypeAppend(type: ReturnType, includeOptional: boolean = true): string {

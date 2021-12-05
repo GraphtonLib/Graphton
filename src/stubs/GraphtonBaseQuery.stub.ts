@@ -27,12 +27,15 @@ interface QueryResponse {
     protected abstract queryName: string;
     protected abstract arguments: Record<string, any>;
     protected abstract rootType: RootType;
-    protected abstract returnType: GraphtonBaseReturnTypeBuilder;
+    protected abstract returnType: GraphtonBaseReturnTypeBuilder | null;
 
-    /**
-     * Function to build the required fields for that query
-     */
-    public abstract returnFields(returnFieldsClosure: (r: GraphtonBaseReturnTypeBuilder) => void): this;
+    private toReturnTypeString(): string {
+        if(this.returnType) {
+            return `{ ${this.returnType.toReturnTypeString()} }`;
+        }
+
+        return '';
+    }
 
     /**
      * Transform builder to graphql query string
@@ -49,7 +52,7 @@ interface QueryResponse {
             queryArgString = `(${queryArgItems.join(', ')})`;
         }
 
-        return `${this.rootType} ${this.queryName} { ${this.queryName}${queryArgString} { ${this.returnType.toReturnTypeString()} } }`;
+        return `${this.rootType} ${this.queryName} { ${this.queryName}${queryArgString} ${this.toReturnTypeString()} }`;
     }
 
     /**

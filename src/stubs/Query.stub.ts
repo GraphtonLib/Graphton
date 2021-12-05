@@ -21,7 +21,7 @@ class __QUERYCLASSNAME__ extends GraphtonBaseQuery {
     protected queryName = "/*QUERYNAME*/";
     protected arguments: Record<string, any> = {};
     protected rootType: RootType = "/*ROOTTYPE*/";
-    protected returnType = new __RETURNTYPEBUILDER__();
+    protected returnType = /*IF:RETURNTYPEOBJECT*/new/*ENDIF:RETURNTYPEOBJECT*/ __RETURNTYPEBUILDER__/*IF:RETURNTYPEOBJECT*/()/*ENDIF:RETURNTYPEOBJECT*/;
 
     constructor(/*TYPEDPARAMS*/) {
         super();
@@ -29,15 +29,33 @@ class __QUERYCLASSNAME__ extends GraphtonBaseQuery {
         Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
     }
 
+    /*IF:RETURNTYPEOBJECT*/
+    /**
+     * Function to build the required fields for that query
+     * Only available if the return type is an OBJECT
+     */
     public returnFields(returnFieldsClosure: (r: __RETURNTYPEBUILDER__) => void) {
         returnFieldsClosure(this.returnType);
         return this;
     }
+    /*ENDIF:RETURNTYPEOBJECT*/
 
+    /*IF:ADDGET*/
+    /**
+     * Execute the query and get the results
+     * Only available on Query type requests
+     */
     async get(requestOptions: RequestOptions = {}): Promise<__QUERYCLASSNAME__Response> {
-        return <__QUERYCLASSNAME__Response>(await super.execute());
+        return <__QUERYCLASSNAME__Response>(await super.execute(requestOptions));
     }
+    /*ENDIF:ADDGET*/
+    /*IF:ADDDO*/
+    /**
+     * Do the mutation on the server
+     * Only available on Mutation type requests
+     */
     async do(requestOptions: RequestOptions = {}): Promise<__QUERYCLASSNAME__Response> {
-        return <__QUERYCLASSNAME__Response>(await super.execute());
+        return <__QUERYCLASSNAME__Response>(await super.execute(requestOptions));
     }
+    /*ENDIF:ADDDO*/
 }

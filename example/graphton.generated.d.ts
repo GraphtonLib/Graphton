@@ -18,11 +18,8 @@ declare abstract class GraphtonBaseQuery {
     protected abstract queryName: string;
     protected abstract arguments: Record<string, any>;
     protected abstract rootType: RootType;
-    protected abstract returnType: GraphtonBaseReturnTypeBuilder;
-    /**
-     * Function to build the required fields for that query
-     */
-    abstract returnFields(returnFieldsClosure: (r: GraphtonBaseReturnTypeBuilder) => void): this;
+    protected abstract returnType: GraphtonBaseReturnTypeBuilder | null;
+    private toReturnTypeString;
     /**
      * Transform builder to graphql query string
      */
@@ -120,6 +117,7 @@ declare class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
 export declare class Query {
     static users(): UsersQuery;
     static user(id?: (number | null)): UserQuery;
+    static userExists(id?: (number | null)): UserExistsQuery;
 }
 interface UsersQueryResponse {
     data: {
@@ -133,9 +131,16 @@ declare class UsersQuery extends GraphtonBaseQuery {
     protected rootType: RootType;
     protected returnType: UserReturnTypeBuilder;
     constructor();
+    /**
+     * Function to build the required fields for that query
+     * Only available if the return type is an OBJECT
+     */
     returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this;
+    /**
+     * Execute the query and get the results
+     * Only available on Query type requests
+     */
     get(requestOptions?: RequestOptions): Promise<UsersQueryResponse>;
-    do(requestOptions?: RequestOptions): Promise<UsersQueryResponse>;
 }
 interface UserQueryResponse {
     data: {
@@ -149,9 +154,34 @@ declare class UserQuery extends GraphtonBaseQuery {
     protected rootType: RootType;
     protected returnType: UserReturnTypeBuilder;
     constructor(id?: (number | null));
+    /**
+     * Function to build the required fields for that query
+     * Only available if the return type is an OBJECT
+     */
     returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this;
+    /**
+     * Execute the query and get the results
+     * Only available on Query type requests
+     */
     get(requestOptions?: RequestOptions): Promise<UserQueryResponse>;
-    do(requestOptions?: RequestOptions): Promise<UserQueryResponse>;
+}
+interface UserExistsQueryResponse {
+    data: {
+        userExists: boolean;
+    };
+    response: AxiosResponse;
+}
+declare class UserExistsQuery extends GraphtonBaseQuery {
+    protected queryName: string;
+    protected arguments: Record<string, any>;
+    protected rootType: RootType;
+    protected returnType: null;
+    constructor(id?: (number | null));
+    /**
+     * Execute the query and get the results
+     * Only available on Query type requests
+     */
+    get(requestOptions?: RequestOptions): Promise<UserExistsQueryResponse>;
 }
 export declare class Mutation {
     static createUser(name: string, age?: (number | null)): CreateUserMutation;
@@ -170,8 +200,15 @@ declare class CreateUserMutation extends GraphtonBaseQuery {
     protected rootType: RootType;
     protected returnType: UserReturnTypeBuilder;
     constructor(name: string, age?: (number | null));
+    /**
+     * Function to build the required fields for that query
+     * Only available if the return type is an OBJECT
+     */
     returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this;
-    get(requestOptions?: RequestOptions): Promise<CreateUserMutationResponse>;
+    /**
+     * Do the mutation on the server
+     * Only available on Mutation type requests
+     */
     do(requestOptions?: RequestOptions): Promise<CreateUserMutationResponse>;
 }
 interface UpdateUserMutationResponse {
@@ -186,8 +223,15 @@ declare class UpdateUserMutation extends GraphtonBaseQuery {
     protected rootType: RootType;
     protected returnType: UserReturnTypeBuilder;
     constructor(id: number, name?: (string | null), age?: (number | null));
+    /**
+     * Function to build the required fields for that query
+     * Only available if the return type is an OBJECT
+     */
     returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this;
-    get(requestOptions?: RequestOptions): Promise<UpdateUserMutationResponse>;
+    /**
+     * Do the mutation on the server
+     * Only available on Mutation type requests
+     */
     do(requestOptions?: RequestOptions): Promise<UpdateUserMutationResponse>;
 }
 interface DeleteUserMutationResponse {
@@ -202,8 +246,15 @@ declare class DeleteUserMutation extends GraphtonBaseQuery {
     protected rootType: RootType;
     protected returnType: UserReturnTypeBuilder;
     constructor(id: number);
+    /**
+     * Function to build the required fields for that query
+     * Only available if the return type is an OBJECT
+     */
     returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this;
-    get(requestOptions?: RequestOptions): Promise<DeleteUserMutationResponse>;
+    /**
+     * Do the mutation on the server
+     * Only available on Mutation type requests
+     */
     do(requestOptions?: RequestOptions): Promise<DeleteUserMutationResponse>;
 }
 export {};

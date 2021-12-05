@@ -15,6 +15,12 @@ export class GraphtonSettings {
 }
 import axios from "axios";
 class GraphtonBaseQuery {
+    toReturnTypeString() {
+        if (this.returnType) {
+            return `{ ${this.returnType.toReturnTypeString()} }`;
+        }
+        return '';
+    }
     /**
      * Transform builder to graphql query string
      */
@@ -28,7 +34,7 @@ class GraphtonBaseQuery {
             }
             queryArgString = `(${queryArgItems.join(', ')})`;
         }
-        return `${this.rootType} ${this.queryName} { ${this.queryName}${queryArgString} { ${this.returnType.toReturnTypeString()} } }`;
+        return `${this.rootType} ${this.queryName} { ${this.queryName}${queryArgString} ${this.toReturnTypeString()} }`;
     }
     /**
      * Execute the query
@@ -191,6 +197,9 @@ export class Query {
     static user(id) {
         return new UserQuery(id);
     }
+    static userExists(id) {
+        return new UserExistsQuery(id);
+    }
 }
 class UsersQuery extends GraphtonBaseQuery {
     queryName = "users";
@@ -202,15 +211,20 @@ class UsersQuery extends GraphtonBaseQuery {
         this.arguments = {};
         Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
     }
+    /**
+     * Function to build the required fields for that query
+     * Only available if the return type is an OBJECT
+     */
     returnFields(returnFieldsClosure) {
         returnFieldsClosure(this.returnType);
         return this;
     }
+    /**
+     * Execute the query and get the results
+     * Only available on Query type requests
+     */
     async get(requestOptions = {}) {
-        return (await super.execute());
-    }
-    async do(requestOptions = {}) {
-        return (await super.execute());
+        return (await super.execute(requestOptions));
     }
 }
 class UserQuery extends GraphtonBaseQuery {
@@ -223,15 +237,38 @@ class UserQuery extends GraphtonBaseQuery {
         this.arguments = { id };
         Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
     }
+    /**
+     * Function to build the required fields for that query
+     * Only available if the return type is an OBJECT
+     */
     returnFields(returnFieldsClosure) {
         returnFieldsClosure(this.returnType);
         return this;
     }
+    /**
+     * Execute the query and get the results
+     * Only available on Query type requests
+     */
     async get(requestOptions = {}) {
-        return (await super.execute());
+        return (await super.execute(requestOptions));
     }
-    async do(requestOptions = {}) {
-        return (await super.execute());
+}
+class UserExistsQuery extends GraphtonBaseQuery {
+    queryName = "userExists";
+    arguments = {};
+    rootType = "query";
+    returnType = null;
+    constructor(id) {
+        super();
+        this.arguments = { id };
+        Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
+    }
+    /**
+     * Execute the query and get the results
+     * Only available on Query type requests
+     */
+    async get(requestOptions = {}) {
+        return (await super.execute(requestOptions));
     }
 }
 // REGION: Mutations
@@ -256,15 +293,20 @@ class CreateUserMutation extends GraphtonBaseQuery {
         this.arguments = { name, age };
         Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
     }
+    /**
+     * Function to build the required fields for that query
+     * Only available if the return type is an OBJECT
+     */
     returnFields(returnFieldsClosure) {
         returnFieldsClosure(this.returnType);
         return this;
     }
-    async get(requestOptions = {}) {
-        return (await super.execute());
-    }
+    /**
+     * Do the mutation on the server
+     * Only available on Mutation type requests
+     */
     async do(requestOptions = {}) {
-        return (await super.execute());
+        return (await super.execute(requestOptions));
     }
 }
 class UpdateUserMutation extends GraphtonBaseQuery {
@@ -277,15 +319,20 @@ class UpdateUserMutation extends GraphtonBaseQuery {
         this.arguments = { id, name, age };
         Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
     }
+    /**
+     * Function to build the required fields for that query
+     * Only available if the return type is an OBJECT
+     */
     returnFields(returnFieldsClosure) {
         returnFieldsClosure(this.returnType);
         return this;
     }
-    async get(requestOptions = {}) {
-        return (await super.execute());
-    }
+    /**
+     * Do the mutation on the server
+     * Only available on Mutation type requests
+     */
     async do(requestOptions = {}) {
-        return (await super.execute());
+        return (await super.execute(requestOptions));
     }
 }
 class DeleteUserMutation extends GraphtonBaseQuery {
@@ -298,14 +345,19 @@ class DeleteUserMutation extends GraphtonBaseQuery {
         this.arguments = { id };
         Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
     }
+    /**
+     * Function to build the required fields for that query
+     * Only available if the return type is an OBJECT
+     */
     returnFields(returnFieldsClosure) {
         returnFieldsClosure(this.returnType);
         return this;
     }
-    async get(requestOptions = {}) {
-        return (await super.execute());
-    }
+    /**
+     * Do the mutation on the server
+     * Only available on Mutation type requests
+     */
     async do(requestOptions = {}) {
-        return (await super.execute());
+        return (await super.execute(requestOptions));
     }
 }

@@ -2,21 +2,26 @@ schema {
   query: Query
   mutation: Mutation
 }
-type Query {
-  users: [User!]!
-  user(id: ID): User
-}
+
 type User {
   id: ID!
   name: String!
   age: Int
   posts: [Post!]!
 }
+
 type Post {
   id: ID!
   author: User!
   text: String!
 }
+
+type Query {
+  users: [User!]!
+  user(id: ID): User
+  userExists(id: ID): Boolean!
+}
+
 type Mutation {
   createUser(name: String!, age: Int): User!
   updateUser(id: ID!, name: String, age: Int): User!

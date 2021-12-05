@@ -212,6 +212,9 @@ GraphtonSettings.setDefaultHeaders({"Authentication": "Bearer XXX"});
 *GraphtonBaseQuery* is abstract, the classes you will call are generated and extended from this base class.
 
 #### returnFields
+
+*Only available if the return type is an OBJECT*
+
 > returnFields(returnFieldsClosure: (r: GraphtonBaseReturnTypeBuilder) => void): this
 
 Function to build the required fields for that query.
@@ -220,6 +223,44 @@ Function to build the required fields for that query.
 > toQuery(): string
 
 Transform builder to graphql Query string
+
+#### get
+
+*Only available on Query type requests*
+
+> get(requestOptions: RequestOptions = {}): Promise<QueryResponse>
+
+Execute the query and get the results
+
+#### do
+
+*Only available on Mutation type requests*
+
+> do(requestOptions: RequestOptions = {}): Promise<QueryResponse>
+
+Do the mutation on the server
+
+#### Type: RequestOptions
+
+> ```typescript
+> interface RequestOptions {
+>   // Headers to include in this request to the server.
+>   headers?: Record<string, string>,
+>   // URL to the GraphQL endpoint (e.g. http://example.com/graphql)
+>   url?: string 
+> }
+> ```
+
+#### Type: QueryResponse
+
+> ```typescript
+> interface QueryResponse {
+>   // `data` changes to the actual return type in the generated file!
+>   data: Record<string, any>,
+>   // The Axios response from the server
+>   response: AxiosResponse
+> }
+> ```
 
 ### GraphtonBaseReturnTypeBuilder
 
