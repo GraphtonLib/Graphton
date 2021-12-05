@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.0](https://github.com/GraphtonLib/Graphton/compare/v0.0.3...v0.1.0) (2021-12-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* GraphtonBaseQuery.do() now ONLY available for Mutatin type queries
+* GraphtonBaseQuery.got() now ONLY available for Query type queries
+* GraphtonBaseQuery.returnFields() not available anymore for non-OBJECT return types
+
+### Bug Fixes
+
+* Non-object type returns for queries ([4cc5046](https://github.com/GraphtonLib/Graphton/commit/4cc5046cb8f5d73bab3871a3e3b3acb9ff26c0e7))
+
 ### [0.0.3](https://github.com/GraphtonLib/Graphton/compare/v0.0.2...v0.0.3) (2021-12-04)
 
 
