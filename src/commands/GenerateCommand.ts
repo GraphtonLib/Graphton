@@ -19,7 +19,7 @@ const scalarMap = (scalarType: string) => ({
 })[scalarType] || scalarType;
 
 
-export default class Generator {
+export default class GenerateCommand {
     private gqlSchema: Schema|null = null;
 
     async generate(schemaUri: string, options: GenerateCommandOptions) {

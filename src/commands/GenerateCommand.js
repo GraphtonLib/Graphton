@@ -12,7 +12,7 @@ const scalarMap = (scalarType) => ({
     'Date': 'string',
     'Time': 'string',
 })[scalarType] || scalarType;
-export default class Generator {
+export default class GenerateCommand {
     gqlSchema = null;
     async generate(schemaUri, options) {
         const outContentSections = [];
