@@ -21,7 +21,7 @@ jobs:
 
       - name: Setup registries
         run: |
-          yarn config set --json npmRegistries '{ "//registry.yarnpkg.com":": { "npmAuthToken": "'${{ secrets.NPM_TOKEN }}'" }, "//npm.pkg.github.com": { "npmAuthToken": "'${{ secrets.GITHUB_TOKEN }}'" } }'
+          yarn config set --json npmRegistries '{ "//registry.yarnpkg.com": { "npmAuthToken": "'${{ secrets.NPM_TOKEN }}'" }, "//npm.pkg.github.com": { "npmAuthToken": "'${{ secrets.GITHUB_TOKEN }}'" } }'
 
       - name: Setup git config
         run: |
