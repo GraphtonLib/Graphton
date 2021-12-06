@@ -20,7 +20,7 @@ jobs:
         run: yarn
 
       - name: Set changelog
-        run: echo CHANGELOG=$(yarn standard-version --dry-run | sed -n '/^---$/,/^---$/p' | sed '1d;$d') >> $GITHUB_ENV
+        run: echo CHANGELOG="$(yarn standard-version --dry-run | sed -n '/^---$/,/^---$/p' | sed '1d;$d')" >> $GITHUB_ENV
 
       - name: Set version
         run: |
