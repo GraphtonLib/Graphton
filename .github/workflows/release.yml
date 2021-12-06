@@ -13,7 +13,6 @@ jobs:
       - name: Fetch Sources
         uses: actions/checkout@v2
         with:
-          persist-credentials: false
           fetch-depth: 0
       - uses: actions/setup-node@v2
         with:
@@ -40,7 +39,6 @@ jobs:
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           tags: true
 
       - name: Create Release
