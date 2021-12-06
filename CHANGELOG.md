@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.2](https://github.com/GraphtonLib/Graphton/compare/v0.1.1...v0.1.2) (2021-12-06)
+
+
+### Features
+
+* **ci:** "Draft release" workflow ([9e2ae99](https://github.com/GraphtonLib/Graphton/commit/9e2ae99442432834fea575c6fa96f83f380ea79e))
+* Support for transpiling generated output automatically to pure javascript ([2ff0966](https://github.com/GraphtonLib/Graphton/commit/2ff0966e00ebafc626bda468319305df9af13a02))
+
 ### [0.1.1](https://github.com/GraphtonLib/Graphton/compare/v0.1.0...v0.1.1) (2021-12-05)
 
 
