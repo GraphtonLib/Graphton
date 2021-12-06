@@ -10,8 +10,7 @@
     "declaration": true
   },
   "include": [
-    "src",
-    "example"
+    "src"
   ],
   "exclude": [
     "**/*.d.ts"

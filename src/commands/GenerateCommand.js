@@ -3,6 +3,7 @@ import { introspectQuery } from "../graphql/query/introspect.js";
 import * as fs from "fs";
 import { pascalCase } from "change-case";
 import axios from "axios";
+import { default as ts } from "typescript";
 const scalarMap = (scalarType) => ({
     'Int': 'number',
     'Boolean': 'boolean',
@@ -16,10 +17,6 @@ export default class GenerateCommand {
     gqlSchema = null;
     async generate(schemaUri, options) {
         const outContentSections = [];
-        if (options.outputFile.endsWith('.js')) {
-            console.error('Graphton can - for now - only generate an .ts file, which will be compiled to .js in a later version of Graphton.');
-            process.exit(1);
-        }
         try {
             if (isUrl(schemaUri)) {
                 this.gqlSchema = (await axios.post(schemaUri, { query: introspectQuery }))?.data?.data?.__schema;
@@ -75,11 +72,26 @@ export default class GenerateCommand {
             ``,
         ]);
         console.log(`Trimming output...`);
-        const outContent = outContentSections.join("\n")
+        let outContent = outContentSections.join("\n")
             .replaceAll(/^\s*[\r\n]/gm, "\n")
             .replaceAll(/^\n+/g, '')
             .replaceAll(/\n+$/g, '')
             .replaceAll(/\n{3,}/g, "\n\n");
+        if (options.outputFile.endsWith('.js')) {
+            console.log(`Transpiling output from TS to JS...`);
+            outContent = ts.transpileModule(outContent, {
+                "compilerOptions": {
+                    "target": ts.ScriptTarget.ESNext,
+                    "module": ts.ModuleKind.ESNext,
+                    "moduleResolution": ts.ModuleResolutionKind.Node12,
+                    "esModuleInterop": true,
+                    "forceConsistentCasingInFileNames": true,
+                    "strict": true,
+                    "skipLibCheck": true,
+                    "declaration": true
+                }
+            }).outputText;
+        }
         console.log(`Writing it all to ${options.outputFile}...`);
         fs.writeFileSync(options.outputFile, outContent, { encoding: "utf8" });
         console.log('');
