@@ -1,3 +1,12 @@
+![Graphton Logo](./.github/Branding/logo-text.png)
+
+![Current package version](https://img.shields.io/github/package-json/v/GraphtonLib/Graphton?label=Current%20Version&style=flat-square)
+![Downloads on NPM](https://img.shields.io/npm/dt/@graphtonlib/graphton?style=flat-square&label=Downloads)
+![GitHub Release Date](https://img.shields.io/github/release-date/GraphtonLib/Graphton?label=Release%20Date&style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/GraphtonLib/Graphton?style=flat-square)
+[![Patreons](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3Droboroads%26type%3Dpatrons&style=flat-square&label=Patreon)](https://www.patreon.com/roboroads) 
+
+
 # Graphton
 A JS/TS generator that builds a GraphQL query builder for your API
 

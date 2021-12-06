@@ -61,7 +61,7 @@ declare abstract class GraphtonBaseReturnTypeBuilder {
     /**
      * Add the `relatedType` OBJECT field, selecting the fields for that type using the `buildFields` closure
      */
-    withRelated(relatedType: string, buildFields: <T extends GraphtonBaseReturnTypeBuilder>(r: T) => void): this;
+    withRelated(relatedType: string, buildFields: (r: GraphtonBaseReturnTypeBuilder) => void): this;
     /**
      * Remove the `relatedType` OBJECT field
      * Selected fields for `relatedType` will be removed!
@@ -77,18 +77,21 @@ export interface User {
     name?: string;
     age?: (number | null);
     posts?: Post[];
+    friends?: User[];
 }
 export interface Post {
     id?: number;
     author?: User;
     text?: string;
+    repatedPosts?: Post[];
 }
 declare type UserReturnTypeSimpleField = "id" | "name" | "age";
-declare type UserReturnTypeObjectField = "posts";
+declare type UserReturnTypeObjectField = "posts" | "friends";
 declare class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
     protected availableSimpleFields: Set<string>;
     protected availableObjectFields: {
         posts: typeof PostReturnTypeBuilder;
+        friends: typeof UserReturnTypeBuilder;
     };
     protected typeName: string;
     with(...fieldNames: (UserReturnTypeSimpleField | UserReturnTypeSimpleField[])[]): this;
@@ -96,14 +99,16 @@ declare class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
     except(...fieldNames: (UserReturnTypeSimpleField | UserReturnTypeSimpleField[])[]): this;
     only(...fieldNames: (UserReturnTypeSimpleField | UserReturnTypeSimpleField[])[]): this;
     withRelated(relatedType: "posts", buildFields: (r: PostReturnTypeBuilder) => void): this;
+    withRelated(relatedType: "friends", buildFields: (r: UserReturnTypeBuilder) => void): this;
     withoutRelated(relatedType: UserReturnTypeObjectField): this;
 }
 declare type PostReturnTypeSimpleField = "id" | "text";
-declare type PostReturnTypeObjectField = "author";
+declare type PostReturnTypeObjectField = "author" | "repatedPosts";
 declare class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
     protected availableSimpleFields: Set<string>;
     protected availableObjectFields: {
         author: typeof UserReturnTypeBuilder;
+        repatedPosts: typeof PostReturnTypeBuilder;
     };
     protected typeName: string;
     with(...fieldNames: (PostReturnTypeSimpleField | PostReturnTypeSimpleField[])[]): this;
@@ -111,6 +116,7 @@ declare class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
     except(...fieldNames: (PostReturnTypeSimpleField | PostReturnTypeSimpleField[])[]): this;
     only(...fieldNames: (PostReturnTypeSimpleField | PostReturnTypeSimpleField[])[]): this;
     withRelated(relatedType: "author", buildFields: (r: UserReturnTypeBuilder) => void): this;
+    withRelated(relatedType: "repatedPosts", buildFields: (r: PostReturnTypeBuilder) => void): this;
     withoutRelated(relatedType: PostReturnTypeObjectField): this;
 }
 export declare class Query {

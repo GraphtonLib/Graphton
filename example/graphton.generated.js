@@ -141,7 +141,7 @@ class GraphtonBaseReturnTypeBuilder {
 }
 class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
     availableSimpleFields = new Set(["id", "name", "age"]);
-    availableObjectFields = { "posts": PostReturnTypeBuilder };
+    availableObjectFields = { "posts": PostReturnTypeBuilder, "friends": UserReturnTypeBuilder };
     typeName = 'User';
     with(...fieldNames) {
         return super.with(...fieldNames);
@@ -164,7 +164,7 @@ class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
 }
 class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
     availableSimpleFields = new Set(["id", "text"]);
-    availableObjectFields = { "author": UserReturnTypeBuilder };
+    availableObjectFields = { "author": UserReturnTypeBuilder, "repatedPosts": PostReturnTypeBuilder };
     typeName = 'Post';
     with(...fieldNames) {
         return super.with(...fieldNames);
