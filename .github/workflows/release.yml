@@ -19,6 +19,10 @@ jobs:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Setup registries
+        run: |
+          yarn config set --json npmRegistries '{ "//registry.npmjs.org": { "npmAuthToken": "'${{ secrets.NPM_TOKEN }}'" }, "//npm.pkg.github.com": { "npmAuthToken": "'${{ secrets.GITHUB_TOKEN }}'" } }'
+
       - name: Setup git config
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -49,10 +53,8 @@ jobs:
             --title "v$RELEASE_VERSION" \
             --notes "$(cat RELEASE_CHANGELOG.md)"
 
-      - name: Publish to NPM
+      - name: Publish
         run: yarn npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - uses: actions/setup-node@v2
         with:
@@ -60,5 +62,3 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
 
       - run: yarn npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
