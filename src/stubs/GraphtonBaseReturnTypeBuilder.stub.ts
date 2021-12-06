@@ -66,7 +66,7 @@
     /**
      * Add the `relatedType` OBJECT field, selecting the fields for that type using the `buildFields` closure
      */
-    public withRelated(relatedType: string, buildFields: <T extends GraphtonBaseReturnTypeBuilder>(r: T) => void): this {
+    public withRelated(relatedType: string, buildFields: (r: GraphtonBaseReturnTypeBuilder) => void): this {
         const relatedReturnTypeClass = this.availableObjectFields[relatedType];
         if(!relatedReturnTypeClass) {
             console.warn(`Trying to add related field ${relatedType} to type ${this.typeName} which does not exist. Ignoring!`);

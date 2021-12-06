@@ -144,7 +144,7 @@ abstract class GraphtonBaseReturnTypeBuilder {
     /**
      * Add the `relatedType` OBJECT field, selecting the fields for that type using the `buildFields` closure
      */
-    public withRelated(relatedType: string, buildFields: <T extends GraphtonBaseReturnTypeBuilder>(r: T) => void): this {
+    public withRelated(relatedType: string, buildFields: (r: GraphtonBaseReturnTypeBuilder) => void): this {
         const relatedReturnTypeClass = this.availableObjectFields[relatedType];
         if(!relatedReturnTypeClass) {
             console.warn(`Trying to add related field ${relatedType} to type ${this.typeName} which does not exist. Ignoring!`);
@@ -225,7 +225,7 @@ class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
         return super.only(...fieldNames);
     }
     public withRelated(relatedType: "posts", buildFields: (r: PostReturnTypeBuilder) => void): this;
-    public withRelated(relatedType: UserReturnTypeObjectField, buildFields: <T extends GraphtonBaseReturnTypeBuilder>(r: T) => void): this {
+    public withRelated(relatedType: UserReturnTypeObjectField, buildFields: (r: GraphtonBaseReturnTypeBuilder) => void): this {
         return super.withRelated(relatedType, buildFields);
     }
     public withoutRelated(relatedType: UserReturnTypeObjectField): this {
@@ -254,7 +254,7 @@ class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
         return super.only(...fieldNames);
     }
     public withRelated(relatedType: "author", buildFields: (r: UserReturnTypeBuilder) => void): this;
-    public withRelated(relatedType: PostReturnTypeObjectField, buildFields: <T extends GraphtonBaseReturnTypeBuilder>(r: T) => void): this {
+    public withRelated(relatedType: PostReturnTypeObjectField, buildFields: (r: GraphtonBaseReturnTypeBuilder) => void): this {
         return super.withRelated(relatedType, buildFields);
     }
     public withoutRelated(relatedType: PostReturnTypeObjectField): this {
