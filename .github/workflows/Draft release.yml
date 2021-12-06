@@ -16,9 +16,14 @@ jobs:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Set changelog and version
+      - name: Link yarn dependencies
+        run: yarn
+
+      - name: Set changelog
+        run: echo CHANGELOG=$(yarn standard-version --dry-run | sed -n '/^---$/,/^---$/p' | sed '1d;$d') >> $GITHUB_ENV
+
+      - name: Set version
         run: |
-          echo CHANGELOG=$(yarn standard-version --dry-run | sed -n '/^---$/,/^---$/p' | sed '1d;$d') >> $GITHUB_ENV
           yarn standard-version
           echo RELEASE_VERSION=$(node -e "console.log(require('./package.json').version);") >> $GITHUB_ENV
 
@@ -37,6 +42,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create ${{ env.RELEASE_VERSION }} \
+            --draft
             --title "${{ env.RELEASE_VERSION }}" \
             --notes "$(cat << 'EOM'
           ${{ env.CHANGELOG }}
