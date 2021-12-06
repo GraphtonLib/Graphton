@@ -1,0 +1,67 @@
+name: Release
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: Release Graphton to NPM & GitHub
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Fetch Sources
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: main
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup git config
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Link yarn dependencies
+        run: yarn
+
+      - name: Get changelog for this release
+        run: echo "CHANGELOG=$(yarn standard-version --dry-run | sed -n '/^---$/,/^---$/p' | sed '1d;$d')" >> $GITHUB_ENV
+
+      - name: Set changelog, version and tag
+        run: yarn standard-version
+
+      - name: Grab new version for release
+        run: echo "RELEASE_VERSION=$(node -e "console.log(require('./package.json').version);")" >> $GITHUB_ENV
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tags: true
+
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create v$RELEASE_VERSION \
+            --title "v$RELEASE_VERSION" \
+            --notes "$CHANGELOG"
+
+      - name: Publish to NPM
+        run: yarn npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+          registry-url: 'https://npm.pkg.github.com'
+
+      - run: yarn npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
