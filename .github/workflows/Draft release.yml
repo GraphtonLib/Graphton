@@ -20,7 +20,8 @@ jobs:
         run: yarn
 
       - name: Set changelog
-        run: echo "$(yarn standard-version --dry-run | sed -n '/^---$/,/^---$/p' | sed '1d;$d')" > RELEASE_CHANGELOG.md
+        run: |
+          yarn standard-version --dry-run | sed -n '/^---$/,/^---$/p' | sed '1d;$d' | tee RELEASE_CHANGELOG.md
 
       - name: Set version
         run: |
@@ -41,6 +42,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          cat RELEASE_CHANGELOG.md
           gh release create v$RELEASE_VERSION \
             --draft \
             --title "v$RELEASE_VERSION" \
