@@ -197,19 +197,21 @@ export interface User {
   name?: string,
   age?: (number | null),
   posts?: Post[],
+  friends?: User[],
 }
 export interface Post {
   id?: number,
   author?: User,
   text?: string,
+  repatedPosts?: Post[],
 }
 
 type UserReturnTypeSimpleField = "id"|"name"|"age";
-type UserReturnTypeObjectField = "posts";
+type UserReturnTypeObjectField = "posts"|"friends";
 
 class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
     protected availableSimpleFields = new Set(["id","name","age"]);
-    protected availableObjectFields = {"posts":PostReturnTypeBuilder};
+    protected availableObjectFields = {"posts":PostReturnTypeBuilder,"friends":UserReturnTypeBuilder};
     protected typeName = 'User';
 
     public with(...fieldNames: (UserReturnTypeSimpleField|UserReturnTypeSimpleField[])[]): this {
@@ -225,6 +227,7 @@ class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
         return super.only(...fieldNames);
     }
     public withRelated(relatedType: "posts", buildFields: (r: PostReturnTypeBuilder) => void): this;
+    public withRelated(relatedType: "friends", buildFields: (r: UserReturnTypeBuilder) => void): this;
     public withRelated(relatedType: UserReturnTypeObjectField, buildFields: (r: GraphtonBaseReturnTypeBuilder) => void): this {
         return super.withRelated(relatedType, buildFields);
     }
@@ -234,11 +237,11 @@ class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
 }
 
 type PostReturnTypeSimpleField = "id"|"text";
-type PostReturnTypeObjectField = "author";
+type PostReturnTypeObjectField = "author"|"repatedPosts";
 
 class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
     protected availableSimpleFields = new Set(["id","text"]);
-    protected availableObjectFields = {"author":UserReturnTypeBuilder};
+    protected availableObjectFields = {"author":UserReturnTypeBuilder,"repatedPosts":PostReturnTypeBuilder};
     protected typeName = 'Post';
 
     public with(...fieldNames: (PostReturnTypeSimpleField|PostReturnTypeSimpleField[])[]): this {
@@ -254,6 +257,7 @@ class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
         return super.only(...fieldNames);
     }
     public withRelated(relatedType: "author", buildFields: (r: UserReturnTypeBuilder) => void): this;
+    public withRelated(relatedType: "repatedPosts", buildFields: (r: PostReturnTypeBuilder) => void): this;
     public withRelated(relatedType: PostReturnTypeObjectField, buildFields: (r: GraphtonBaseReturnTypeBuilder) => void): this {
         return super.withRelated(relatedType, buildFields);
     }

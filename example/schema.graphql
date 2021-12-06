@@ -8,12 +8,14 @@ type User {
   name: String!
   age: Int
   posts: [Post!]!
+  friends: [User!]!
 }
 
 type Post {
   id: ID!
   author: User!
   text: String!
+  repatedPosts: [Post!]!
 }
 
 type Query {
