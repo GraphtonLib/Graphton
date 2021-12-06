@@ -19,13 +19,9 @@ jobs:
       - name: Link yarn dependencies
         run: yarn
 
-      - name: Set changelog
-        run: echo CHANGELOG="$(yarn standard-version --dry-run | sed -n '/^---$/,/^---$/p' | sed '1d;$d')" >> $GITHUB_ENV
-
       - name: Set version
         run: |
           yarn standard-version --skip.commit --skip.tag
-          echo RELEASE_VERSION=$(node -e "console.log(require('./package.json').version);") >> $GITHUB_ENV
 
       # Remove old release drafts by using the curl request for the available releases with draft flag
       - name: Remove Old Release Drafts
@@ -41,10 +37,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create ${{ env.RELEASE_VERSION }} \
+          gh release create v$(node -e "console.log(require('./package.json').version);") \
             --draft \
-            --title "${{ env.RELEASE_VERSION }}" \
+            --title "v$(node -e "console.log(require('./package.json').version);")" \
             --notes "$(cat << 'EOM'
-          ${{ env.CHANGELOG }}
+          $(yarn standard-version --dry-run | sed -n '/^---$/,/^---$/p' | sed '1d;$d')
           EOM
           )"
