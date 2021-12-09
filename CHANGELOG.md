@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.2.0](https://github.com/GraphtonLib/Graphton/compare/v0.1.2...v0.2.0) (2021-12-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* Query parameters are replaced for one object to make the parameters feel more like how arguments work in GraphQL. `Mutation.createUser("Some name", 10)` => `Mutation.createUser({name: "Some name", age: 10})`.
+
+### Features
+
+* Rework overrides to be part of the base class only using types ([e998083](https://github.com/GraphtonLib/Graphton/commit/e9980833325c55d1b9ff6ffb92e7d9ec49199b12))
+
 ### [0.1.2](https://github.com/GraphtonLib/Graphton/compare/v0.1.1...v0.1.2) (2021-12-06)
 
 
