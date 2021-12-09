@@ -18,20 +18,24 @@ interface __QUERYCLASSNAME__Response {
     response: AxiosResponse;
 }
 
-interface __QUERYCLASSNAME__Arguments {
-    /*ARGUMENTINTERFACE*//*IGNORE*/[key: string]: string|boolean|number/*ENDIGNORE*/;
+/*IF:ARGUMENTS*/
+interface __ARGUMENTINTERFACENAME__ {
+    /*ARGUMENTINTERFACEPROPERTIES*//*IGNORE*/[key: string]: string|boolean|number/*ENDIGNORE*/;
 }
+/*ENDIF:ARGUMENTS*/
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-class __QUERYCLASSNAME__ extends GraphtonBaseQuery<__QUERYCLASSNAME__Arguments> {
+class __QUERYCLASSNAME__ extends GraphtonBaseQuery<__ARGUMENTINTERFACENAME__> {
     protected queryName = "/*QUERYNAME*/";
     protected rootType: RootType = "/*ROOTTYPE*/";
     protected returnType = /*IF:RETURNTYPEOBJECT*/new/*ENDIF:RETURNTYPEOBJECT*/ __RETURNTYPEBUILDER__/*IF:RETURNTYPEOBJECT*/()/*ENDIF:RETURNTYPEOBJECT*/;
 
-    constructor(queryArgs?: __QUERYCLASSNAME__Arguments) {
+    /*IF:ARGUMENTS*/
+    constructor(queryArgs?: __ARGUMENTINTERFACENAME__) {
         super();
         queryArgs && this.setArgs(queryArgs);
     }
+    /*ENDIF:ARGUMENTS*/
 
     /*IF:RETURNTYPEOBJECT*/
     /**
