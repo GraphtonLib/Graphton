@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.1](https://github.com/GraphtonLib/Graphton/compare/v0.2.0...v0.2.1) (2021-12-09)
+
+
+### Bug Fixes
+
+* Little more output flair ✨ ([24a7dd0](https://github.com/GraphtonLib/Graphton/commit/24a7dd0049eec51fcc145dc95502ce2178ed615c))
+
 ## [0.2.0](https://github.com/GraphtonLib/Graphton/compare/v0.1.2...v0.2.0) (2021-12-09)
 
 
