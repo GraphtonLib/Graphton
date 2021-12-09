@@ -66,12 +66,12 @@ export default class GenerateCommand {
         console.log('Generating query classes...');
         outContentSections.push(...[
             '// REGION: Queries',
-            ...this.generateQueries(this.gqlSchema.types.find(t => t.name === this.gqlSchema?.queryType?.name)?.fields || [], options.exportQueryFactoryAs),
+            ...this.generateQueryFactory('query', this.gqlSchema.types.find(t => t.name === this.gqlSchema?.queryType?.name)?.fields || [], options.exportQueryFactoryAs),
         ]);
         console.log('Generating mutation classes...');
         outContentSections.push(...[
             '// REGION: Mutations',
-            ...this.generateMutations(this.gqlSchema.types.find(t => t.name === this.gqlSchema?.mutationType?.name)?.fields || [], options.exportMutationFactoryAs),
+            ...this.generateQueryFactory('mutation', this.gqlSchema.types.find(t => t.name === this.gqlSchema?.mutationType?.name)?.fields || [], options.exportMutationFactoryAs),
             '',
         ]);
         console.log('Trimming output...');
@@ -138,38 +138,24 @@ export default class GenerateCommand {
             yield `  ${field.name}${this.toTypeAppend(field.type)},`;
         }
     }
-    *generateQueries(queries, exportQueryAs = 'Query') {
-        yield `export class ${exportQueryAs} {`;
+    *generateQueryFactory(factoryType, queries, exportFactoryAs) {
+        yield `export class ${exportFactoryAs} {`;
         for (const query of queries) {
             if (query.args.length < 1) {
                 yield `  public static ${query.name}() {`;
-                yield `    return new ${pascalCase(query.name)}Query();`;
+                yield `    return new ${pascalCase(query.name)}${pascalCase(factoryType)}();`;
                 yield '  }';
             }
             else {
-                yield `  public static ${query.name}(queryArgs?: ${pascalCase(query.name)}QueryArguments) {`;
-                yield `    return new ${pascalCase(query.name)}Query(queryArgs);`;
+                yield `  public static ${query.name}(queryArgs?: ${pascalCase(query.name)}${pascalCase(factoryType)}Arguments) {`;
+                yield `    return new ${pascalCase(query.name)}${pascalCase(factoryType)}(queryArgs);`;
                 yield '  }';
             }
         }
         yield '}';
         yield '';
         for (const query of queries) {
-            yield this.generateQueryClass(query, 'query');
-            yield '';
-        }
-    }
-    *generateMutations(queries, exportMutationAs = 'Mutation') {
-        yield `export class ${exportMutationAs} {`;
-        for (const query of queries) {
-            yield `  public static ${query.name}(queryArgs: ${pascalCase(query.name)}MutationArguments) {`;
-            yield `    return new ${pascalCase(query.name)}Mutation(queryArgs);`;
-            yield '  }';
-        }
-        yield '}';
-        yield '';
-        for (const query of queries) {
-            yield this.generateQueryClass(query, 'mutation');
+            yield this.generateQueryClass(query, factoryType);
             yield '';
         }
     }

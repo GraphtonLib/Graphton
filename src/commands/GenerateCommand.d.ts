@@ -6,8 +6,7 @@ export default class GenerateCommand {
     private generateReturnTypeBuilders;
     private generateEnumTypes;
     private generateFields;
-    private generateQueries;
-    private generateMutations;
+    private generateQueryFactory;
     private argsToMethodParameters;
     private generateQueryClass;
     private toTypeAppend;

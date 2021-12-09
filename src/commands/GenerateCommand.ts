@@ -3,7 +3,7 @@ import {introspectQuery} from '../graphql/query/introspect.js';
 import * as fs from 'fs';
 import {pascalCase} from 'change-case';
 import {Arg, Field, ReturnType, RootType, Schema, Type} from '../types/GraphQL';
-import {ReturnTypeInfo, GenerateCommandOptions} from '../types/Generator';
+import {ReturnTypeInfo, GenerateCommandOptions, FactoryTypeName} from '../types/Generator';
 import axios from 'axios';
 
 import {default as ts} from 'typescript';
@@ -82,7 +82,8 @@ export default class GenerateCommand {
         console.log('Generating query classes...');
         outContentSections.push(...[
             '// REGION: Queries',
-            ...this.generateQueries(
+            ...this.generateQueryFactory(
+                'query',
                 this.gqlSchema.types.find(t => t.name === this.gqlSchema?.queryType?.name)?.fields || [],
                 options.exportQueryFactoryAs
             ),
@@ -91,7 +92,8 @@ export default class GenerateCommand {
         console.log('Generating mutation classes...');
         outContentSections.push(...[
             '// REGION: Mutations',
-            ...this.generateMutations(
+            ...this.generateQueryFactory(
+                'mutation',
                 this.gqlSchema.types.find(t => t.name === this.gqlSchema?.mutationType?.name)?.fields || [],
                 options.exportMutationFactoryAs
             ),
@@ -173,17 +175,17 @@ export default class GenerateCommand {
         }
     }
 
-    private *generateQueries(queries: Field[], exportQueryAs = 'Query'): IterableIterator<string> {
-        yield `export class ${exportQueryAs} {`;
+    private *generateQueryFactory(factoryType: RootType, queries: Field[], exportFactoryAs: string): IterableIterator<string> {
+        yield `export class ${exportFactoryAs} {`;
 
         for(const query of queries) {
             if(query.args.length < 1) {
                 yield `  public static ${query.name}() {`;
-                yield `    return new ${pascalCase(query.name)}Query();`;
+                yield `    return new ${pascalCase(query.name)}${pascalCase(factoryType)}();`;
                 yield '  }';
             } else {
-                yield `  public static ${query.name}(queryArgs?: ${pascalCase(query.name)}QueryArguments) {`;
-                yield `    return new ${pascalCase(query.name)}Query(queryArgs);`;
+                yield `  public static ${query.name}(queryArgs?: ${pascalCase(query.name)}${pascalCase(factoryType)}Arguments) {`;
+                yield `    return new ${pascalCase(query.name)}${pascalCase(factoryType)}(queryArgs);`;
                 yield '  }';
             }
         }
@@ -192,25 +194,7 @@ export default class GenerateCommand {
         yield '';
 
         for(const query of queries) {
-            yield this.generateQueryClass(query, 'query');
-            yield '';
-        }
-    }
-
-    private *generateMutations(queries: Field[], exportMutationAs = 'Mutation'): IterableIterator<string> {
-        yield `export class ${exportMutationAs} {`;
-
-        for(const query of queries) {
-            yield `  public static ${query.name}(queryArgs: ${pascalCase(query.name)}MutationArguments) {`;
-            yield `    return new ${pascalCase(query.name)}Mutation(queryArgs);`;
-            yield '  }';
-        }
-
-        yield '}';
-        yield '';
-
-        for(const query of queries) {
-            yield this.generateQueryClass(query, 'mutation');
+            yield this.generateQueryClass(query, factoryType);
             yield '';
         }
     }

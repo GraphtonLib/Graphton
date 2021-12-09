@@ -20,7 +20,7 @@ export class GraphtonSettings {
     }
 }
 
-import axios, {AxiosResponse} from "axios";
+import axios, {AxiosResponse} from 'axios';
 
 type GraphQLServerEndpoint = string;
 type Headers = Record<string, string>;
@@ -79,7 +79,7 @@ type QueryArgs<T> = {
     protected async execute(requestOptions: RequestOptions = {}): Promise<QueryResponse> {
         const response = await axios.post(requestOptions?.url || settings.defaultUrl, {query: this.toQuery()}, {
             headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
                 ...settings.defaultHeaders,
                 ...requestOptions?.headers
             },
@@ -188,7 +188,7 @@ abstract class GraphtonBaseReturnTypeBuilder<ObjectField extends Record<keyof Ob
      */
     public toReturnTypeString(): string {
         if(this.querySimpleFields.size < 1 && Object.values(this.queryObjectFields).length < 1) {
-            return ``;
+            return '';
         }
 
         const returnTypeString = ['{', ...this.querySimpleFields];
@@ -221,22 +221,22 @@ export interface Post {
   repatedPosts?: Post[],
 }
 
-interface UserReturnTypeBuilderObjectBuilder {"posts":PostReturnTypeBuilder,"friends":UserReturnTypeBuilder}
-type UserReturnTypeSimpleField = "id"|"name"|"age";
+interface UserReturnTypeBuilderObjectBuilder {'posts':PostReturnTypeBuilder,'friends':UserReturnTypeBuilder}
+type UserReturnTypeSimpleField = 'id'|'name'|'age';
 
 class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder<UserReturnTypeBuilderObjectBuilder, UserReturnTypeSimpleField> {
-    protected availableSimpleFields: Set<UserReturnTypeSimpleField> = new Set(["id","name","age"]);
+    protected availableSimpleFields: Set<UserReturnTypeSimpleField> = new Set(['id','name','age']);
     protected typeName = 'User';
-    protected queryObjectFieldBuilders = {"posts":PostReturnTypeBuilder,"friends":UserReturnTypeBuilder};
+    protected queryObjectFieldBuilders = {'posts':PostReturnTypeBuilder,'friends':UserReturnTypeBuilder};
 }
 
-interface PostReturnTypeBuilderObjectBuilder {"author":UserReturnTypeBuilder,"repatedPosts":PostReturnTypeBuilder}
-type PostReturnTypeSimpleField = "id"|"text";
+interface PostReturnTypeBuilderObjectBuilder {'author':UserReturnTypeBuilder,'repatedPosts':PostReturnTypeBuilder}
+type PostReturnTypeSimpleField = 'id'|'text';
 
 class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder<PostReturnTypeBuilderObjectBuilder, PostReturnTypeSimpleField> {
-    protected availableSimpleFields: Set<PostReturnTypeSimpleField> = new Set(["id","text"]);
+    protected availableSimpleFields: Set<PostReturnTypeSimpleField> = new Set(['id','text']);
     protected typeName = 'Post';
-    protected queryObjectFieldBuilders = {"author":UserReturnTypeBuilder,"repatedPosts":PostReturnTypeBuilder};
+    protected queryObjectFieldBuilders = {'author':UserReturnTypeBuilder,'repatedPosts':PostReturnTypeBuilder};
 }
 
 // REGION: Queries
@@ -260,8 +260,8 @@ interface UsersQueryResponse {
 }
 
 class UsersQuery extends GraphtonBaseQuery<never> {
-    protected queryName = "users";
-    protected rootType: RootType = "query";
+    protected queryName = 'users';
+    protected rootType: RootType = 'query';
     protected returnType = new UserReturnTypeBuilder();
 
     /**
@@ -295,8 +295,8 @@ interface UserQueryArguments {
 }
 
 class UserQuery extends GraphtonBaseQuery<UserQueryArguments> {
-    protected queryName = "user";
-    protected rootType: RootType = "query";
+    protected queryName = 'user';
+    protected rootType: RootType = 'query';
     protected returnType = new UserReturnTypeBuilder();
 
     constructor(queryArgs?: UserQueryArguments) {
@@ -335,8 +335,8 @@ interface UserExistsQueryArguments {
 }
 
 class UserExistsQuery extends GraphtonBaseQuery<UserExistsQueryArguments> {
-    protected queryName = "userExists";
-    protected rootType: RootType = "query";
+    protected queryName = 'userExists';
+    protected rootType: RootType = 'query';
     protected returnType =  null;
 
     constructor(queryArgs?: UserExistsQueryArguments) {
@@ -356,13 +356,13 @@ class UserExistsQuery extends GraphtonBaseQuery<UserExistsQueryArguments> {
 
 // REGION: Mutations
 export class Mutation {
-  public static createUser(queryArgs: CreateUserMutationArguments) {
+  public static createUser(queryArgs?: CreateUserMutationArguments) {
     return new CreateUserMutation(queryArgs);
   }
-  public static updateUser(queryArgs: UpdateUserMutationArguments) {
+  public static updateUser(queryArgs?: UpdateUserMutationArguments) {
     return new UpdateUserMutation(queryArgs);
   }
-  public static deleteUser(queryArgs: DeleteUserMutationArguments) {
+  public static deleteUser(queryArgs?: DeleteUserMutationArguments) {
     return new DeleteUserMutation(queryArgs);
   }
 }
@@ -380,8 +380,8 @@ interface CreateUserMutationArguments {
 }
 
 class CreateUserMutation extends GraphtonBaseQuery<CreateUserMutationArguments> {
-    protected queryName = "createUser";
-    protected rootType: RootType = "mutation";
+    protected queryName = 'createUser';
+    protected rootType: RootType = 'mutation';
     protected returnType = new UserReturnTypeBuilder();
 
     constructor(queryArgs?: CreateUserMutationArguments) {
@@ -422,8 +422,8 @@ interface UpdateUserMutationArguments {
 }
 
 class UpdateUserMutation extends GraphtonBaseQuery<UpdateUserMutationArguments> {
-    protected queryName = "updateUser";
-    protected rootType: RootType = "mutation";
+    protected queryName = 'updateUser';
+    protected rootType: RootType = 'mutation';
     protected returnType = new UserReturnTypeBuilder();
 
     constructor(queryArgs?: UpdateUserMutationArguments) {
@@ -462,8 +462,8 @@ interface DeleteUserMutationArguments {
 }
 
 class DeleteUserMutation extends GraphtonBaseQuery<DeleteUserMutationArguments> {
-    protected queryName = "deleteUser";
-    protected rootType: RootType = "mutation";
+    protected queryName = 'deleteUser';
+    protected rootType: RootType = 'mutation';
     protected returnType = new UserReturnTypeBuilder();
 
     constructor(queryArgs?: DeleteUserMutationArguments) {

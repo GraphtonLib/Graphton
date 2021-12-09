@@ -12,3 +12,5 @@ export interface ReturnTypeInfo {
     listNotNull?: boolean,
     kind: 'simple'|'object',
 }
+
+export type FactoryTypeName = 'Mutation'|'Query'|'Subscription';
