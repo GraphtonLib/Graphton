@@ -100,6 +100,7 @@ export default class GenerateCommand {
 
         console.log(`Trimming output...`);
         let outContent = outContentSections.join("\n")
+            .replaceAll(/\n.*?eslint-disable-next-line.*?\n/g, "\n")
             .replaceAll(/^\s*[\r\n]/gm, "\n")
             .replaceAll(/^\n+/g, '')
             .replaceAll(/\n+$/g, '')
