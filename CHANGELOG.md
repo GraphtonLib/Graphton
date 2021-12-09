@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.3](https://github.com/GraphtonLib/Graphton/compare/v0.2.2...v0.2.3) (2021-12-09)
+
+
+### Bug Fixes
+
+* Mutation queries not getting the same treatment from previous fixes to Query queries ([fd9a031](https://github.com/GraphtonLib/Graphton/commit/fd9a031658edca527a14f0e174ecfbddf25c5605))
+
 ### [0.2.2](https://github.com/GraphtonLib/Graphton/compare/v0.2.1...v0.2.2) (2021-12-09)
 
 
