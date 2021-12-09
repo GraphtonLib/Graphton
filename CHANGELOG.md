@@ -4,9 +4,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.2.1](https://github.com/GraphtonLib/Graphton/compare/v0.2.0...v0.2.1) (2021-12-09)
 
-
-### Bug Fixes
-
 * Little more output flair ✨ ([24a7dd0](https://github.com/GraphtonLib/Graphton/commit/24a7dd0049eec51fcc145dc95502ce2178ed615c))
 
 ## [0.2.0](https://github.com/GraphtonLib/Graphton/compare/v0.1.2...v0.2.0) (2021-12-09)
@@ -19,6 +16,12 @@ All notable changes to this project will be documented in this file. See [standa
 ### Features
 
 * Rework overrides to be part of the base class only using types ([e998083](https://github.com/GraphtonLib/Graphton/commit/e9980833325c55d1b9ff6ffb92e7d9ec49199b12))
+* Rework query arguments to be "named parameters" so they can be nullable in any order (makes it an object) ([e998083](https://github.com/GraphtonLib/Graphton/commit/e9980833325c55d1b9ff6ffb92e7d9ec49199b12))
+
+### Bugfixes
+
+* Type safety in some cases ([e998083](https://github.com/GraphtonLib/Graphton/commit/e9980833325c55d1b9ff6ffb92e7d9ec49199b12))
+
 
 ### [0.1.2](https://github.com/GraphtonLib/Graphton/compare/v0.1.1...v0.1.2) (2021-12-06)
 
