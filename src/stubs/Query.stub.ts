@@ -14,19 +14,23 @@ interface RequestOptions {
 interface __QUERYCLASSNAME__Response {
     data: {
         /*QUERYNAME*//*RETURNTYPE*/
-    },
-    response: AxiosResponse
+    };
+    response: AxiosResponse;
 }
-class __QUERYCLASSNAME__ extends GraphtonBaseQuery {
+
+interface __QUERYCLASSNAME__Arguments {
+    /*ARGUMENTINTERFACE*//*IGNORE*/[key: string]: string|boolean|number/*ENDIGNORE*/;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+class __QUERYCLASSNAME__ extends GraphtonBaseQuery<__QUERYCLASSNAME__Arguments> {
     protected queryName = "/*QUERYNAME*/";
-    protected arguments: Record<string, any> = {};
     protected rootType: RootType = "/*ROOTTYPE*/";
     protected returnType = /*IF:RETURNTYPEOBJECT*/new/*ENDIF:RETURNTYPEOBJECT*/ __RETURNTYPEBUILDER__/*IF:RETURNTYPEOBJECT*/()/*ENDIF:RETURNTYPEOBJECT*/;
 
-    constructor(/*TYPEDPARAMS*/) {
+    constructor(queryArgs?: __QUERYCLASSNAME__Arguments) {
         super();
-        this.arguments = {/*PARAMS*/};
-        Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
+        queryArgs && this.setArgs(queryArgs);
     }
 
     /*IF:RETURNTYPEOBJECT*/

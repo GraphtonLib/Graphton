@@ -15,14 +15,24 @@ export class GraphtonSettings {
 }
 import axios from "axios";
 class GraphtonBaseQuery {
+    queryArgs = {};
+    setArgs(queryArgs) {
+        const newArgs = {};
+        const mergedArgs = { ...this.queryArgs, ...queryArgs };
+        for (const key in mergedArgs) {
+            if (this.queryArgs[key] !== undefined && this.queryArgs[key] !== null) {
+                newArgs[key] = this.queryArgs[key];
+            }
+        }
+    }
     /**
      * Transform builder to graphql query string
      */
     toQuery() {
-        const queryArgs = Object.entries(this.arguments);
+        const queryArgs = Object.entries(this.queryArgs);
         let queryArgString = '';
         if (queryArgs.length > 0) {
-            let queryArgItems = [];
+            const queryArgItems = [];
             for (const [name, value] of queryArgs) {
                 queryArgItems.push(`${name}: ${JSON.stringify(value)}`);
             }
@@ -34,7 +44,7 @@ class GraphtonBaseQuery {
      * Execute the query
      */
     async execute(requestOptions = {}) {
-        let response = await axios.post(requestOptions?.url || settings.defaultUrl, { query: this.toQuery() }, {
+        const response = await axios.post(requestOptions?.url || settings.defaultUrl, { query: this.toQuery() }, {
             headers: {
                 "Content-Type": "application/json",
                 ...settings.defaultHeaders,
@@ -68,8 +78,7 @@ class GraphtonBaseReturnTypeBuilder {
      * Select `...fieldNames` to be returned
      */
     with(...fieldNames) {
-        const flatFieldNames = fieldNames.flat();
-        for (const fieldName of flatFieldNames) {
+        for (const fieldName of fieldNames) {
             if (!this.availableSimpleFields.has(fieldName)) {
                 console.warn(`Field "${fieldName}" might not exist in type "${this.typeName}"!`);
             }
@@ -81,8 +90,7 @@ class GraphtonBaseReturnTypeBuilder {
      * Remove `...fieldNames` from selection
      */
     without(...fieldNames) {
-        const flatFieldNames = fieldNames.flat();
-        for (const fieldName of flatFieldNames) {
+        for (const fieldName of fieldNames) {
             this.querySimpleFields.delete(fieldName);
         }
         return this;
@@ -103,12 +111,7 @@ class GraphtonBaseReturnTypeBuilder {
      * Add the `relatedType` OBJECT field, selecting the fields for that type using the `buildFields` closure
      */
     withRelated(relatedType, buildFields) {
-        const relatedReturnTypeClass = this.availableObjectFields[relatedType];
-        if (!relatedReturnTypeClass) {
-            console.warn(`Trying to add related field ${relatedType} to type ${this.typeName} which does not exist. Ignoring!`);
-            return this;
-        }
-        const relatedReturnType = new relatedReturnTypeClass();
+        const relatedReturnType = new this.queryObjectFieldBuilders[relatedType]();
         buildFields(relatedReturnType);
         this.queryObjectFields[relatedType] = relatedReturnType;
         return this;
@@ -128,9 +131,9 @@ class GraphtonBaseReturnTypeBuilder {
         if (this.querySimpleFields.size < 1 && Object.values(this.queryObjectFields).length < 1) {
             return ``;
         }
-        let returnTypeString = ['{', ...this.querySimpleFields];
+        const returnTypeString = ['{', ...this.querySimpleFields];
         for (const [objectType, objectField] of Object.entries(this.queryObjectFields)) {
-            let objectFieldReturnTypeString = objectField.toReturnTypeString();
+            const objectFieldReturnTypeString = objectField.toReturnTypeString();
             if (objectFieldReturnTypeString.length > 0) {
                 returnTypeString.push(objectType, objectFieldReturnTypeString);
             }
@@ -141,71 +144,34 @@ class GraphtonBaseReturnTypeBuilder {
 }
 class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
     availableSimpleFields = new Set(["id", "name", "age"]);
-    availableObjectFields = { "posts": PostReturnTypeBuilder, "friends": UserReturnTypeBuilder };
     typeName = 'User';
-    with(...fieldNames) {
-        return super.with(...fieldNames);
-    }
-    without(...fieldNames) {
-        return super.without(...fieldNames);
-    }
-    except(...fieldNames) {
-        return super.except(...fieldNames);
-    }
-    only(...fieldNames) {
-        return super.only(...fieldNames);
-    }
-    withRelated(relatedType, buildFields) {
-        return super.withRelated(relatedType, buildFields);
-    }
-    withoutRelated(relatedType) {
-        return super.withoutRelated(relatedType);
-    }
+    queryObjectFieldBuilders = { "posts": PostReturnTypeBuilder, "friends": UserReturnTypeBuilder };
 }
 class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
     availableSimpleFields = new Set(["id", "text"]);
-    availableObjectFields = { "author": UserReturnTypeBuilder, "repatedPosts": PostReturnTypeBuilder };
     typeName = 'Post';
-    with(...fieldNames) {
-        return super.with(...fieldNames);
-    }
-    without(...fieldNames) {
-        return super.without(...fieldNames);
-    }
-    except(...fieldNames) {
-        return super.except(...fieldNames);
-    }
-    only(...fieldNames) {
-        return super.only(...fieldNames);
-    }
-    withRelated(relatedType, buildFields) {
-        return super.withRelated(relatedType, buildFields);
-    }
-    withoutRelated(relatedType) {
-        return super.withoutRelated(relatedType);
-    }
+    queryObjectFieldBuilders = { "author": UserReturnTypeBuilder, "repatedPosts": PostReturnTypeBuilder };
 }
 // REGION: Queries
 export class Query {
-    static users() {
-        return new UsersQuery();
+    static users(queryArgs) {
+        return new UsersQuery(queryArgs);
     }
-    static user(id) {
-        return new UserQuery(id);
+    static user(queryArgs) {
+        return new UserQuery(queryArgs);
     }
-    static userExists(id) {
-        return new UserExistsQuery(id);
+    static userExists(queryArgs) {
+        return new UserExistsQuery(queryArgs);
     }
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class UsersQuery extends GraphtonBaseQuery {
     queryName = "users";
-    arguments = {};
     rootType = "query";
     returnType = new UserReturnTypeBuilder();
-    constructor() {
+    constructor(queryArgs) {
         super();
-        this.arguments = {};
-        Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
+        queryArgs && this.setArgs(queryArgs);
     }
     /**
      * Function to build the required fields for that query
@@ -223,15 +189,14 @@ class UsersQuery extends GraphtonBaseQuery {
         return (await super.execute(requestOptions));
     }
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class UserQuery extends GraphtonBaseQuery {
     queryName = "user";
-    arguments = {};
     rootType = "query";
     returnType = new UserReturnTypeBuilder();
-    constructor(id) {
+    constructor(queryArgs) {
         super();
-        this.arguments = { id };
-        Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
+        queryArgs && this.setArgs(queryArgs);
     }
     /**
      * Function to build the required fields for that query
@@ -249,15 +214,14 @@ class UserQuery extends GraphtonBaseQuery {
         return (await super.execute(requestOptions));
     }
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class UserExistsQuery extends GraphtonBaseQuery {
     queryName = "userExists";
-    arguments = {};
     rootType = "query";
     returnType = null;
-    constructor(id) {
+    constructor(queryArgs) {
         super();
-        this.arguments = { id };
-        Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
+        queryArgs && this.setArgs(queryArgs);
     }
     /**
      * Execute the query and get the results
@@ -269,25 +233,24 @@ class UserExistsQuery extends GraphtonBaseQuery {
 }
 // REGION: Mutations
 export class Mutation {
-    static createUser(name, age) {
-        return new CreateUserMutation(name, age);
+    static createUser(queryArgs) {
+        return new CreateUserMutation(queryArgs);
     }
-    static updateUser(id, name, age) {
-        return new UpdateUserMutation(id, name, age);
+    static updateUser(queryArgs) {
+        return new UpdateUserMutation(queryArgs);
     }
-    static deleteUser(id) {
-        return new DeleteUserMutation(id);
+    static deleteUser(queryArgs) {
+        return new DeleteUserMutation(queryArgs);
     }
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class CreateUserMutation extends GraphtonBaseQuery {
     queryName = "createUser";
-    arguments = {};
     rootType = "mutation";
     returnType = new UserReturnTypeBuilder();
-    constructor(name, age) {
+    constructor(queryArgs) {
         super();
-        this.arguments = { name, age };
-        Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
+        queryArgs && this.setArgs(queryArgs);
     }
     /**
      * Function to build the required fields for that query
@@ -305,15 +268,14 @@ class CreateUserMutation extends GraphtonBaseQuery {
         return (await super.execute(requestOptions));
     }
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class UpdateUserMutation extends GraphtonBaseQuery {
     queryName = "updateUser";
-    arguments = {};
     rootType = "mutation";
     returnType = new UserReturnTypeBuilder();
-    constructor(id, name, age) {
+    constructor(queryArgs) {
         super();
-        this.arguments = { id, name, age };
-        Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
+        queryArgs && this.setArgs(queryArgs);
     }
     /**
      * Function to build the required fields for that query
@@ -331,15 +293,14 @@ class UpdateUserMutation extends GraphtonBaseQuery {
         return (await super.execute(requestOptions));
     }
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class DeleteUserMutation extends GraphtonBaseQuery {
     queryName = "deleteUser";
-    arguments = {};
     rootType = "mutation";
     returnType = new UserReturnTypeBuilder();
-    constructor(id) {
+    constructor(queryArgs) {
         super();
-        this.arguments = { id };
-        Object.keys(this.arguments).forEach(key => this.arguments[key] === undefined && delete this.arguments[key]);
+        queryArgs && this.setArgs(queryArgs);
     }
     /**
      * Function to build the required fields for that query

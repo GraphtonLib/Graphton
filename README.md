@@ -109,7 +109,7 @@ Starting a new query is fairly simple. Import `Query` from the generated file an
 ```typescript
 import {Query} from "./example/graphton.generated.js";
 const usersQuery = Query.users();
-const getFirstUserQuery = Query.user(1);
+const getFirstUserQuery = Query.user({id: 1});
 ```
 
 ### Add returnfields
@@ -119,7 +119,7 @@ In GraphQL you have to define which fields you want to get in return. You do thi
 ```typescript
 import {Query} from "./example/graphton.generated.js";
 const usersQuery = Query.users().returnFields(r=>r.all());
-const getFirstUserQuery = Query.user(1)
+const getFirstUserQuery = Query.user({id: 1})
     .returnFields(r=>r
         .with("id", "name")
         .withRelated('posts', r=>r
@@ -134,7 +134,7 @@ After building the query, you can directly execute it with the `get()` method.
 
 ```typescript
 import {Query} from './example/graphton.generated.js';
-const firstUser = await Query.user(1)
+const firstUser = await Query.user({id: 1})
     .returnFields(r=>r
         .with('id', 'name')
         .withRelated('posts', r=>r
@@ -171,10 +171,10 @@ Running mutations is about the same as running a query. The only diferences are:
 
 ```typescript
 import {Mutation} from "./example/graphton.generated.js";
-const newUser = await Mutation.createUser('User Infinite')
+const newUser = await Mutation.createUser({name: 'User Infinite'})
     .returnFields(r=>r.all())
     .do();
-const updatedUser = await Mutation.updateUser(1, 'User NotOne', 12)
+const updatedUser = await Mutation.updateUser({id: 1, name: 'User NotOne', age: 12})
     .returnFields(r=>r.except('name')) // All fields except "name"
     .do();
 ```
@@ -185,7 +185,7 @@ Return fields can be dynamically changed.
 
 ```typescript
 import {Query} from './example/graphton.generated.js';
-const firstUserQuery = Query.user(1)
+const firstUserQuery = Query.user({id: 1})
     .returnFields(r=>r
         .with('id', 'name')
     );
@@ -216,15 +216,28 @@ GraphtonSettings.setDefaultHeaders({"Authentication": "Bearer XXX"});
 
 ## Reference
 
+### Note: abstraction
+
+Most of the reference underneath here is **very abstract**, since we do not know how the external GraphQL schema looks like that you are going to use this on. Because of this, whenever you see a `$` next to something in this guide means that **it's a value or type that is replaced to accomodate your GraphQL schema**. 
+
+That said, if you use the .ts variant of the genered output, tsc or your IDE can tell you exactly where something goes wrong.
+
+**This is why we recommend TypeScript**. The JavaScrips variant works just fine, but without any error correction or autocomplete it might be a little harder to do the thing you want to do.
+
 ### GraphtonBaseQuery
 
 *GraphtonBaseQuery* is abstract, the classes you will call are generated and extended from this base class.
+
+### constructor
+> constructor(queryArgs?: $Record<string, number|string|boolean|null>)
+
+Create a new instance of a query with `queryArgs` as arguments for the query.
 
 #### returnFields
 
 *Only available if the return type is an OBJECT*
 
-> returnFields(returnFieldsClosure: (r: GraphtonBaseReturnTypeBuilder) => void): this
+> returnFields(returnFieldsClosure: (r: $GraphtonBaseReturnTypeBuilder) => void): this
 
 Function to build the required fields for that query.
 
@@ -275,6 +288,8 @@ Do the mutation on the server
 
 *GraphtonBaseReturnTypeBuilder* is abstract, the classes you will call are generated and extended from this base class.
 
+> Everything that's abstract and replaced are prefixed in this doc with $. Like `$Field` will be replaced for, for example, `'id'|'name'|'age'`
+
 #### all
 > all(): this
 
@@ -286,32 +301,32 @@ Select all known fields te be returned
 Clear all selected fields.
 
 #### with
-> with(...fieldNames: (string|string[])[]): this
+> with(...fieldNames: $Field[]): this
 
 Select `...fieldNames` to be returned
 
 #### without
-> without(...fieldNames: (string|string[])[]): this
+> without(...fieldNames: $Field[]): this
 
 Remove `...fieldNames` from selection
 
 #### except
-> except(...fieldNames: (string|string[])[]): this
+> except(...fieldNames: $Field[]): this
 
 Alias for .all().without(...fieldNames)
 
 #### only
-> only(...fieldNames: (string|string[])[]): this
+> only(...fieldNames: $Field[]): this
 
 Alias for .clear().with(...fieldNames)
 
 #### withRelated
-> withRelated(relatedType: string, buildFields: (type: GraphtonBaseReturnTypeBuilder) => void)
+> withRelated(relatedType: $string, buildFields: (type: $GraphtonBaseReturnTypeBuilder) => void)
 
 Add the `relatedType` OBJECT field, selecting the fields for that type using the `buildFields` closure
 
 #### withoutRelated
-> withoutRelated(relatedType: string): void
+> withoutRelated(relatedType: $string): void
 
 Remove the `relatedType` OBJECT field. Selected fields for `relatedType` will be removed!
 

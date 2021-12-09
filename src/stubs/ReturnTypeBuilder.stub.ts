@@ -2,32 +2,12 @@
 import {GraphtonBaseReturnTypeBuilder} from "./GraphtonBaseReturnTypeBuilder.stub.js";
 /*ENDIGNORE*/
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface __TYPENAME__ReturnTypeBuilderObjectBuilder {/**OBJECTFIELDOBJECT**/}
+type __TYPENAME__ReturnTypeSimpleField = '/**SIMPLEFIELDLITERALS**/';
 
-type __TYPENAME__ReturnTypeSimpleField = '/**SIMPLEFIELDTUPLE**/';
-type __TYPENAME__ReturnTypeObjectField = '/**OBJECTFIELDTUPLE**/';
-
-/*IGNORE*/export/*ENDIGNORE*/class __TYPENAME__ReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
-    protected availableSimpleFields = new Set([/**SIMPLEFIELDARRAY**/]);
-    protected availableObjectFields = {/**OBJECTFIELDOBJECT**/};
+/*IGNORE*/export/*ENDIGNORE*/class __TYPENAME__ReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder<__TYPENAME__ReturnTypeBuilderObjectBuilder, __TYPENAME__ReturnTypeSimpleField> {
+    protected availableSimpleFields: Set<__TYPENAME__ReturnTypeSimpleField> = new Set([/**SIMPLEFIELDARRAY**/]);
     protected typeName = '/*TYPENAME*/';
-
-    public with(...fieldNames: (__TYPENAME__ReturnTypeSimpleField|__TYPENAME__ReturnTypeSimpleField[])[]): this {
-        return super.with(...fieldNames);
-    }
-    public without(...fieldNames: (__TYPENAME__ReturnTypeSimpleField|__TYPENAME__ReturnTypeSimpleField[])[]): this {
-        return super.without(...fieldNames);
-    }
-    public except(...fieldNames: (__TYPENAME__ReturnTypeSimpleField|__TYPENAME__ReturnTypeSimpleField[])[]): this {
-        return super.except(...fieldNames);
-    }
-    public only(...fieldNames: (__TYPENAME__ReturnTypeSimpleField|__TYPENAME__ReturnTypeSimpleField[])[]): this {
-        return super.only(...fieldNames);
-    }
-    /*WITHRELATEDOVERLOADS*/
-    public withRelated(relatedType: __TYPENAME__ReturnTypeObjectField, buildFields: (r: GraphtonBaseReturnTypeBuilder) => void): this {
-        return super.withRelated(relatedType, buildFields);
-    }
-    public withoutRelated(relatedType: __TYPENAME__ReturnTypeObjectField): this {
-        return super.withoutRelated(relatedType);
-    }
+    protected queryObjectFieldBuilders = {/**OBJECTFIELDOBJECT**/};
 }

@@ -6,7 +6,11 @@ export interface MutationType {
     name: string;
 }
 
-export type RootType = "mutation"|"query";
+export interface SubscriptionType {
+    name: string;
+}
+
+export type RootType = "mutation"|"query"|"subscription";
 
 export interface ReturnType {
     kind: string;
@@ -27,21 +31,21 @@ export interface Field {
     args: Arg[];
     type: ReturnType;
     isDeprecated: boolean;
-    deprecationReason?: any;
+    deprecationReason?: string;
 }
 
 export interface InputField {
     name: string;
     description: string;
     type: ReturnType;
-    defaultValue?: any;
+    defaultValue?: unknown;
 }
 
 export interface EnumValue {
     name: string;
     description: string;
     isDeprecated: boolean;
-    deprecationReason?: any;
+    deprecationReason?: string;
 }
 
 export interface Type {
@@ -50,9 +54,9 @@ export interface Type {
     description: string;
     fields: Field[];
     inputFields: InputField[];
-    interfaces: any[];
+    interfaces: unknown[];
     enumValues: EnumValue[];
-    possibleTypes?: any;
+    possibleTypes?: unknown;
 }
 
 export interface Directive {
@@ -65,7 +69,7 @@ export interface Directive {
 export interface Schema {
     queryType: QueryType;
     mutationType: MutationType;
-    subscriptionType?: any;
+    subscriptionType: SubscriptionType;
     types: Type[];
     directives: Directive[];
 }

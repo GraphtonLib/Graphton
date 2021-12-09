@@ -1,8 +1,16 @@
-/*IGNORE*/export/*ENDIGNORE*/abstract class GraphtonBaseReturnTypeBuilder {
-    protected abstract availableSimpleFields: Set<string>;
-    protected abstract availableObjectFields: Record<string, new() => GraphtonBaseReturnTypeBuilder>;
-    protected querySimpleFields: Set<string> = new Set([]);
-    protected queryObjectFields: Record<string, GraphtonBaseReturnTypeBuilder> = {};
+type AvailableFieldBuilderConstructor<T> = {
+    [Property in keyof T]: new() => T[Property]
+}
+type QueryObjectFields<T> = {
+    [Property in keyof T]?: T[Property]
+}
+
+
+/*IGNORE*/export/*ENDIGNORE*/abstract class GraphtonBaseReturnTypeBuilder<ObjectField extends Record<keyof ObjectField, GraphtonBaseReturnTypeBuilder<any,any>>, SimpleField> {
+    protected abstract availableSimpleFields: Set<SimpleField>;
+    protected querySimpleFields: Set<SimpleField> = new Set([]);
+    protected queryObjectFields: QueryObjectFields<ObjectField> = {};
+    protected abstract queryObjectFieldBuilders: AvailableFieldBuilderConstructor<ObjectField>;
     protected abstract typeName: string;
 
     /**
@@ -24,9 +32,8 @@
     /**
      * Select `...fieldNames` to be returned
      */
-    public with(...fieldNames: (string|string[])[]): this {
-        const flatFieldNames = fieldNames.flat();
-        for(const fieldName of flatFieldNames) {
+    public with(...fieldNames: SimpleField[]): this {
+        for(const fieldName of fieldNames) {
             if(!this.availableSimpleFields.has(fieldName)) {
                 console.warn(`Field "${fieldName}" might not exist in type "${this.typeName}"!`);
             }
@@ -40,9 +47,8 @@
     /**
      * Remove `...fieldNames` from selection
      */
-    public without(...fieldNames: (string|string[])[]): this {
-        const flatFieldNames = fieldNames.flat();
-        for(const fieldName of flatFieldNames) {
+    public without(...fieldNames: SimpleField[]): this {
+        for(const fieldName of fieldNames) {
             this.querySimpleFields.delete(fieldName);
         }
 
@@ -52,28 +58,22 @@
     /**
      * Alias for .all().without(...fieldNames)
      */
-    public except(...fieldNames: (string|string[])[]): this {
+    public except(...fieldNames: SimpleField[]): this {
         return this.all().without(...fieldNames);
     }
 
     /**
      * Alias for .clear().with(...fieldNames)
      */
-    public only(...fieldNames: (string|string[])[]): this {
+    public only(...fieldNames: SimpleField[]): this {
         return this.clear().with(...fieldNames);
     }
 
     /**
      * Add the `relatedType` OBJECT field, selecting the fields for that type using the `buildFields` closure
      */
-    public withRelated(relatedType: string, buildFields: (r: GraphtonBaseReturnTypeBuilder) => void): this {
-        const relatedReturnTypeClass = this.availableObjectFields[relatedType];
-        if(!relatedReturnTypeClass) {
-            console.warn(`Trying to add related field ${relatedType} to type ${this.typeName} which does not exist. Ignoring!`);
-            return this;
-        }
-
-        const relatedReturnType = new relatedReturnTypeClass();
+    public withRelated<ObjectFieldName extends keyof ObjectField>(relatedType: ObjectFieldName, buildFields: (r: ObjectField[ObjectFieldName]) => void): this {
+        const relatedReturnType = new this.queryObjectFieldBuilders[relatedType]();
         buildFields(relatedReturnType);
         this.queryObjectFields[relatedType] = relatedReturnType;
 
@@ -84,7 +84,7 @@
      * Remove the `relatedType` OBJECT field
      * Selected fields for `relatedType` will be removed!
      */
-    public withoutRelated(relatedType: string): this {
+    public withoutRelated<ObjectFieldName extends keyof ObjectField>(relatedType: ObjectFieldName): this {
         delete this.queryObjectFields[relatedType];
 
         return this;
@@ -98,10 +98,10 @@
             return ``;
         }
 
-        let returnTypeString = ['{', ...this.querySimpleFields];
+        const returnTypeString = ['{', ...this.querySimpleFields];
 
         for(const [objectType, objectField] of Object.entries(this.queryObjectFields)) {
-            let objectFieldReturnTypeString = objectField.toReturnTypeString();
+            const objectFieldReturnTypeString = (<GraphtonBaseReturnTypeBuilder<any,any>>objectField).toReturnTypeString();
             if(objectFieldReturnTypeString.length > 0) {
                 returnTypeString.push(objectType, objectFieldReturnTypeString);
             }

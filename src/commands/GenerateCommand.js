@@ -108,10 +108,9 @@ export default class GenerateCommand {
         for (const type of types) {
             const returnTypes = type.fields
                 .map(f => ({ name: f.name, info: this.returnTypeInfo(f.type) }))
-                .filter(f => !!f.info);
+                .filter((f) => !!f.info);
             yield fillStub('ReturnTypeBuilder', {
-                "SIMPLEFIELDTUPLE": returnTypes.filter(t => t.info.kind == "simple").map(t => JSON.stringify(t.name)).join("|") || 'never',
-                "OBJECTFIELDTUPLE": returnTypes.filter(t => t.info.kind == "object").map(t => JSON.stringify(t.name)).join("|") || 'never',
+                "SIMPLEFIELDLITERALS": returnTypes.filter(t => t.info.kind == "simple").map(t => JSON.stringify(t.name)).join("|") || 'never',
                 "SIMPLEFIELDARRAY": JSON.stringify(returnTypes.filter(t => t.info.kind == "simple").map(t => t.name)),
                 "OBJECTFIELDOBJECT": JSON.stringify(returnTypes.filter(t => t.info.kind == "object")
                     .reduce((obj, t) => {
@@ -119,12 +118,6 @@ export default class GenerateCommand {
                     return obj;
                 }, {}))
                     .replaceAll(/"([^"]*?ReturnTypeBuilder)"/g, '$1'),
-                "WITHRELATEDOVERLOADS": returnTypes.filter(t => t.info.kind == "object")
-                    .reduce((overloads, t) => {
-                    overloads.push(`public withRelated(relatedType: "${t.name}", buildFields: (r: ${t.info.type}ReturnTypeBuilder) => void): this;`);
-                    return overloads;
-                }, [])
-                    .join("\n    ") || '',
                 "TYPENAME": type.name,
             });
         }
@@ -142,9 +135,8 @@ export default class GenerateCommand {
     *generateQueries(queries, exportQueryAs = 'Query') {
         yield `export class ${exportQueryAs} {`;
         for (const query of queries) {
-            const { typed, untyped } = this.argsToMethodParameters(query.args);
-            yield `  public static ${query.name}(${typed.join(', ')}) {`;
-            yield `    return new ${pascalCase(query.name)}Query(${untyped.join(', ')});`;
+            yield `  public static ${query.name}(queryArgs?: ${pascalCase(query.name)}QueryArguments) {`;
+            yield `    return new ${pascalCase(query.name)}Query(queryArgs);`;
             yield `  }`;
         }
         yield `}`;
@@ -157,9 +149,8 @@ export default class GenerateCommand {
     *generateMutations(queries, exportMutationAs = 'Mutation') {
         yield `export class ${exportMutationAs} {`;
         for (const query of queries) {
-            const { typed, untyped } = this.argsToMethodParameters(query.args);
-            yield `  public static ${query.name}(${typed.join(', ')}) {`;
-            yield `    return new ${pascalCase(query.name)}Mutation(${untyped.join(', ')});`;
+            yield `  public static ${query.name}(queryArgs: ${pascalCase(query.name)}MutationArguments) {`;
+            yield `    return new ${pascalCase(query.name)}Mutation(queryArgs);`;
             yield `  }`;
         }
         yield `}`;
@@ -194,8 +185,7 @@ export default class GenerateCommand {
         return fillStub('Query', {
             "QUERYCLASSNAME": `${pascalCase(query.name)}${pascalCase(rootType)}`,
             "QUERYNAME": query.name,
-            "TYPEDPARAMS": params.typed.join(', '),
-            "PARAMS": params.untyped.join(', '),
+            "ARGUMENTINTERFACE": params.typed.join(";\n") || '[index: string]: never',
             "ROOTTYPE": rootType,
             "RETURNTYPE": this.toTypeAppend(query.type, false),
             "RETURNTYPEBUILDER": returnTypeInfo?.kind == "object"

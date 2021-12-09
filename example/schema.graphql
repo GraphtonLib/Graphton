@@ -20,8 +20,8 @@ type Post {
 
 type Query {
   users: [User!]!
-  user(id: ID): User
-  userExists(id: ID): Boolean!
+  user(id: ID!): User
+  userExists(id: ID!): Boolean!
 }
 
 type Mutation {

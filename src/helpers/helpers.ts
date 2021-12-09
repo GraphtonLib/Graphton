@@ -1,8 +1,6 @@
 import { readFileSync }from "fs";
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import {introspectQuery} from "../graphql/query/introspect";
-
 
 export function isUrl(urlString: string) {
     let url;
@@ -41,7 +39,7 @@ export function fillStub(stub: string, substitutions: Record<string, string> = {
 }
 
 type HttpMethod = "GET"|"POST"|"PUT"|"PATCH"|"DELETE";
-export function httpRequest<T>(method: HttpMethod, url: string, data: Record<string, any>, headers: Record<string, string> = {}): Promise<T> {
+export function httpRequest<T>(method: HttpMethod, url: string, data: Record<string, unknown>, headers: Record<string, string> = {}): Promise<T> {
     return new Promise<T>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
 
