@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.2](https://github.com/GraphtonLib/Graphton/compare/v0.2.1...v0.2.2) (2021-12-09)
+
+
+### Features
+
+* Add `this` returntype to returnFields ([2578fbe](https://github.com/GraphtonLib/Graphton/commit/2578fbe7c3441e75b68ffe5b4ea8746f4b7c3cb4))
+
+
+### Bug Fixes
+
+* Generate `never` arguments for queries without arguments and remove constructors for argumentless queries ([6409e10](https://github.com/GraphtonLib/Graphton/commit/6409e10ceae42aadfe511c676ea8ec710f8913c7))
+* Removes eslint-disable-next-line comments in generated file, which were left behind by the stubs ([bba38b2](https://github.com/GraphtonLib/Graphton/commit/bba38b25af909c03788f52179cb0e091ccaa23b4))
+* Weirdness in top comment in generated file ([606ef0a](https://github.com/GraphtonLib/Graphton/commit/606ef0a639584281420d6d290dd2569e80934cb7))
+
 ### [0.2.1](https://github.com/GraphtonLib/Graphton/compare/v0.2.0...v0.2.1) (2021-12-09)
 
 * Little more output flair ✨ ([24a7dd0](https://github.com/GraphtonLib/Graphton/commit/24a7dd0049eec51fcc145dc95502ce2178ed615c))
