@@ -95,7 +95,7 @@ type QueryObjectFields<T> = {
      */
     public toReturnTypeString(): string {
         if(this.querySimpleFields.size < 1 && Object.values(this.queryObjectFields).length < 1) {
-            return ``;
+            return '';
         }
 
         const returnTypeString = ['{', ...this.querySimpleFields];

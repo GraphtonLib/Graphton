@@ -1,5 +1,5 @@
 /*IGNORE*/
-import {GraphtonBaseReturnTypeBuilder} from "./GraphtonBaseReturnTypeBuilder.stub.js";
+import {GraphtonBaseReturnTypeBuilder} from './GraphtonBaseReturnTypeBuilder.stub.js';
 /*ENDIGNORE*/
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

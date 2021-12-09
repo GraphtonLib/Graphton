@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import GenerateCommand from "./commands/GenerateCommand.js";
+import GenerateCommand from './commands/GenerateCommand.js';
 const program = new Command();
 async function main() {
     program

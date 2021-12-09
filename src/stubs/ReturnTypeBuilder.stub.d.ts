@@ -1,4 +1,4 @@
-import { GraphtonBaseReturnTypeBuilder } from "./GraphtonBaseReturnTypeBuilder.stub.js";
+import { GraphtonBaseReturnTypeBuilder } from './GraphtonBaseReturnTypeBuilder.stub.js';
 interface __TYPENAME__ReturnTypeBuilderObjectBuilder {
 }
 declare type __TYPENAME__ReturnTypeSimpleField = '/**SIMPLEFIELDLITERALS**/';

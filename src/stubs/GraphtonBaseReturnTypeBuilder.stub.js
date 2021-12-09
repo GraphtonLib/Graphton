@@ -70,7 +70,7 @@
      */
     toReturnTypeString() {
         if (this.querySimpleFields.size < 1 && Object.values(this.queryObjectFields).length < 1) {
-            return ``;
+            return '';
         }
         const returnTypeString = ['{', ...this.querySimpleFields];
         for (const [objectType, objectField] of Object.entries(this.queryObjectFields)) {

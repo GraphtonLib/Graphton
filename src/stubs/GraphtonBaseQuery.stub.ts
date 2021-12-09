@@ -1,5 +1,5 @@
 /*IGNORE*/
-import {GraphtonBaseReturnTypeBuilder} from "./GraphtonBaseReturnTypeBuilder.stub";
+import {GraphtonBaseReturnTypeBuilder} from './GraphtonBaseReturnTypeBuilder.stub';
 
 const settings = {
     defaultHeaders: {},
@@ -7,7 +7,7 @@ const settings = {
 };
 /*ENDIGNORE*/
 
-import axios, {AxiosResponse} from "axios";
+import axios, {AxiosResponse} from 'axios';
 
 type GraphQLServerEndpoint = string;
 type Headers = Record<string, string>;
@@ -66,7 +66,7 @@ type QueryArgs<T> = {
     protected async execute(requestOptions: RequestOptions = {}): Promise<QueryResponse> {
         const response = await axios.post(requestOptions?.url || settings.defaultUrl, {query: this.toQuery()}, {
             headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
                 ...settings.defaultHeaders,
                 ...requestOptions?.headers
             },

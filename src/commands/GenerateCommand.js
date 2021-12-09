@@ -1,9 +1,9 @@
-import { fillStub, isUrl } from "../helpers/helpers.js";
-import { introspectQuery } from "../graphql/query/introspect.js";
-import * as fs from "fs";
-import { pascalCase } from "change-case";
-import axios from "axios";
-import { default as ts } from "typescript";
+import { fillStub, isUrl } from '../helpers/helpers.js';
+import { introspectQuery } from '../graphql/query/introspect.js';
+import * as fs from 'fs';
+import { pascalCase } from 'change-case';
+import axios from 'axios';
+import { default as ts } from 'typescript';
 const scalarMap = (scalarType) => ({
     'Int': 'number',
     'Boolean': 'boolean',
@@ -22,7 +22,7 @@ export default class GenerateCommand {
                 this.gqlSchema = (await axios.post(schemaUri, { query: introspectQuery }))?.data?.data?.__schema;
             }
             else if (fs.existsSync(schemaUri)) {
-                this.gqlSchema = JSON.parse(fs.readFileSync(schemaUri, { encoding: "utf8" })).__schema;
+                this.gqlSchema = JSON.parse(fs.readFileSync(schemaUri, { encoding: 'utf8' })).__schema;
             }
         }
         catch (_) {
@@ -38,7 +38,7 @@ export default class GenerateCommand {
             this.gqlSchema.subscriptionType?.name,
         ];
         const types = this.gqlSchema.types
-            .filter(type => !type.name.startsWith("__") && ignoreTypes.indexOf(type.name) < 0);
+            .filter(type => !type.name.startsWith('__') && ignoreTypes.indexOf(type.name) < 0);
         const objectTypes = types.filter(type => type.kind === 'OBJECT');
         const enumTypes = types.filter(type => type.kind === 'ENUM');
         outContentSections.push(...[
@@ -52,7 +52,7 @@ export default class GenerateCommand {
         console.log('Adding base classes...');
         outContentSections.push(...[
             '// REGION: Base classes',
-            fillStub('Settings', { "DEFAULTPOSTURL": isUrl(schemaUri) ? schemaUri : '' }),
+            fillStub('Settings', { 'DEFAULTPOSTURL': isUrl(schemaUri) ? schemaUri : '' }),
             fillStub('GraphtonBaseQuery'),
             fillStub('GraphtonBaseReturnTypeBuilder'),
         ]);
@@ -72,42 +72,42 @@ export default class GenerateCommand {
         outContentSections.push(...[
             '// REGION: Mutations',
             ...this.generateMutations(this.gqlSchema.types.find(t => t.name === this.gqlSchema?.mutationType?.name)?.fields || [], options.exportMutationFactoryAs),
-            ``,
+            '',
         ]);
-        console.log(`Trimming output...`);
-        let outContent = outContentSections.join("\n")
-            .replaceAll(/\n.*?eslint-disable-next-line.*?\n/g, "\n")
-            .replaceAll(/^\s*[\r\n]/gm, "\n")
+        console.log('Trimming output...');
+        let outContent = outContentSections.join('\n')
+            .replaceAll(/\n.*?eslint-disable-next-line.*?\n/g, '\n')
+            .replaceAll(/^\s*[\r\n]/gm, '\n')
             .replaceAll(/^\n+/g, '')
             .replaceAll(/\n+$/g, '')
-            .replaceAll(/\n{3,}/g, "\n\n");
+            .replaceAll(/\n{3,}/g, '\n\n');
         if (options.outputFile.endsWith('.js')) {
-            console.log(`Transpiling output from TS to JS...`);
+            console.log('Transpiling output from TS to JS...');
             outContent = ts.transpileModule(outContent, {
-                "compilerOptions": {
-                    "target": ts.ScriptTarget.ESNext,
-                    "module": ts.ModuleKind.ESNext,
-                    "moduleResolution": ts.ModuleResolutionKind.Node12,
-                    "esModuleInterop": true,
-                    "forceConsistentCasingInFileNames": true,
-                    "strict": true,
-                    "skipLibCheck": true,
-                    "declaration": true
+                'compilerOptions': {
+                    'target': ts.ScriptTarget.ESNext,
+                    'module': ts.ModuleKind.ESNext,
+                    'moduleResolution': ts.ModuleResolutionKind.Node12,
+                    'esModuleInterop': true,
+                    'forceConsistentCasingInFileNames': true,
+                    'strict': true,
+                    'skipLibCheck': true,
+                    'declaration': true
                 }
             }).outputText;
         }
         console.log(`Writing it all to ${options.outputFile}...`);
-        fs.writeFileSync(options.outputFile, outContent, { encoding: "utf8" });
+        fs.writeFileSync(options.outputFile, outContent, { encoding: 'utf8' });
         console.log('');
         console.log(`🚀 Generated ${options.outputFile}`);
-        console.log(`✨ Now create something awesome!`);
+        console.log('✨ Now create something awesome!');
         console.log('');
     }
     *generateObjectTypes(types) {
         for (const type of types) {
             yield `export interface ${type.name} {`;
             yield* this.generateFields(type.fields);
-            yield `}`;
+            yield '}';
         }
     }
     *generateReturnTypeBuilders(types) {
@@ -116,15 +116,15 @@ export default class GenerateCommand {
                 .map(f => ({ name: f.name, info: this.returnTypeInfo(f.type) }))
                 .filter((f) => !!f.info);
             yield fillStub('ReturnTypeBuilder', {
-                "SIMPLEFIELDLITERALS": returnTypes.filter(t => t.info.kind == "simple").map(t => JSON.stringify(t.name)).join("|") || 'never',
-                "SIMPLEFIELDARRAY": JSON.stringify(returnTypes.filter(t => t.info.kind == "simple").map(t => t.name)),
-                "OBJECTFIELDOBJECT": JSON.stringify(returnTypes.filter(t => t.info.kind == "object")
+                'SIMPLEFIELDLITERALS': returnTypes.filter(t => t.info.kind == 'simple').map(t => JSON.stringify(t.name)).join('|') || 'never',
+                'SIMPLEFIELDARRAY': JSON.stringify(returnTypes.filter(t => t.info.kind == 'simple').map(t => t.name)),
+                'OBJECTFIELDOBJECT': JSON.stringify(returnTypes.filter(t => t.info.kind == 'object')
                     .reduce((obj, t) => {
                     obj[t.name] = `${t.info.type}ReturnTypeBuilder`;
                     return obj;
                 }, {}))
                     .replaceAll(/"([^"]*?ReturnTypeBuilder)"/g, '$1'),
-                "TYPENAME": type.name,
+                'TYPENAME': type.name,
             });
         }
     }
@@ -144,19 +144,19 @@ export default class GenerateCommand {
             if (query.args.length < 1) {
                 yield `  public static ${query.name}() {`;
                 yield `    return new ${pascalCase(query.name)}Query();`;
-                yield `  }`;
+                yield '  }';
             }
             else {
                 yield `  public static ${query.name}(queryArgs?: ${pascalCase(query.name)}QueryArguments) {`;
                 yield `    return new ${pascalCase(query.name)}Query(queryArgs);`;
-                yield `  }`;
+                yield '  }';
             }
         }
-        yield `}`;
-        yield ``;
+        yield '}';
+        yield '';
         for (const query of queries) {
             yield this.generateQueryClass(query, 'query');
-            yield ``;
+            yield '';
         }
     }
     *generateMutations(queries, exportMutationAs = 'Mutation') {
@@ -164,13 +164,13 @@ export default class GenerateCommand {
         for (const query of queries) {
             yield `  public static ${query.name}(queryArgs: ${pascalCase(query.name)}MutationArguments) {`;
             yield `    return new ${pascalCase(query.name)}Mutation(queryArgs);`;
-            yield `  }`;
+            yield '  }';
         }
-        yield `}`;
-        yield ``;
+        yield '}';
+        yield '';
         for (const query of queries) {
-            yield this.generateQueryClass(query, "mutation");
-            yield ``;
+            yield this.generateQueryClass(query, 'mutation');
+            yield '';
         }
     }
     argsToMethodParameters(args) {
@@ -187,28 +187,28 @@ export default class GenerateCommand {
         const params = this.argsToMethodParameters(query.args);
         const queryClassName = `${pascalCase(query.name)}${pascalCase(rootType)}`;
         const includeInStub = [];
-        if (returnTypeInfo?.kind == "object") {
-            includeInStub.push("RETURNTYPEOBJECT");
+        if (returnTypeInfo?.kind == 'object') {
+            includeInStub.push('RETURNTYPEOBJECT');
         }
-        if (rootType == "query") {
-            includeInStub.push("ADDGET");
+        if (rootType == 'query') {
+            includeInStub.push('ADDGET');
         }
-        if (rootType == "mutation") {
-            includeInStub.push("ADDDO");
+        if (rootType == 'mutation') {
+            includeInStub.push('ADDDO');
         }
         let argumentsInterfaceName = 'never';
         if (params.typed.length > 0) {
-            includeInStub.push("ARGUMENTS");
+            includeInStub.push('ARGUMENTS');
             argumentsInterfaceName = `${queryClassName}Arguments`;
         }
         return fillStub('Query', {
-            "QUERYCLASSNAME": queryClassName,
-            "QUERYNAME": query.name,
-            "ARGUMENTINTERFACEPROPERTIES": params.typed.join(";\n    "),
-            "ARGUMENTINTERFACENAME": argumentsInterfaceName,
-            "ROOTTYPE": rootType,
-            "RETURNTYPE": this.toTypeAppend(query.type, false),
-            "RETURNTYPEBUILDER": returnTypeInfo?.kind == "object"
+            'QUERYCLASSNAME': queryClassName,
+            'QUERYNAME': query.name,
+            'ARGUMENTINTERFACEPROPERTIES': params.typed.join(';\n    '),
+            'ARGUMENTINTERFACENAME': argumentsInterfaceName,
+            'ROOTTYPE': rootType,
+            'RETURNTYPE': this.toTypeAppend(query.type, false),
+            'RETURNTYPEBUILDER': returnTypeInfo?.kind == 'object'
                 ? `${this.returnTypeInfo(query.type)?.type}ReturnTypeBuilder`
                 : 'null',
         }, includeInStub);
@@ -238,17 +238,17 @@ export default class GenerateCommand {
             isListOf: false,
             kind: 'simple',
             notNull: false,
-            type: ""
+            type: ''
         };
         switch (type?.kind || '') {
             case 'OBJECT':
                 returnTypeInfo.type = type.name;
-                returnTypeInfo.kind = "object";
+                returnTypeInfo.kind = 'object';
                 return returnTypeInfo;
             case 'SCALAR':
             case 'ENUM':
                 returnTypeInfo.type = type.name;
-                returnTypeInfo.kind = "simple";
+                returnTypeInfo.kind = 'simple';
                 return returnTypeInfo;
             case 'NON_NULL':
                 if (returnTypeInfo.isListOf) {

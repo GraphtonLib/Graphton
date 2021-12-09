@@ -10,7 +10,7 @@ export interface SubscriptionType {
     name: string;
 }
 
-export type RootType = "mutation"|"query"|"subscription";
+export type RootType = 'mutation'|'query'|'subscription';
 
 export interface ReturnType {
     kind: string;

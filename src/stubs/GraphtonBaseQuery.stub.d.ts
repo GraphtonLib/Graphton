@@ -1,5 +1,5 @@
-import { GraphtonBaseReturnTypeBuilder } from "./GraphtonBaseReturnTypeBuilder.stub";
-import { AxiosResponse } from "axios";
+import { GraphtonBaseReturnTypeBuilder } from './GraphtonBaseReturnTypeBuilder.stub';
+import { AxiosResponse } from 'axios';
 declare type GraphQLServerEndpoint = string;
 declare type Headers = Record<string, string>;
 interface RequestOptions {

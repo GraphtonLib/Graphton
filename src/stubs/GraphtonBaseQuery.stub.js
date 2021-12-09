@@ -3,7 +3,7 @@ const settings = {
     defaultUrl: ''
 };
 /*ENDIGNORE*/
-import axios from "axios";
+import axios from 'axios';
 /*IGNORE*/ export /*ENDIGNORE*/ class GraphtonBaseQuery {
     queryArgs = {};
     setArgs(queryArgs) {
@@ -36,7 +36,7 @@ import axios from "axios";
     async execute(requestOptions = {}) {
         const response = await axios.post(requestOptions?.url || settings.defaultUrl, { query: this.toQuery() }, {
             headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
                 ...settings.defaultHeaders,
                 ...requestOptions?.headers
             },

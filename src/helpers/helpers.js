@@ -1,4 +1,4 @@
-import { readFileSync } from "fs";
+import { readFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 export function isUrl(urlString) {
@@ -9,10 +9,10 @@ export function isUrl(urlString) {
     catch (_) {
         return false;
     }
-    return ["http:", "https:"].indexOf(url.protocol) > -1;
+    return ['http:', 'https:'].indexOf(url.protocol) > -1;
 }
 export function fillStub(stub, substitutions = {}, conditions = []) {
-    let stubContent = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '..', 'stubs', `${stub}.stub.ts`), { encoding: "utf8" });
+    let stubContent = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '..', 'stubs', `${stub}.stub.ts`), { encoding: 'utf8' });
     for (const [searchValue, replaceValue] of Object.entries(substitutions)) {
         stubContent = stubContent.replaceAll(`/*${searchValue}*/`, replaceValue)
             .replaceAll(RegExp(`.\\/\\*\\*${searchValue}\\*\\*\\/.`, 'g'), replaceValue)
@@ -33,8 +33,8 @@ export function httpRequest(method, url, data, headers = {}) {
     return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open(method, url, true);
-        xhr.responseType = "json";
-        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.responseType = 'json';
+        xhr.setRequestHeader('Content-Type', 'application/json');
         for (const [name, value] of Object.entries(headers)) {
             xhr.setRequestHeader(name, value);
         }

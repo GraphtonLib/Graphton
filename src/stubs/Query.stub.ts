@@ -1,10 +1,10 @@
 /*IGNORE*/
-import {GraphtonBaseQuery, RootType} from "./GraphtonBaseQuery.stub.js";
-import {__TYPENAME__ReturnTypeBuilder as __RETURNTYPEBUILDER__} from "./ReturnTypeBuilder.stub.js"
+import {GraphtonBaseQuery, RootType} from './GraphtonBaseQuery.stub.js';
+import {__TYPENAME__ReturnTypeBuilder as __RETURNTYPEBUILDER__} from './ReturnTypeBuilder.stub.js'
 
 type GraphQLServerEndpoint = string;
 type Headers = Record<string, string>;
-import {AxiosResponse} from "axios";
+import {AxiosResponse} from 'axios';
 interface RequestOptions {
     headers?: Headers,
     url?: GraphQLServerEndpoint
@@ -26,8 +26,8 @@ interface __ARGUMENTINTERFACENAME__ {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 class __QUERYCLASSNAME__ extends GraphtonBaseQuery<__ARGUMENTINTERFACENAME__> {
-    protected queryName = "/*QUERYNAME*/";
-    protected rootType: RootType = "/*ROOTTYPE*/";
+    protected queryName = '/*QUERYNAME*/';
+    protected rootType: RootType = '/*ROOTTYPE*/';
     protected returnType = /*IF:RETURNTYPEOBJECT*/new/*ENDIF:RETURNTYPEOBJECT*/ __RETURNTYPEBUILDER__/*IF:RETURNTYPEOBJECT*/()/*ENDIF:RETURNTYPEOBJECT*/;
 
     /*IF:ARGUMENTS*/
