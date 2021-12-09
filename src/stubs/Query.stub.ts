@@ -38,7 +38,7 @@ class __QUERYCLASSNAME__ extends GraphtonBaseQuery<__QUERYCLASSNAME__Arguments> 
      * Function to build the required fields for that query
      * Only available if the return type is an OBJECT
      */
-    public returnFields(returnFieldsClosure: (r: __RETURNTYPEBUILDER__) => void) {
+    public returnFields(returnFieldsClosure: (r: __RETURNTYPEBUILDER__) => void): this {
         returnFieldsClosure(this.returnType);
         return this;
     }
