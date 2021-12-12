@@ -20,6 +20,13 @@
     "typescript",
     "generator"
   ],
+  "files": [
+    "src/**/*",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "FUNDING.yml"
+  ],
   "scripts": {
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",

@@ -3,7 +3,7 @@ import {introspectQuery} from '../graphql/query/introspect.js';
 import * as fs from 'fs';
 import {pascalCase} from 'change-case';
 import {Arg, Field, ReturnType, RootType, Schema, Type} from '../types/GraphQL';
-import {ReturnTypeInfo, GenerateCommandOptions, FactoryTypeName} from '../types/Generator';
+import {ReturnTypeInfo, GenerateCommandOptions} from '../types/Generator';
 import axios from 'axios';
 
 import {default as ts} from 'typescript';
