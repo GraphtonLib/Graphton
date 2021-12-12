@@ -224,7 +224,7 @@ export default class GenerateCommand {
         if(rootType == 'mutation') {
             includeInStub.push('ADDDO');
         }
-        let argumentsInterfaceName = 'never';
+        let argumentsInterfaceName = 'Record<string, never>';
         if(params.typed.length > 0) {
             includeInStub.push('ARGUMENTS');
             argumentsInterfaceName = `${queryClassName}Arguments`;

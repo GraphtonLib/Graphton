@@ -28,32 +28,27 @@ type QueryArgs<T> = {
 
 /*IGNORE*/export/*ENDIGNORE*/ abstract class GraphtonBaseQuery<QueryArgumentType extends QueryArgs<QueryArgumentType>> {
     protected abstract queryName: string;
-    protected queryArgs: Partial<NonNullable<QueryArgumentType>> = {};
+    protected abstract queryArgs: Partial<QueryArgumentType>;
     protected abstract rootType: RootType;
     protected abstract returnType: GraphtonBaseReturnTypeBuilder<any, any> | null;
 
     public setArgs(queryArgs: Partial<QueryArgumentType>): void {
-        const newArgs: Partial<NonNullable<QueryArgumentType>> = {};
-        const mergedArgs: Partial<QueryArgumentType> = {...this.queryArgs, ...queryArgs};
-        for(const key in mergedArgs) {
-            if (this.queryArgs[key] !== undefined && this.queryArgs[key] !== null) {
-                newArgs[key] = this.queryArgs[key];
-            }
-        }
+        this.queryArgs = {...this.queryArgs, ...queryArgs};
     }
 
     /**
      * Transform builder to graphql query string
      */
     public toQuery(): string {
-        const queryArgs = Object.entries(this.queryArgs);
-        let queryArgString = '';
-        if (queryArgs.length > 0) {
-            const queryArgItems: string[] = [];
-            for (const [name, value] of queryArgs) {
-                queryArgItems.push(`${name}: ${JSON.stringify(value)}`);
+        const queryArgItems: string[] = [];
+        for (const argKey in this.queryArgs) {
+            if(this.queryArgs[argKey]) {
+                queryArgItems.push(`${argKey}: ${JSON.stringify(this.queryArgs[argKey])}`);
             }
+        }
 
+        let queryArgString = '';
+        if(queryArgItems.length > 0) {
             queryArgString = `(${queryArgItems.join(', ')})`;
         }
 

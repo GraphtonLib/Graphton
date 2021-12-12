@@ -41,32 +41,27 @@ type QueryArgs<T> = {
 
  abstract class GraphtonBaseQuery<QueryArgumentType extends QueryArgs<QueryArgumentType>> {
     protected abstract queryName: string;
-    protected queryArgs: Partial<NonNullable<QueryArgumentType>> = {};
+    protected abstract queryArgs: Partial<QueryArgumentType>;
     protected abstract rootType: RootType;
     protected abstract returnType: GraphtonBaseReturnTypeBuilder<any, any> | null;
 
     public setArgs(queryArgs: Partial<QueryArgumentType>): void {
-        const newArgs: Partial<NonNullable<QueryArgumentType>> = {};
-        const mergedArgs: Partial<QueryArgumentType> = {...this.queryArgs, ...queryArgs};
-        for(const key in mergedArgs) {
-            if (this.queryArgs[key] !== undefined && this.queryArgs[key] !== null) {
-                newArgs[key] = this.queryArgs[key];
-            }
-        }
+        this.queryArgs = {...this.queryArgs, ...queryArgs};
     }
 
     /**
      * Transform builder to graphql query string
      */
     public toQuery(): string {
-        const queryArgs = Object.entries(this.queryArgs);
-        let queryArgString = '';
-        if (queryArgs.length > 0) {
-            const queryArgItems: string[] = [];
-            for (const [name, value] of queryArgs) {
-                queryArgItems.push(`${name}: ${JSON.stringify(value)}`);
+        const queryArgItems: string[] = [];
+        for (const argKey in this.queryArgs) {
+            if(this.queryArgs[argKey]) {
+                queryArgItems.push(`${argKey}: ${JSON.stringify(this.queryArgs[argKey])}`);
             }
+        }
 
+        let queryArgString = '';
+        if(queryArgItems.length > 0) {
             queryArgString = `(${queryArgItems.join(', ')})`;
         }
 
@@ -259,8 +254,9 @@ interface UsersQueryResponse {
     response: AxiosResponse;
 }
 
-class UsersQuery extends GraphtonBaseQuery<never> {
+class UsersQuery extends GraphtonBaseQuery<Record<string, never>> {
     protected queryName = 'users';
+    protected queryArgs: Partial<Record<string, never>> = {};
     protected rootType: RootType = 'query';
     protected returnType = new UserReturnTypeBuilder();
 
@@ -296,6 +292,7 @@ interface UserQueryArguments {
 
 class UserQuery extends GraphtonBaseQuery<UserQueryArguments> {
     protected queryName = 'user';
+    protected queryArgs: Partial<UserQueryArguments> = {};
     protected rootType: RootType = 'query';
     protected returnType = new UserReturnTypeBuilder();
 
@@ -336,6 +333,7 @@ interface UserExistsQueryArguments {
 
 class UserExistsQuery extends GraphtonBaseQuery<UserExistsQueryArguments> {
     protected queryName = 'userExists';
+    protected queryArgs: Partial<UserExistsQueryArguments> = {};
     protected rootType: RootType = 'query';
     protected returnType =  null;
 
@@ -381,6 +379,7 @@ interface CreateUserMutationArguments {
 
 class CreateUserMutation extends GraphtonBaseQuery<CreateUserMutationArguments> {
     protected queryName = 'createUser';
+    protected queryArgs: Partial<CreateUserMutationArguments> = {};
     protected rootType: RootType = 'mutation';
     protected returnType = new UserReturnTypeBuilder();
 
@@ -423,6 +422,7 @@ interface UpdateUserMutationArguments {
 
 class UpdateUserMutation extends GraphtonBaseQuery<UpdateUserMutationArguments> {
     protected queryName = 'updateUser';
+    protected queryArgs: Partial<UpdateUserMutationArguments> = {};
     protected rootType: RootType = 'mutation';
     protected returnType = new UserReturnTypeBuilder();
 
@@ -463,6 +463,7 @@ interface DeleteUserMutationArguments {
 
 class DeleteUserMutation extends GraphtonBaseQuery<DeleteUserMutationArguments> {
     protected queryName = 'deleteUser';
+    protected queryArgs: Partial<DeleteUserMutationArguments> = {};
     protected rootType: RootType = 'mutation';
     protected returnType = new UserReturnTypeBuilder();
 

@@ -18,27 +18,21 @@ export class GraphtonSettings {
 }
 import axios from 'axios';
 class GraphtonBaseQuery {
-    queryArgs = {};
     setArgs(queryArgs) {
-        const newArgs = {};
-        const mergedArgs = { ...this.queryArgs, ...queryArgs };
-        for (const key in mergedArgs) {
-            if (this.queryArgs[key] !== undefined && this.queryArgs[key] !== null) {
-                newArgs[key] = this.queryArgs[key];
-            }
-        }
+        this.queryArgs = { ...this.queryArgs, ...queryArgs };
     }
     /**
      * Transform builder to graphql query string
      */
     toQuery() {
-        const queryArgs = Object.entries(this.queryArgs);
-        let queryArgString = '';
-        if (queryArgs.length > 0) {
-            const queryArgItems = [];
-            for (const [name, value] of queryArgs) {
-                queryArgItems.push(`${name}: ${JSON.stringify(value)}`);
+        const queryArgItems = [];
+        for (const argKey in this.queryArgs) {
+            if (this.queryArgs[argKey]) {
+                queryArgItems.push(`${argKey}: ${JSON.stringify(this.queryArgs[argKey])}`);
             }
+        }
+        let queryArgString = '';
+        if (queryArgItems.length > 0) {
             queryArgString = `(${queryArgItems.join(', ')})`;
         }
         return `${this.rootType} ${this.queryName} { ${this.queryName}${queryArgString} ${this.returnType?.toReturnTypeString() || ''} }`;
@@ -169,6 +163,7 @@ export class Query {
 }
 class UsersQuery extends GraphtonBaseQuery {
     queryName = 'users';
+    queryArgs = {};
     rootType = 'query';
     returnType = new UserReturnTypeBuilder();
     /**
@@ -189,6 +184,7 @@ class UsersQuery extends GraphtonBaseQuery {
 }
 class UserQuery extends GraphtonBaseQuery {
     queryName = 'user';
+    queryArgs = {};
     rootType = 'query';
     returnType = new UserReturnTypeBuilder();
     constructor(queryArgs) {
@@ -213,6 +209,7 @@ class UserQuery extends GraphtonBaseQuery {
 }
 class UserExistsQuery extends GraphtonBaseQuery {
     queryName = 'userExists';
+    queryArgs = {};
     rootType = 'query';
     returnType = null;
     constructor(queryArgs) {
@@ -241,6 +238,7 @@ export class Mutation {
 }
 class CreateUserMutation extends GraphtonBaseQuery {
     queryName = 'createUser';
+    queryArgs = {};
     rootType = 'mutation';
     returnType = new UserReturnTypeBuilder();
     constructor(queryArgs) {
@@ -265,6 +263,7 @@ class CreateUserMutation extends GraphtonBaseQuery {
 }
 class UpdateUserMutation extends GraphtonBaseQuery {
     queryName = 'updateUser';
+    queryArgs = {};
     rootType = 'mutation';
     returnType = new UserReturnTypeBuilder();
     constructor(queryArgs) {
@@ -289,6 +288,7 @@ class UpdateUserMutation extends GraphtonBaseQuery {
 }
 class DeleteUserMutation extends GraphtonBaseQuery {
     queryName = 'deleteUser';
+    queryArgs = {};
     rootType = 'mutation';
     returnType = new UserReturnTypeBuilder();
     constructor(queryArgs) {

@@ -5,27 +5,21 @@ const settings = {
 /*ENDIGNORE*/
 import axios from 'axios';
 /*IGNORE*/ export /*ENDIGNORE*/ class GraphtonBaseQuery {
-    queryArgs = {};
     setArgs(queryArgs) {
-        const newArgs = {};
-        const mergedArgs = { ...this.queryArgs, ...queryArgs };
-        for (const key in mergedArgs) {
-            if (this.queryArgs[key] !== undefined && this.queryArgs[key] !== null) {
-                newArgs[key] = this.queryArgs[key];
-            }
-        }
+        this.queryArgs = { ...this.queryArgs, ...queryArgs };
     }
     /**
      * Transform builder to graphql query string
      */
     toQuery() {
-        const queryArgs = Object.entries(this.queryArgs);
-        let queryArgString = '';
-        if (queryArgs.length > 0) {
-            const queryArgItems = [];
-            for (const [name, value] of queryArgs) {
-                queryArgItems.push(`${name}: ${JSON.stringify(value)}`);
+        const queryArgItems = [];
+        for (const argKey in this.queryArgs) {
+            if (this.queryArgs[argKey]) {
+                queryArgItems.push(`${argKey}: ${JSON.stringify(this.queryArgs[argKey])}`);
             }
+        }
+        let queryArgString = '';
+        if (queryArgItems.length > 0) {
             queryArgString = `(${queryArgItems.join(', ')})`;
         }
         return `${this.rootType} ${this.queryName} { ${this.queryName}${queryArgString} ${this.returnType?.toReturnTypeString() || ''} }`;

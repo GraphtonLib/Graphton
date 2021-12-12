@@ -27,6 +27,7 @@ interface __ARGUMENTINTERFACENAME__ {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 class __QUERYCLASSNAME__ extends GraphtonBaseQuery<__ARGUMENTINTERFACENAME__> {
     protected queryName = '/*QUERYNAME*/';
+    protected queryArgs: Partial<__ARGUMENTINTERFACENAME__> = {};
     protected rootType: RootType = '/*ROOTTYPE*/';
     protected returnType = /*IF:RETURNTYPEOBJECT*/new/*ENDIF:RETURNTYPEOBJECT*/ __RETURNTYPEBUILDER__/*IF:RETURNTYPEOBJECT*/()/*ENDIF:RETURNTYPEOBJECT*/;
 

@@ -16,7 +16,7 @@ declare type QueryArgs<T> = {
 export declare type RootType = 'query' | 'mutation' | '/*ROOTTYPE*/';
 export declare abstract class GraphtonBaseQuery<QueryArgumentType extends QueryArgs<QueryArgumentType>> {
     protected abstract queryName: string;
-    protected queryArgs: Partial<NonNullable<QueryArgumentType>>;
+    protected abstract queryArgs: Partial<QueryArgumentType>;
     protected abstract rootType: RootType;
     protected abstract returnType: GraphtonBaseReturnTypeBuilder<any, any> | null;
     setArgs(queryArgs: Partial<QueryArgumentType>): void;
