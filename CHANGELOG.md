@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.5](https://github.com/GraphtonLib/Graphton/compare/v0.2.4...v0.2.5) (2021-12-12)
+
+
+### Bug Fixes
+
+* Less files are now packed with the package ([ec7f6d8](https://github.com/GraphtonLib/Graphton/commit/ec7f6d84159054562e506c4e465e73402e392737))
+
 ### [0.2.4](https://github.com/GraphtonLib/Graphton/compare/v0.2.3...v0.2.4) (2021-12-12)
 
 
