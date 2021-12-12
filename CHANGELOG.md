@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.4](https://github.com/GraphtonLib/Graphton/compare/v0.2.3...v0.2.4) (2021-12-12)
+
+
+### Bug Fixes
+
+* Query argument - they now actually get set ([0064601](https://github.com/GraphtonLib/Graphton/commit/00646011f0f8cf73e224435a7556615fd894b0a9))
+
 ### [0.2.3](https://github.com/GraphtonLib/Graphton/compare/v0.2.2...v0.2.3) (2021-12-09)
 
 
