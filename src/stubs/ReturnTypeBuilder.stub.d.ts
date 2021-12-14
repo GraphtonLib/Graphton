@@ -1,9 +1,9 @@
 import { GraphtonBaseReturnTypeBuilder } from './GraphtonBaseReturnTypeBuilder.stub.js';
-interface __TYPENAME__ReturnTypeBuilderObjectBuilder {
+interface _t_TYPENAME_t_ReturnTypeBuilderObjectBuilder {
 }
-declare type __TYPENAME__ReturnTypeSimpleField = '/**SIMPLEFIELDLITERALS**/';
-export declare class __TYPENAME__ReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder<__TYPENAME__ReturnTypeBuilderObjectBuilder, __TYPENAME__ReturnTypeSimpleField> {
-    protected availableSimpleFields: Set<__TYPENAME__ReturnTypeSimpleField>;
+declare type _t_TYPENAME_t_ReturnTypeSimpleField = '/**SIMPLEFIELDLITERALS**/';
+export declare class _t_TYPENAME_t_ReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder<_t_TYPENAME_t_ReturnTypeBuilderObjectBuilder, _t_TYPENAME_t_ReturnTypeSimpleField> {
+    protected availableSimpleFields: Set<_t_TYPENAME_t_ReturnTypeSimpleField>;
     protected typeName: string;
     protected queryObjectFieldBuilders: {};
 }

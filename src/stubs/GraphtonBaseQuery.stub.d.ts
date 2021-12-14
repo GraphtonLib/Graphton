@@ -10,20 +10,22 @@ interface QueryResponse {
     data: Record<string, unknown>;
     response: AxiosResponse;
 }
-declare type QueryArgs<T> = {
-    [Property in keyof T]: string | boolean | number | null | undefined;
-};
+export declare class GraphtonEnum<T extends string> {
+    readonly enumValue: T;
+    constructor(enumValue: T);
+}
 export declare type RootType = 'query' | 'mutation' | '/*ROOTTYPE*/';
-export declare abstract class GraphtonBaseQuery<QueryArgumentType extends QueryArgs<QueryArgumentType>> {
+export declare abstract class GraphtonBaseQuery<T> {
     protected abstract queryName: string;
-    protected abstract queryArgs: Partial<QueryArgumentType>;
     protected abstract rootType: RootType;
     protected abstract returnType: GraphtonBaseReturnTypeBuilder<any, any> | null;
-    setArgs(queryArgs: Partial<QueryArgumentType>): void;
+    abstract setArgs(queryArgs: Partial<T>): void;
+    protected abstract toArgString(): string;
     /**
      * Transform builder to graphql query string
      */
     toQuery(): string;
+    protected argify(argValue: unknown): string;
     /**
      * Execute the query
      */

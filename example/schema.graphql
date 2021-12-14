@@ -3,10 +3,17 @@ schema {
   mutation: Mutation
 }
 
+enum Role {
+  ADMIN
+  USER
+  GUEST
+}
+
 type User {
   id: ID!
   name: String!
   age: Int
+  role: Role!
   posts: [Post!]!
   friends: [User!]!
 }
@@ -15,11 +22,22 @@ type Post {
   id: ID!
   author: User!
   text: String!
-  repatedPosts: [Post!]!
+  relatedPosts: [Post!]!
+}
+
+input UserInput {
+  column: String!
+  order: SortOrder!
+}
+
+enum SortOrder {
+  ASC
+  DESC
 }
 
 type Query {
   users: [User!]!
+  usersOrdered(orderBy: [UserInput!]): [User!]!
   user(id: ID!): User
   userExists(id: ID!): Boolean!
 }

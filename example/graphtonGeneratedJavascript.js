@@ -17,25 +17,38 @@ export class GraphtonSettings {
     }
 }
 import axios from 'axios';
-class GraphtonBaseQuery {
-    setArgs(queryArgs) {
-        this.queryArgs = { ...this.queryArgs, ...queryArgs };
+class GraphtonEnum {
+    enumValue;
+    constructor(enumValue) {
+        this.enumValue = enumValue;
     }
+}
+class GraphtonBaseQuery {
     /**
      * Transform builder to graphql query string
      */
     toQuery() {
-        const queryArgItems = [];
-        for (const argKey in this.queryArgs) {
-            if (this.queryArgs[argKey]) {
-                queryArgItems.push(`${argKey}: ${JSON.stringify(this.queryArgs[argKey])}`);
+        return `${this.rootType} ${this.queryName} { ${this.queryName}${this.toArgString()} ${this.returnType?.toReturnTypeString() || ''} }`;
+    }
+    argify(argValue) {
+        if (argValue instanceof GraphtonEnum) {
+            return `${argValue.enumValue}`;
+        }
+        if (Array.isArray(argValue)) {
+            return `[${argValue.map(v => this.argify(v))}]`;
+        }
+        if (typeof argValue === 'object' && !Array.isArray(argValue) && argValue !== null) {
+            const decoded = [];
+            for (const [key, value] of Object.entries(argValue)) {
+                decoded.push(`${key}: ${this.argify(value)}`);
             }
+            return `{${decoded.join(',')}}`;
         }
-        let queryArgString = '';
-        if (queryArgItems.length > 0) {
-            queryArgString = `(${queryArgItems.join(', ')})`;
+        if (typeof argValue === 'string' || typeof argValue === 'number' || typeof argValue === 'boolean' || argValue === null) {
+            return JSON.stringify(argValue);
         }
-        return `${this.rootType} ${this.queryName} { ${this.queryName}${queryArgString} ${this.returnType?.toReturnTypeString() || ''} }`;
+        console.warn(`Unsure how to argify ${argValue} (of type ${typeof argValue}).`);
+        return '';
     }
     /**
      * Execute the query
@@ -139,20 +152,32 @@ class GraphtonBaseReturnTypeBuilder {
         return returnTypeString.join(' ');
     }
 }
+export const Role = {
+    ADMIN: new GraphtonEnum("ADMIN"),
+    USER: new GraphtonEnum("USER"),
+    GUEST: new GraphtonEnum("GUEST")
+};
+export const SortOrder = {
+    ASC: new GraphtonEnum("ASC"),
+    DESC: new GraphtonEnum("DESC")
+};
 class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
-    availableSimpleFields = new Set(["id", "name", "age"]);
+    availableSimpleFields = new Set(["id", "name", "age", "role"]);
     typeName = 'User';
     queryObjectFieldBuilders = { "posts": PostReturnTypeBuilder, "friends": UserReturnTypeBuilder };
 }
 class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
     availableSimpleFields = new Set(["id", "text"]);
     typeName = 'Post';
-    queryObjectFieldBuilders = { "author": UserReturnTypeBuilder, "repatedPosts": PostReturnTypeBuilder };
+    queryObjectFieldBuilders = { "author": UserReturnTypeBuilder, "relatedPosts": PostReturnTypeBuilder };
 }
 // REGION: Queries
 export class Query {
     static users() {
         return new UsersQuery();
+    }
+    static usersOrdered(queryArgs) {
+        return new UsersOrderedQuery(queryArgs);
     }
     static user(queryArgs) {
         return new UserQuery(queryArgs);
@@ -166,6 +191,61 @@ class UsersQuery extends GraphtonBaseQuery {
     queryArgs = {};
     rootType = 'query';
     returnType = new UserReturnTypeBuilder();
+    setArgs(queryArgs) {
+        this.queryArgs = { ...this.queryArgs, ...queryArgs };
+    }
+    toArgString() {
+        const queryArgItems = [];
+        for (const [argKey, argValue] of Object.entries(this.queryArgs)) {
+            if (argValue) {
+                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            }
+        }
+        if (queryArgItems.length > 0) {
+            return `(${queryArgItems.join(', ')})`;
+        }
+        return '';
+    }
+    /**
+     * Function to build the required fields for that query
+     * Only available if the return type is an OBJECT
+     */
+    returnFields(returnFieldsClosure) {
+        returnFieldsClosure(this.returnType);
+        return this;
+    }
+    /**
+     * Execute the query and get the results
+     * Only available on Query type requests
+     */
+    async get(requestOptions = {}) {
+        return (await super.execute(requestOptions));
+    }
+}
+class UsersOrderedQuery extends GraphtonBaseQuery {
+    queryName = 'usersOrdered';
+    queryArgs = {};
+    rootType = 'query';
+    returnType = new UserReturnTypeBuilder();
+    constructor(queryArgs) {
+        super();
+        queryArgs && this.setArgs(queryArgs);
+    }
+    setArgs(queryArgs) {
+        this.queryArgs = { ...this.queryArgs, ...queryArgs };
+    }
+    toArgString() {
+        const queryArgItems = [];
+        for (const [argKey, argValue] of Object.entries(this.queryArgs)) {
+            if (argValue) {
+                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            }
+        }
+        if (queryArgItems.length > 0) {
+            return `(${queryArgItems.join(', ')})`;
+        }
+        return '';
+    }
     /**
      * Function to build the required fields for that query
      * Only available if the return type is an OBJECT
@@ -191,6 +271,21 @@ class UserQuery extends GraphtonBaseQuery {
         super();
         queryArgs && this.setArgs(queryArgs);
     }
+    setArgs(queryArgs) {
+        this.queryArgs = { ...this.queryArgs, ...queryArgs };
+    }
+    toArgString() {
+        const queryArgItems = [];
+        for (const [argKey, argValue] of Object.entries(this.queryArgs)) {
+            if (argValue) {
+                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            }
+        }
+        if (queryArgItems.length > 0) {
+            return `(${queryArgItems.join(', ')})`;
+        }
+        return '';
+    }
     /**
      * Function to build the required fields for that query
      * Only available if the return type is an OBJECT
@@ -215,6 +310,21 @@ class UserExistsQuery extends GraphtonBaseQuery {
     constructor(queryArgs) {
         super();
         queryArgs && this.setArgs(queryArgs);
+    }
+    setArgs(queryArgs) {
+        this.queryArgs = { ...this.queryArgs, ...queryArgs };
+    }
+    toArgString() {
+        const queryArgItems = [];
+        for (const [argKey, argValue] of Object.entries(this.queryArgs)) {
+            if (argValue) {
+                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            }
+        }
+        if (queryArgItems.length > 0) {
+            return `(${queryArgItems.join(', ')})`;
+        }
+        return '';
     }
     /**
      * Execute the query and get the results
@@ -245,6 +355,21 @@ class CreateUserMutation extends GraphtonBaseQuery {
         super();
         queryArgs && this.setArgs(queryArgs);
     }
+    setArgs(queryArgs) {
+        this.queryArgs = { ...this.queryArgs, ...queryArgs };
+    }
+    toArgString() {
+        const queryArgItems = [];
+        for (const [argKey, argValue] of Object.entries(this.queryArgs)) {
+            if (argValue) {
+                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            }
+        }
+        if (queryArgItems.length > 0) {
+            return `(${queryArgItems.join(', ')})`;
+        }
+        return '';
+    }
     /**
      * Function to build the required fields for that query
      * Only available if the return type is an OBJECT
@@ -270,6 +395,21 @@ class UpdateUserMutation extends GraphtonBaseQuery {
         super();
         queryArgs && this.setArgs(queryArgs);
     }
+    setArgs(queryArgs) {
+        this.queryArgs = { ...this.queryArgs, ...queryArgs };
+    }
+    toArgString() {
+        const queryArgItems = [];
+        for (const [argKey, argValue] of Object.entries(this.queryArgs)) {
+            if (argValue) {
+                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            }
+        }
+        if (queryArgItems.length > 0) {
+            return `(${queryArgItems.join(', ')})`;
+        }
+        return '';
+    }
     /**
      * Function to build the required fields for that query
      * Only available if the return type is an OBJECT
@@ -294,6 +434,21 @@ class DeleteUserMutation extends GraphtonBaseQuery {
     constructor(queryArgs) {
         super();
         queryArgs && this.setArgs(queryArgs);
+    }
+    setArgs(queryArgs) {
+        this.queryArgs = { ...this.queryArgs, ...queryArgs };
+    }
+    toArgString() {
+        const queryArgItems = [];
+        for (const [argKey, argValue] of Object.entries(this.queryArgs)) {
+            if (argValue) {
+                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            }
+        }
+        if (queryArgItems.length > 0) {
+            return `(${queryArgItems.join(', ')})`;
+        }
+        return '';
     }
     /**
      * Function to build the required fields for that query

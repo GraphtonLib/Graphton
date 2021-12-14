@@ -1,19 +1,34 @@
 /*IGNORE*/
 import { GraphtonBaseQuery } from './GraphtonBaseQuery.stub.js';
-import { __TYPENAME__ReturnTypeBuilder as __RETURNTYPEBUILDER__ } from './ReturnTypeBuilder.stub.js';
+import { _t_TYPENAME_t_ReturnTypeBuilder as _t_RETURNTYPEBUILDER_t_ } from './ReturnTypeBuilder.stub.js';
 /*ENDIF:ARGUMENTS*/
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-class __QUERYCLASSNAME__ extends GraphtonBaseQuery {
+class _t_QUERYCLASSNAME_t_ extends GraphtonBaseQuery {
     queryName = '/*QUERYNAME*/';
     queryArgs = {};
     rootType = '/*ROOTTYPE*/';
-    returnType = /*IF:RETURNTYPEOBJECT*/ new /*ENDIF:RETURNTYPEOBJECT*/ __RETURNTYPEBUILDER__ /*IF:RETURNTYPEOBJECT*/() /*ENDIF:RETURNTYPEOBJECT*/;
+    returnType = /*IF:RETURNTYPEOBJECT*/ new /*ENDIF:RETURNTYPEOBJECT*/ _t_RETURNTYPEBUILDER_t_ /*IF:RETURNTYPEOBJECT*/() /*ENDIF:RETURNTYPEOBJECT*/;
     /*IF:ARGUMENTS*/
     constructor(queryArgs) {
         super();
         queryArgs && this.setArgs(queryArgs);
     }
     /*ENDIF:ARGUMENTS*/
+    setArgs(queryArgs) {
+        this.queryArgs = { ...this.queryArgs, ...queryArgs };
+    }
+    toArgString() {
+        const queryArgItems = [];
+        for (const [argKey, argValue] of Object.entries(this.queryArgs)) {
+            if (argValue) {
+                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            }
+        }
+        if (queryArgItems.length > 0) {
+            return `(${queryArgItems.join(', ')})`;
+        }
+        return '';
+    }
     /*IF:RETURNTYPEOBJECT*/
     /**
      * Function to build the required fields for that query

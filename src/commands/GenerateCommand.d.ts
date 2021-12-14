@@ -3,6 +3,7 @@ export default class GenerateCommand {
     private gqlSchema;
     generate(schemaUri: string, options: GenerateCommandOptions): Promise<void>;
     private generateObjectTypes;
+    private generateInputObjectTypes;
     private generateReturnTypeBuilders;
     private generateEnumTypes;
     private generateFields;

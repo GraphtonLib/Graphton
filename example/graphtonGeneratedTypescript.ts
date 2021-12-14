@@ -33,39 +33,51 @@ interface QueryResponse {
     data: Record<string, unknown>,
     response: AxiosResponse
 }
-type QueryArgs<T> = {
-    [Property in keyof T]: string|boolean|number|null|undefined;
+
+ class GraphtonEnum<T extends string> {
+    public readonly enumValue: T;
+    constructor(enumValue: T) {
+        this.enumValue = enumValue;
+    }
 }
 
  type RootType = 'query'|'mutation';
 
- abstract class GraphtonBaseQuery<QueryArgumentType extends QueryArgs<QueryArgumentType>> {
+ abstract class GraphtonBaseQuery<T> {
     protected abstract queryName: string;
-    protected abstract queryArgs: Partial<QueryArgumentType>;
     protected abstract rootType: RootType;
     protected abstract returnType: GraphtonBaseReturnTypeBuilder<any, any> | null;
 
-    public setArgs(queryArgs: Partial<QueryArgumentType>): void {
-        this.queryArgs = {...this.queryArgs, ...queryArgs};
-    }
+    public abstract setArgs(queryArgs: Partial<T>): void;
+    protected abstract toArgString(): string;
 
     /**
      * Transform builder to graphql query string
      */
     public toQuery(): string {
-        const queryArgItems: string[] = [];
-        for (const argKey in this.queryArgs) {
-            if(this.queryArgs[argKey]) {
-                queryArgItems.push(`${argKey}: ${JSON.stringify(this.queryArgs[argKey])}`);
+        return `${this.rootType} ${this.queryName} { ${this.queryName}${this.toArgString()} ${this.returnType?.toReturnTypeString()||''} }`;
+    }
+
+    protected argify(argValue: unknown): string {
+        if(argValue instanceof GraphtonEnum) {
+            return `${argValue.enumValue}`;
+        }
+        if(Array.isArray(argValue)) {
+            return `[${argValue.map(v=>this.argify(v))}]`;
+        }
+        if(typeof argValue === 'object' && !Array.isArray(argValue) && argValue !== null) {
+            const decoded: string[] = [];
+            for(const [key, value] of Object.entries(argValue)) {
+                decoded.push(`${key}: ${this.argify(value)}`);
             }
+            return `{${decoded.join(',')}}`;
+        }
+        if(typeof argValue === 'string' || typeof argValue === 'number' || typeof argValue === 'boolean' || argValue === null) {
+            return JSON.stringify(argValue);
         }
 
-        let queryArgString = '';
-        if(queryArgItems.length > 0) {
-            queryArgString = `(${queryArgItems.join(', ')})`;
-        }
-
-        return `${this.rootType} ${this.queryName} { ${this.queryName}${queryArgString} ${this.returnType?.toReturnTypeString()||''} }`;
+        console.warn(`Unsure how to argify ${argValue} (of type ${typeof argValue}).`);
+        return '';
     }
 
     /**
@@ -206,6 +218,7 @@ export interface User {
   id?: number,
   name?: string,
   age?: (number | null),
+  role?: Role,
   posts?: Post[],
   friends?: User[],
 }
@@ -213,31 +226,49 @@ export interface Post {
   id?: number,
   author?: User,
   text?: string,
-  repatedPosts?: Post[],
+  relatedPosts?: Post[],
+}
+export interface UserInput {
+  column?: string,
+  order?: SortOrder,
+}
+export type Role = GraphtonEnum<'ADMIN'>|GraphtonEnum<'USER'>|GraphtonEnum<'GUEST'>;
+export const Role = {
+  ADMIN: new GraphtonEnum('ADMIN'),
+  USER: new GraphtonEnum('USER'),
+  GUEST: new GraphtonEnum('GUEST')
+}
+export type SortOrder = GraphtonEnum<'ASC'>|GraphtonEnum<'DESC'>;
+export const SortOrder = {
+  ASC: new GraphtonEnum('ASC'),
+  DESC: new GraphtonEnum('DESC')
 }
 
 interface UserReturnTypeBuilderObjectBuilder {'posts':PostReturnTypeBuilder,'friends':UserReturnTypeBuilder}
-type UserReturnTypeSimpleField = 'id'|'name'|'age';
+type UserReturnTypeSimpleField = 'id'|'name'|'age'|'role';
 
 class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder<UserReturnTypeBuilderObjectBuilder, UserReturnTypeSimpleField> {
-    protected availableSimpleFields: Set<UserReturnTypeSimpleField> = new Set(['id','name','age']);
+    protected availableSimpleFields: Set<UserReturnTypeSimpleField> = new Set(['id','name','age','role']);
     protected typeName = 'User';
     protected queryObjectFieldBuilders = {'posts':PostReturnTypeBuilder,'friends':UserReturnTypeBuilder};
 }
 
-interface PostReturnTypeBuilderObjectBuilder {'author':UserReturnTypeBuilder,'repatedPosts':PostReturnTypeBuilder}
+interface PostReturnTypeBuilderObjectBuilder {'author':UserReturnTypeBuilder,'relatedPosts':PostReturnTypeBuilder}
 type PostReturnTypeSimpleField = 'id'|'text';
 
 class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder<PostReturnTypeBuilderObjectBuilder, PostReturnTypeSimpleField> {
     protected availableSimpleFields: Set<PostReturnTypeSimpleField> = new Set(['id','text']);
     protected typeName = 'Post';
-    protected queryObjectFieldBuilders = {'author':UserReturnTypeBuilder,'repatedPosts':PostReturnTypeBuilder};
+    protected queryObjectFieldBuilders = {'author':UserReturnTypeBuilder,'relatedPosts':PostReturnTypeBuilder};
 }
 
 // REGION: Queries
 export class Query {
   public static users() {
     return new UsersQuery();
+  }
+  public static usersOrdered(queryArgs?: UsersOrderedQueryArguments) {
+    return new UsersOrderedQuery(queryArgs);
   }
   public static user(queryArgs?: UserQueryArguments) {
     return new UserQuery(queryArgs);
@@ -260,6 +291,25 @@ class UsersQuery extends GraphtonBaseQuery<Record<string, never>> {
     protected rootType: RootType = 'query';
     protected returnType = new UserReturnTypeBuilder();
 
+    public setArgs(queryArgs: Partial<Record<string, never>>) {
+        this.queryArgs = {...this.queryArgs, ...queryArgs};
+    }
+
+    protected toArgString(): string {
+        const queryArgItems: string[] = [];
+        for(const [argKey, argValue] of Object.entries(this.queryArgs)) {
+            if (argValue) {
+                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            }
+        }
+
+        if(queryArgItems.length > 0) {
+            return `(${queryArgItems.join(', ')})`;
+        }
+
+        return '';
+    }
+
     /**
      * Function to build the required fields for that query
      * Only available if the return type is an OBJECT
@@ -275,6 +325,66 @@ class UsersQuery extends GraphtonBaseQuery<Record<string, never>> {
      */
     async get(requestOptions: RequestOptions = {}): Promise<UsersQueryResponse> {
         return <UsersQueryResponse>(await super.execute(requestOptions));
+    }
+
+}
+
+interface UsersOrderedQueryResponse {
+    data: {
+        usersOrdered: User[]
+    };
+    response: AxiosResponse;
+}
+
+interface UsersOrderedQueryArguments {
+    orderBy?: (UserInput | null)[];
+}
+
+class UsersOrderedQuery extends GraphtonBaseQuery<UsersOrderedQueryArguments> {
+    protected queryName = 'usersOrdered';
+    protected queryArgs: Partial<UsersOrderedQueryArguments> = {};
+    protected rootType: RootType = 'query';
+    protected returnType = new UserReturnTypeBuilder();
+
+    constructor(queryArgs?: UsersOrderedQueryArguments) {
+        super();
+        queryArgs && this.setArgs(queryArgs);
+    }
+
+    public setArgs(queryArgs: Partial<UsersOrderedQueryArguments>) {
+        this.queryArgs = {...this.queryArgs, ...queryArgs};
+    }
+
+    protected toArgString(): string {
+        const queryArgItems: string[] = [];
+        for(const [argKey, argValue] of Object.entries(this.queryArgs)) {
+            if (argValue) {
+                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            }
+        }
+
+        if(queryArgItems.length > 0) {
+            return `(${queryArgItems.join(', ')})`;
+        }
+
+        return '';
+    }
+
+    /**
+     * Function to build the required fields for that query
+     * Only available if the return type is an OBJECT
+     */
+    public returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this {
+        returnFieldsClosure(this.returnType);
+        return this;
+    }
+
+    /**
+     * Execute the query and get the results
+     * Only available on Query type requests
+     */
+    async get(requestOptions: RequestOptions = {}): Promise<UsersOrderedQueryResponse> {
+        return <UsersOrderedQueryResponse>(await super.execute(requestOptions));
     }
 
 }
@@ -299,6 +409,25 @@ class UserQuery extends GraphtonBaseQuery<UserQueryArguments> {
     constructor(queryArgs?: UserQueryArguments) {
         super();
         queryArgs && this.setArgs(queryArgs);
+    }
+
+    public setArgs(queryArgs: Partial<UserQueryArguments>) {
+        this.queryArgs = {...this.queryArgs, ...queryArgs};
+    }
+
+    protected toArgString(): string {
+        const queryArgItems: string[] = [];
+        for(const [argKey, argValue] of Object.entries(this.queryArgs)) {
+            if (argValue) {
+                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            }
+        }
+
+        if(queryArgItems.length > 0) {
+            return `(${queryArgItems.join(', ')})`;
+        }
+
+        return '';
     }
 
     /**
@@ -340,6 +469,25 @@ class UserExistsQuery extends GraphtonBaseQuery<UserExistsQueryArguments> {
     constructor(queryArgs?: UserExistsQueryArguments) {
         super();
         queryArgs && this.setArgs(queryArgs);
+    }
+
+    public setArgs(queryArgs: Partial<UserExistsQueryArguments>) {
+        this.queryArgs = {...this.queryArgs, ...queryArgs};
+    }
+
+    protected toArgString(): string {
+        const queryArgItems: string[] = [];
+        for(const [argKey, argValue] of Object.entries(this.queryArgs)) {
+            if (argValue) {
+                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            }
+        }
+
+        if(queryArgItems.length > 0) {
+            return `(${queryArgItems.join(', ')})`;
+        }
+
+        return '';
     }
 
     /**
@@ -388,6 +536,25 @@ class CreateUserMutation extends GraphtonBaseQuery<CreateUserMutationArguments> 
         queryArgs && this.setArgs(queryArgs);
     }
 
+    public setArgs(queryArgs: Partial<CreateUserMutationArguments>) {
+        this.queryArgs = {...this.queryArgs, ...queryArgs};
+    }
+
+    protected toArgString(): string {
+        const queryArgItems: string[] = [];
+        for(const [argKey, argValue] of Object.entries(this.queryArgs)) {
+            if (argValue) {
+                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            }
+        }
+
+        if(queryArgItems.length > 0) {
+            return `(${queryArgItems.join(', ')})`;
+        }
+
+        return '';
+    }
+
     /**
      * Function to build the required fields for that query
      * Only available if the return type is an OBJECT
@@ -431,6 +598,25 @@ class UpdateUserMutation extends GraphtonBaseQuery<UpdateUserMutationArguments> 
         queryArgs && this.setArgs(queryArgs);
     }
 
+    public setArgs(queryArgs: Partial<UpdateUserMutationArguments>) {
+        this.queryArgs = {...this.queryArgs, ...queryArgs};
+    }
+
+    protected toArgString(): string {
+        const queryArgItems: string[] = [];
+        for(const [argKey, argValue] of Object.entries(this.queryArgs)) {
+            if (argValue) {
+                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            }
+        }
+
+        if(queryArgItems.length > 0) {
+            return `(${queryArgItems.join(', ')})`;
+        }
+
+        return '';
+    }
+
     /**
      * Function to build the required fields for that query
      * Only available if the return type is an OBJECT
@@ -470,6 +656,25 @@ class DeleteUserMutation extends GraphtonBaseQuery<DeleteUserMutationArguments> 
     constructor(queryArgs?: DeleteUserMutationArguments) {
         super();
         queryArgs && this.setArgs(queryArgs);
+    }
+
+    public setArgs(queryArgs: Partial<DeleteUserMutationArguments>) {
+        this.queryArgs = {...this.queryArgs, ...queryArgs};
+    }
+
+    protected toArgString(): string {
+        const queryArgItems: string[] = [];
+        for(const [argKey, argValue] of Object.entries(this.queryArgs)) {
+            if (argValue) {
+                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            }
+        }
+
+        if(queryArgItems.length > 0) {
+            return `(${queryArgItems.join(', ')})`;
+        }
+
+        return '';
     }
 
     /**

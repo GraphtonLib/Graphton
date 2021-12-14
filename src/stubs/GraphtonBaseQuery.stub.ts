@@ -20,39 +20,51 @@ interface QueryResponse {
     data: Record<string, unknown>,
     response: AxiosResponse
 }
-type QueryArgs<T> = {
-    [Property in keyof T]: string|boolean|number|null|undefined;
+
+/*IGNORE*/export/*ENDIGNORE*/ class GraphtonEnum<T extends string> {
+    public readonly enumValue: T;
+    constructor(enumValue: T) {
+        this.enumValue = enumValue;
+    }
 }
 
 /*IGNORE*/export/*ENDIGNORE*/ type RootType = 'query'|'mutation'/*IGNORE*/|'/*ROOTTYPE*/'/*ENDIGNORE*/;
 
-/*IGNORE*/export/*ENDIGNORE*/ abstract class GraphtonBaseQuery<QueryArgumentType extends QueryArgs<QueryArgumentType>> {
+/*IGNORE*/export/*ENDIGNORE*/ abstract class GraphtonBaseQuery<T> {
     protected abstract queryName: string;
-    protected abstract queryArgs: Partial<QueryArgumentType>;
     protected abstract rootType: RootType;
     protected abstract returnType: GraphtonBaseReturnTypeBuilder<any, any> | null;
 
-    public setArgs(queryArgs: Partial<QueryArgumentType>): void {
-        this.queryArgs = {...this.queryArgs, ...queryArgs};
-    }
+    public abstract setArgs(queryArgs: Partial<T>): void;
+    protected abstract toArgString(): string;
 
     /**
      * Transform builder to graphql query string
      */
     public toQuery(): string {
-        const queryArgItems: string[] = [];
-        for (const argKey in this.queryArgs) {
-            if(this.queryArgs[argKey]) {
-                queryArgItems.push(`${argKey}: ${JSON.stringify(this.queryArgs[argKey])}`);
+        return `${this.rootType} ${this.queryName} { ${this.queryName}${this.toArgString()} ${this.returnType?.toReturnTypeString()||''} }`;
+    }
+
+    protected argify(argValue: unknown): string {
+        if(argValue instanceof GraphtonEnum) {
+            return `${argValue.enumValue}`;
+        }
+        if(Array.isArray(argValue)) {
+            return `[${argValue.map(v=>this.argify(v))}]`;
+        }
+        if(typeof argValue === 'object' && !Array.isArray(argValue) && argValue !== null) {
+            const decoded: string[] = [];
+            for(const [key, value] of Object.entries(argValue)) {
+                decoded.push(`${key}: ${this.argify(value)}`);
             }
+            return `{${decoded.join(',')}}`;
+        }
+        if(typeof argValue === 'string' || typeof argValue === 'number' || typeof argValue === 'boolean' || argValue === null) {
+            return JSON.stringify(argValue);
         }
 
-        let queryArgString = '';
-        if(queryArgItems.length > 0) {
-            queryArgString = `(${queryArgItems.join(', ')})`;
-        }
-
-        return `${this.rootType} ${this.queryName} { ${this.queryName}${queryArgString} ${this.returnType?.toReturnTypeString()||''} }`;
+        console.warn(`Unsure how to argify ${argValue} (of type ${typeof argValue}).`);
+        return '';
     }
 
     /**

@@ -16,7 +16,7 @@ export function fillStub(stub, substitutions = {}, conditions = []) {
     for (const [searchValue, replaceValue] of Object.entries(substitutions)) {
         stubContent = stubContent.replaceAll(`/*${searchValue}*/`, replaceValue)
             .replaceAll(RegExp(`.\\/\\*\\*${searchValue}\\*\\*\\/.`, 'g'), replaceValue)
-            .replaceAll(`__${searchValue}__`, replaceValue);
+            .replaceAll(`_t_${searchValue}_t_`, replaceValue);
     }
     for (const condition of conditions) {
         stubContent = stubContent.replaceAll(`/*IF:${condition}*/`, '')
@@ -26,7 +26,7 @@ export function fillStub(stub, substitutions = {}, conditions = []) {
         .replaceAll(/\/\*IGNORE\*\/[^]*?\/\*ENDIGNORE\*\//g, '');
     stubContent = stubContent.replaceAll(/\/\*.*?\*\//g, '')
         .replaceAll(/'\/\*\*.*?\*\*\/'/g, '')
-        .replaceAll(/__.*?__/g, '');
+        .replaceAll(/_t_.*?_t_/g, '');
     return stubContent;
 }
 export function httpRequest(method, url, data, headers = {}) {

@@ -1,6 +1,6 @@
 /*IGNORE*/
 import {GraphtonBaseQuery, RootType} from './GraphtonBaseQuery.stub.js';
-import {__TYPENAME__ReturnTypeBuilder as __RETURNTYPEBUILDER__} from './ReturnTypeBuilder.stub.js'
+import {_t_TYPENAME_t_ReturnTypeBuilder as _t_RETURNTYPEBUILDER_t_} from './ReturnTypeBuilder.stub.js'
 
 type GraphQLServerEndpoint = string;
 type Headers = Record<string, string>;
@@ -11,7 +11,7 @@ interface RequestOptions {
 }
 /*ENDIGNORE*/
 
-interface __QUERYCLASSNAME__Response {
+interface _t_QUERYCLASSNAME_t_Response {
     data: {
         /*QUERYNAME*//*RETURNTYPE*/
     };
@@ -19,31 +19,50 @@ interface __QUERYCLASSNAME__Response {
 }
 
 /*IF:ARGUMENTS*/
-interface __ARGUMENTINTERFACENAME__ {
+interface _t_ARGUMENTINTERFACENAME_t_ {
     /*ARGUMENTINTERFACEPROPERTIES*//*IGNORE*/[key: string]: string|boolean|number/*ENDIGNORE*/;
 }
 /*ENDIF:ARGUMENTS*/
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-class __QUERYCLASSNAME__ extends GraphtonBaseQuery<__ARGUMENTINTERFACENAME__> {
+class _t_QUERYCLASSNAME_t_ extends GraphtonBaseQuery<_t_ARGUMENTINTERFACENAME_t_> {
     protected queryName = '/*QUERYNAME*/';
-    protected queryArgs: Partial<__ARGUMENTINTERFACENAME__> = {};
+    protected queryArgs: Partial<_t_ARGUMENTINTERFACENAME_t_> = {};
     protected rootType: RootType = '/*ROOTTYPE*/';
-    protected returnType = /*IF:RETURNTYPEOBJECT*/new/*ENDIF:RETURNTYPEOBJECT*/ __RETURNTYPEBUILDER__/*IF:RETURNTYPEOBJECT*/()/*ENDIF:RETURNTYPEOBJECT*/;
+    protected returnType = /*IF:RETURNTYPEOBJECT*/new/*ENDIF:RETURNTYPEOBJECT*/ _t_RETURNTYPEBUILDER_t_/*IF:RETURNTYPEOBJECT*/()/*ENDIF:RETURNTYPEOBJECT*/;
 
     /*IF:ARGUMENTS*/
-    constructor(queryArgs?: __ARGUMENTINTERFACENAME__) {
+    constructor(queryArgs?: _t_ARGUMENTINTERFACENAME_t_) {
         super();
         queryArgs && this.setArgs(queryArgs);
     }
     /*ENDIF:ARGUMENTS*/
+
+    public setArgs(queryArgs: Partial<_t_ARGUMENTINTERFACENAME_t_>) {
+        this.queryArgs = {...this.queryArgs, ...queryArgs};
+    }
+
+    protected toArgString(): string {
+        const queryArgItems: string[] = [];
+        for(const [argKey, argValue] of Object.entries(this.queryArgs)) {
+            if (argValue) {
+                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            }
+        }
+
+        if(queryArgItems.length > 0) {
+            return `(${queryArgItems.join(', ')})`;
+        }
+
+        return '';
+    }
 
     /*IF:RETURNTYPEOBJECT*/
     /**
      * Function to build the required fields for that query
      * Only available if the return type is an OBJECT
      */
-    public returnFields(returnFieldsClosure: (r: __RETURNTYPEBUILDER__) => void): this {
+    public returnFields(returnFieldsClosure: (r: _t_RETURNTYPEBUILDER_t_) => void): this {
         returnFieldsClosure(this.returnType);
         return this;
     }
@@ -54,8 +73,8 @@ class __QUERYCLASSNAME__ extends GraphtonBaseQuery<__ARGUMENTINTERFACENAME__> {
      * Execute the query and get the results
      * Only available on Query type requests
      */
-    async get(requestOptions: RequestOptions = {}): Promise<__QUERYCLASSNAME__Response> {
-        return <__QUERYCLASSNAME__Response>(await super.execute(requestOptions));
+    async get(requestOptions: RequestOptions = {}): Promise<_t_QUERYCLASSNAME_t_Response> {
+        return <_t_QUERYCLASSNAME_t_Response>(await super.execute(requestOptions));
     }
     /*ENDIF:ADDGET*/
     /*IF:ADDDO*/
@@ -63,8 +82,8 @@ class __QUERYCLASSNAME__ extends GraphtonBaseQuery<__ARGUMENTINTERFACENAME__> {
      * Do the mutation on the server
      * Only available on Mutation type requests
      */
-    async do(requestOptions: RequestOptions = {}): Promise<__QUERYCLASSNAME__Response> {
-        return <__QUERYCLASSNAME__Response>(await super.execute(requestOptions));
+    async do(requestOptions: RequestOptions = {}): Promise<_t_QUERYCLASSNAME_t_Response> {
+        return <_t_QUERYCLASSNAME_t_Response>(await super.execute(requestOptions));
     }
     /*ENDIF:ADDDO*/
 }

@@ -4,25 +4,38 @@ const settings = {
 };
 /*ENDIGNORE*/
 import axios from 'axios';
-/*IGNORE*/ export /*ENDIGNORE*/ class GraphtonBaseQuery {
-    setArgs(queryArgs) {
-        this.queryArgs = { ...this.queryArgs, ...queryArgs };
+/*IGNORE*/ export /*ENDIGNORE*/ class GraphtonEnum {
+    enumValue;
+    constructor(enumValue) {
+        this.enumValue = enumValue;
     }
+}
+/*IGNORE*/ export /*ENDIGNORE*/ class GraphtonBaseQuery {
     /**
      * Transform builder to graphql query string
      */
     toQuery() {
-        const queryArgItems = [];
-        for (const argKey in this.queryArgs) {
-            if (this.queryArgs[argKey]) {
-                queryArgItems.push(`${argKey}: ${JSON.stringify(this.queryArgs[argKey])}`);
+        return `${this.rootType} ${this.queryName} { ${this.queryName}${this.toArgString()} ${this.returnType?.toReturnTypeString() || ''} }`;
+    }
+    argify(argValue) {
+        if (argValue instanceof GraphtonEnum) {
+            return `${argValue.enumValue}`;
+        }
+        if (Array.isArray(argValue)) {
+            return `[${argValue.map(v => this.argify(v))}]`;
+        }
+        if (typeof argValue === 'object' && !Array.isArray(argValue) && argValue !== null) {
+            const decoded = [];
+            for (const [key, value] of Object.entries(argValue)) {
+                decoded.push(`${key}: ${this.argify(value)}`);
             }
+            return `{${decoded.join(',')}}`;
         }
-        let queryArgString = '';
-        if (queryArgItems.length > 0) {
-            queryArgString = `(${queryArgItems.join(', ')})`;
+        if (typeof argValue === 'string' || typeof argValue === 'number' || typeof argValue === 'boolean' || argValue === null) {
+            return JSON.stringify(argValue);
         }
-        return `${this.rootType} ${this.queryName} { ${this.queryName}${queryArgString} ${this.returnType?.toReturnTypeString() || ''} }`;
+        console.warn(`Unsure how to argify ${argValue} (of type ${typeof argValue}).`);
+        return '';
     }
     /**
      * Execute the query
