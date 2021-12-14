@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.3.0](https://github.com/GraphtonLib/Graphton/compare/v0.2.5...v0.3.0) (2021-12-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* Enums should now be called with its object - to ensure enums are correctly parsed they should be wrapped in a GraphtonEnum class
+
+### Features
+
+* Complex argument structures ([0955879](https://github.com/GraphtonLib/Graphton/commit/095587942be7d6159a7ed0006c297764ac49de9a))
+* Generation for InputObjects ([2b0119f](https://github.com/GraphtonLib/Graphton/commit/2b0119f44c488e140e70d4d8f981a2df7c47090c))
+* Generation of Enums ([d600972](https://github.com/GraphtonLib/Graphton/commit/d600972b28049bf38d763ae1d2b89066d3e8e1c5))
+
+
+### Bug Fixes
+
+* Less complex argument generic typing ([77f032b](https://github.com/GraphtonLib/Graphton/commit/77f032b6ad4f0cb5af8d9b3887169a10f30aecc9))
+
 ### [0.2.5](https://github.com/GraphtonLib/Graphton/compare/v0.2.4...v0.2.5) (2021-12-12)
 
 
