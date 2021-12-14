@@ -20,7 +20,7 @@ export function fillStub(stub: string, substitutions: Record<string, string> = {
     for(const [searchValue, replaceValue] of Object.entries(substitutions)) {
         stubContent = stubContent.replaceAll(`/*${searchValue}*/`, replaceValue)
             .replaceAll(RegExp(`.\\/\\*\\*${searchValue}\\*\\*\\/.`, 'g'), replaceValue)
-            .replaceAll(`__${searchValue}__`, replaceValue);
+            .replaceAll(`_t_${searchValue}_t_`, replaceValue);
     }
 
     for(const condition of conditions) {
@@ -33,7 +33,7 @@ export function fillStub(stub: string, substitutions: Record<string, string> = {
 
     stubContent = stubContent.replaceAll(/\/\*.*?\*\//g, '')
         .replaceAll(/'\/\*\*.*?\*\*\/'/g, '')
-        .replaceAll(/__.*?__/g, '');
+        .replaceAll(/_t_.*?_t_/g, '');
 
     return stubContent;
 }
