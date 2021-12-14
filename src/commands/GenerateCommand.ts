@@ -2,7 +2,7 @@ import {fillStub, isUrl} from '../helpers/helpers.js';
 import {introspectQuery} from '../graphql/query/introspect.js';
 import * as fs from 'fs';
 import {pascalCase} from 'change-case';
-import {Arg, Field, ReturnType, RootType, Schema, Type} from '../types/GraphQL';
+import {Arg, Field, InputField, ReturnType, RootType, Schema, Type} from '../types/GraphQL';
 import {ReturnTypeInfo, GenerateCommandOptions} from '../types/Generator';
 import axios from 'axios';
 
@@ -52,6 +52,7 @@ export default class GenerateCommand {
             .filter(type => !type.name.startsWith('__') && ignoreTypes.indexOf(type.name) < 0);
         const objectTypes = types.filter(type=>type.kind === 'OBJECT');
         const enumTypes = types.filter(type=>type.kind === 'ENUM');
+        const inputTypes = types.filter(type=>type.kind === 'INPUT_OBJECT');
 
         outContentSections.push(...[
             '/**',
@@ -75,6 +76,7 @@ export default class GenerateCommand {
         outContentSections.push(...[
             '// REGION: Types',
             ...this.generateObjectTypes(objectTypes),
+            ...this.generateInputObjectTypes(inputTypes),
             ...this.generateEnumTypes(enumTypes),
             ...this.generateReturnTypeBuilders(objectTypes),
         ]);
@@ -142,6 +144,14 @@ export default class GenerateCommand {
         }
     }
 
+    private *generateInputObjectTypes(types: Type[]): IterableIterator<string> {
+        for(const type of types) {
+            yield `export interface ${type.name} {`;
+            yield* this.generateFields(type.inputFields);
+            yield '}';
+        }
+    }
+
     private *generateReturnTypeBuilders(types: Type[]): IterableIterator<string> {
         for(const type of types) {
             const returnTypes = type.fields
@@ -165,11 +175,14 @@ export default class GenerateCommand {
 
     private *generateEnumTypes(enumTypes: Type[]): IterableIterator<string> {
         for(const enumType of enumTypes) {
-            yield `export type ${enumType.name} = ${enumType.enumValues.map(t=>JSON.stringify(t.name)).join('|')};`;
+            yield `export type ${enumType.name} = ${enumType.enumValues.map(t=>`GraphtonEnum<${JSON.stringify(t.name)}>`).join('|')};`;
+            yield `export const ${enumType.name} = {`;
+            yield `  ${enumType.enumValues.map(t=>`${t.name}: new GraphtonEnum(${JSON.stringify(t.name)}`).join('),\n  ')})`;
+            yield '}';
         }
     }
 
-    private *generateFields(fields: Field[]): IterableIterator<string> {
+    private *generateFields(fields: Field[]|InputField[]): IterableIterator<string> {
         for(const field of fields) {
             yield `  ${field.name}${this.toTypeAppend(field.type)},`;
         }
@@ -202,6 +215,7 @@ export default class GenerateCommand {
     private argsToMethodParameters(args: Arg[]) {
         const typed: string[] = [];
         const untyped: string[] = [];
+
         for (const arg of args) {
             typed.push(`${arg.name}${this.toTypeAppend(arg.type, false)}${arg.defaultValue ? ` = ${JSON.stringify(arg.defaultValue)}` : ''}`);
             untyped.push(arg.name);
@@ -278,6 +292,7 @@ export default class GenerateCommand {
 
         switch(type?.kind || '') {
             case 'OBJECT':
+            case 'INPUT_OBJECT':
                 returnTypeInfo.type = type.name;
                 returnTypeInfo.kind = 'object';
                 return returnTypeInfo;
