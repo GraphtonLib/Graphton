@@ -8,7 +8,7 @@ const scalarMap = (scalarType) => ({
     'Int': 'number',
     'Boolean': 'boolean',
     'String': 'string',
-    'ID': 'number',
+    'ID': 'string',
     'DateTime': 'string',
     'Date': 'string',
     'Time': 'string',
