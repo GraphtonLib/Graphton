@@ -14,7 +14,7 @@ const scalarMap = (scalarType: string) => ({
     'Int': 'number',
     'Boolean': 'boolean',
     'String': 'string',
-    'ID': 'number',
+    'ID': 'string',
     'DateTime': 'string',
     'Date': 'string',
     'Time': 'string',
