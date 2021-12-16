@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.4.0](https://github.com/GraphtonLib/Graphton/compare/v0.3.0...v0.4.0) (2021-12-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* ID scalars are now parsed as String
+
+### Bug Fixes
+
+* Parse GraphQL ID scalar to String instead of Int, following GraphQL spec ([2440065](https://github.com/GraphtonLib/Graphton/commit/2440065f3fd7d5f3d484e45472d60bc79acd3776))
+
 ## [0.3.0](https://github.com/GraphtonLib/Graphton/compare/v0.2.5...v0.3.0) (2021-12-14)
 
 
