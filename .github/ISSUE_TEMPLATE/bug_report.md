@@ -10,8 +10,13 @@ assignees: ''
 **Bug description**
 Write here a clear and concise description of what the bug is. Please include any (type)errors.
 
+**Minimal reproducable GraphQL schema**
+If applicable, please provide the minimal GraphQL `.schema` or introspection `.json` with which generation bugs or fails, with which we can reproduce your issue.
+
 **To Reproduce**
-What did you do to encounter the bug? Note that we **have to** reproduce the bug you are having to be able to fix it!
+What did you do to encounter the bug? Note that we **have to** reproduce the bug you are having to be able to fix it! 
+
+> If you are not sure if you provided enough information here, start a new project and document all the steps you take to get the bug to show up. That's what we need! If you cannot reproduce the bug like this - then we probably cannot fix the bug you are having.
 
 **Expected behavior**
 If the description didn't make it clear enough, what should have happened?
