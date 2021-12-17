@@ -52,10 +52,10 @@ export interface Type {
     kind: string;
     name: string;
     description: string;
-    fields: Field[];
-    inputFields: InputField[];
+    fields: Field[] | null;
+    inputFields: InputField[] | null;
     interfaces: unknown[];
-    enumValues: EnumValue[];
+    enumValues: EnumValue[] | null;
     possibleTypes?: unknown;
 }
 

@@ -2,7 +2,7 @@ export declare class GraphtonSettings {
     static setDefaultHeaders(headers: Record<string, string>): void;
     static setDefaultUrl(defaultUrl: string): void;
 }
-import { AxiosResponse } from "axios";
+import { AxiosResponse } from 'axios';
 declare type GraphQLServerEndpoint = string;
 declare type Headers = Record<string, string>;
 interface RequestOptions {
@@ -93,10 +93,10 @@ export interface Post {
     repatedPosts?: Post[];
 }
 interface UserReturnTypeBuilderObjectBuilder {
-    "posts": PostReturnTypeBuilder;
-    "friends": UserReturnTypeBuilder;
+    'posts': PostReturnTypeBuilder;
+    'friends': UserReturnTypeBuilder;
 }
-declare type UserReturnTypeSimpleField = "id" | "name" | "age";
+declare type UserReturnTypeSimpleField = 'id' | 'name' | 'age';
 declare class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder<UserReturnTypeBuilderObjectBuilder, UserReturnTypeSimpleField> {
     protected availableSimpleFields: Set<UserReturnTypeSimpleField>;
     protected typeName: string;
@@ -106,10 +106,10 @@ declare class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder<UserRe
     };
 }
 interface PostReturnTypeBuilderObjectBuilder {
-    "author": UserReturnTypeBuilder;
-    "repatedPosts": PostReturnTypeBuilder;
+    'author': UserReturnTypeBuilder;
+    'repatedPosts': PostReturnTypeBuilder;
 }
-declare type PostReturnTypeSimpleField = "id" | "text";
+declare type PostReturnTypeSimpleField = 'id' | 'text';
 declare class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder<PostReturnTypeBuilderObjectBuilder, PostReturnTypeSimpleField> {
     protected availableSimpleFields: Set<PostReturnTypeSimpleField>;
     protected typeName: string;

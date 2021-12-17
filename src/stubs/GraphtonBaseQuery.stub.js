@@ -1,15 +1,10 @@
+import { GraphtonEnum } from './GraphtonBaseEnum.stub';
 const settings = {
     defaultHeaders: {},
     defaultUrl: ''
 };
 /*ENDIGNORE*/
 import axios from 'axios';
-/*IGNORE*/ export /*ENDIGNORE*/ class GraphtonEnum {
-    enumValue;
-    constructor(enumValue) {
-        this.enumValue = enumValue;
-    }
-}
 /*IGNORE*/ export /*ENDIGNORE*/ class GraphtonBaseQuery {
     /**
      * Transform builder to graphql query string
@@ -19,7 +14,7 @@ import axios from 'axios';
     }
     argify(argValue) {
         if (argValue instanceof GraphtonEnum) {
-            return `${argValue.enumValue}`;
+            return `${argValue}`;
         }
         if (Array.isArray(argValue)) {
             return `[${argValue.map(v => this.argify(v))}]`;

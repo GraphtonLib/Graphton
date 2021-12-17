@@ -335,6 +335,38 @@ Remove the `relatedType` OBJECT field. Selected fields for `relatedType` will be
 
 Compile the selected fields to a GraphQL selection.
 
+### GraphtonEnum
+
+Intermediary class used to correctly parse Enums in arguments. Your Enum values can be gotten with how you would normally call an enum.
+
+```typescript
+Query.usersOrdered({
+    orderBy: [
+        {
+            column: UserSortColumn.age,
+            order: SortOrder.ASC
+        }
+    ]
+})
+```
+
+#### parse
+> public static parse(value: keyof typeof $GraphtonEnum.possibleValues): $GraphtonEnum
+
+Transforms a string into an enum.
+
+Alias:
+```typescript
+$GraphtonEnum.VALUE;
+// Is the same as
+$GraphtonEnum.parse("VALUE");
+```
+
+#### list
+> public static list(): $GraphtonEnum[]
+
+Gives you a list of possible enums
+
 ### GraphtonSettings
 
 Use this to change the global settings used by Graphton on the fly!

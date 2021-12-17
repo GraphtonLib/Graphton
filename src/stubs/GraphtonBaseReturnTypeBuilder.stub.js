@@ -1,3 +1,4 @@
+/*ENDIGNORE*/
 /*IGNORE*/ export /*ENDIGNORE*/ class GraphtonBaseReturnTypeBuilder {
     querySimpleFields = new Set([]);
     queryObjectFields = {};

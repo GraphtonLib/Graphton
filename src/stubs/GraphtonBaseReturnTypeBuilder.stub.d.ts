@@ -1,9 +1,4 @@
-declare type AvailableFieldBuilderConstructor<T> = {
-    [Property in keyof T]: new () => T[Property];
-};
-declare type QueryObjectFields<T> = {
-    [Property in keyof T]?: T[Property];
-};
+import { AvailableFieldBuilderConstructor, QueryObjectFields } from './GraphtonTypes.stub';
 export declare abstract class GraphtonBaseReturnTypeBuilder<ObjectField extends Record<keyof ObjectField, GraphtonBaseReturnTypeBuilder<any, any>>, SimpleField> {
     protected abstract availableSimpleFields: Set<SimpleField>;
     protected querySimpleFields: Set<SimpleField>;
@@ -48,4 +43,3 @@ export declare abstract class GraphtonBaseReturnTypeBuilder<ObjectField extends 
      */
     toReturnTypeString(): string;
 }
-export {};

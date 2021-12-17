@@ -3,8 +3,8 @@ import {GraphtonBaseReturnTypeBuilder} from './GraphtonBaseReturnTypeBuilder.stu
 /*ENDIGNORE*/
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface _t_TYPENAME_t_ReturnTypeBuilderObjectBuilder {/**OBJECTFIELDOBJECT**/}
-type _t_TYPENAME_t_ReturnTypeSimpleField = '/**SIMPLEFIELDLITERALS**/';
+export interface _t_TYPENAME_t_ReturnTypeBuilderObjectBuilder {/**OBJECTFIELDOBJECT**/}
+export type _t_TYPENAME_t_ReturnTypeSimpleField = '/**SIMPLEFIELDLITERALS**/';
 
 /*IGNORE*/export/*ENDIGNORE*/class _t_TYPENAME_t_ReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder<_t_TYPENAME_t_ReturnTypeBuilderObjectBuilder, _t_TYPENAME_t_ReturnTypeSimpleField> {
     protected availableSimpleFields: Set<_t_TYPENAME_t_ReturnTypeSimpleField> = new Set([/**SIMPLEFIELDARRAY**/]);

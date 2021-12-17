@@ -11,7 +11,7 @@ enum Role {
 
 type User {
   id: ID!
-  name: String!
+  username: String!
   age: Int
   role: Role!
   posts: [Post!]!
@@ -25,8 +25,8 @@ type Post {
   relatedPosts: [Post!]!
 }
 
-input UserInput {
-  column: String!
+input UserOrderInput {
+  column: UserSortColumn!
   order: SortOrder!
 }
 
@@ -35,15 +35,21 @@ enum SortOrder {
   DESC
 }
 
+enum UserSortColumn {
+  id
+  username
+  age
+}
+
 type Query {
   users: [User!]!
-  usersOrdered(orderBy: [UserInput!]): [User!]!
+  usersOrdered(orderBy: [UserOrderInput!]): [User!]!
   user(id: ID!): User
   userExists(id: ID!): Boolean!
 }
 
 type Mutation {
-  createUser(name: String!, age: Int): User!
-  updateUser(id: ID!, name: String, age: Int): User!
+  createUser(username: String!, role: Role!, age: Int): User!
+  updateUser(id: ID!, username: String, role: Role, age: Int): User!
   deleteUser(id: ID!): User!
 }

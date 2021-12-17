@@ -1,5 +1,7 @@
 /*IGNORE*/
 import {GraphtonBaseReturnTypeBuilder} from './GraphtonBaseReturnTypeBuilder.stub';
+import {GraphtonEnum} from './GraphtonBaseEnum.stub';
+import {QueryResponse, RequestOptions} from './GraphtonTypes.stub';
 
 const settings = {
     defaultHeaders: {},
@@ -7,30 +9,11 @@ const settings = {
 };
 /*ENDIGNORE*/
 
-import axios, {AxiosResponse} from 'axios';
+import axios from 'axios';
 
-type GraphQLServerEndpoint = string;
-type Headers = Record<string, string>;
+/*IGNORE*/export /*ENDIGNORE*/type RootType = 'query'|'mutation'/*IGNORE*/|'/*ROOTTYPE*/'/*ENDIGNORE*/;
 
-interface RequestOptions {
-    headers?: Headers,
-    url?: GraphQLServerEndpoint
-}
-interface QueryResponse {
-    data: Record<string, unknown>,
-    response: AxiosResponse
-}
-
-/*IGNORE*/export/*ENDIGNORE*/ class GraphtonEnum<T extends string> {
-    public readonly enumValue: T;
-    constructor(enumValue: T) {
-        this.enumValue = enumValue;
-    }
-}
-
-/*IGNORE*/export/*ENDIGNORE*/ type RootType = 'query'|'mutation'/*IGNORE*/|'/*ROOTTYPE*/'/*ENDIGNORE*/;
-
-/*IGNORE*/export/*ENDIGNORE*/ abstract class GraphtonBaseQuery<T> {
+/*IGNORE*/export /*ENDIGNORE*/abstract class GraphtonBaseQuery<T> {
     protected abstract queryName: string;
     protected abstract rootType: RootType;
     protected abstract returnType: GraphtonBaseReturnTypeBuilder<any, any> | null;
@@ -47,7 +30,7 @@ interface QueryResponse {
 
     protected argify(argValue: unknown): string {
         if(argValue instanceof GraphtonEnum) {
-            return `${argValue.enumValue}`;
+            return `${argValue}`;
         }
         if(Array.isArray(argValue)) {
             return `[${argValue.map(v=>this.argify(v))}]`;

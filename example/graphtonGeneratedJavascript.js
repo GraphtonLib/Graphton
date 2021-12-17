@@ -17,12 +17,6 @@ export class GraphtonSettings {
     }
 }
 import axios from 'axios';
-class GraphtonEnum {
-    enumValue;
-    constructor(enumValue) {
-        this.enumValue = enumValue;
-    }
-}
 class GraphtonBaseQuery {
     /**
      * Transform builder to graphql query string
@@ -32,7 +26,7 @@ class GraphtonBaseQuery {
     }
     argify(argValue) {
         if (argValue instanceof GraphtonEnum) {
-            return `${argValue.enumValue}`;
+            return `${argValue}`;
         }
         if (Array.isArray(argValue)) {
             return `[${argValue.map(v => this.argify(v))}]`;
@@ -152,24 +146,71 @@ class GraphtonBaseReturnTypeBuilder {
         return returnTypeString.join(' ');
     }
 }
-export const Role = {
-    ADMIN: new GraphtonEnum("ADMIN"),
-    USER: new GraphtonEnum("USER"),
-    GUEST: new GraphtonEnum("GUEST")
-};
-export const SortOrder = {
-    ASC: new GraphtonEnum("ASC"),
-    DESC: new GraphtonEnum("DESC")
-};
+class GraphtonEnum {
+    value;
+    constructor(value) {
+        this.value = value;
+    }
+    valueOf() {
+        return this.value;
+    }
+    toString() {
+        return this.valueOf();
+    }
+}
+export class Role extends GraphtonEnum {
+    static ADMIN = new Role('ADMIN');
+    static USER = new Role('USER');
+    static GUEST = new Role('GUEST');
+    static possibleValues = { ADMIN: Role.ADMIN, USER: Role.USER, GUEST: Role.GUEST };
+    constructor(value) {
+        super(value);
+    }
+    static parse(value) {
+        return Role.possibleValues[value];
+    }
+    static list() {
+        return Object.values(Role.possibleValues);
+    }
+}
+export class SortOrder extends GraphtonEnum {
+    static ASC = new SortOrder('ASC');
+    static DESC = new SortOrder('DESC');
+    static possibleValues = { ASC: SortOrder.ASC, DESC: SortOrder.DESC };
+    constructor(value) {
+        super(value);
+    }
+    static parse(value) {
+        return SortOrder.possibleValues[value];
+    }
+    static list() {
+        return Object.values(SortOrder.possibleValues);
+    }
+}
+export class UserSortColumn extends GraphtonEnum {
+    static id = new UserSortColumn('id');
+    static username = new UserSortColumn('username');
+    static age = new UserSortColumn('age');
+    static possibleValues = { id: UserSortColumn.id, username: UserSortColumn.username, age: UserSortColumn.age };
+    constructor(value) {
+        super(value);
+    }
+    static parse(value) {
+        return UserSortColumn.possibleValues[value];
+    }
+    static list() {
+        return Object.values(UserSortColumn.possibleValues);
+    }
+}
 class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
-    availableSimpleFields = new Set(["id", "name", "age", "role"]);
+    availableSimpleFields = new Set(['id', 'username', 'age']);
     typeName = 'User';
-    queryObjectFieldBuilders = { "posts": PostReturnTypeBuilder, "friends": UserReturnTypeBuilder };
+    queryObjectFieldBuilders = { 'posts': PostReturnTypeBuilder, 'friends': UserReturnTypeBuilder };
 }
 class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
-    availableSimpleFields = new Set(["id", "text"]);
+    availableSimpleFields = new Set(['id', 'text']);
     typeName = 'Post';
-    queryObjectFieldBuilders = { "author": UserReturnTypeBuilder, "relatedPosts": PostReturnTypeBuilder };
+    queryObjectFieldBuilders = { 'author': UserReturnTypeBuilder, 'relatedPosts': PostReturnTypeBuilder };
 }
 // REGION: Queries
 export class Query {

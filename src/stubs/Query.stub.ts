@@ -11,7 +11,7 @@ interface RequestOptions {
 }
 /*ENDIGNORE*/
 
-interface _t_QUERYCLASSNAME_t_Response {
+export interface _t_QUERYCLASSNAME_t_Response {
     data: {
         /*QUERYNAME*//*RETURNTYPE*/
     };
@@ -19,7 +19,7 @@ interface _t_QUERYCLASSNAME_t_Response {
 }
 
 /*IF:ARGUMENTS*/
-interface _t_ARGUMENTINTERFACENAME_t_ {
+export interface _t_ARGUMENTINTERFACENAME_t_ {
     /*ARGUMENTINTERFACEPROPERTIES*//*IGNORE*/[key: string]: string|boolean|number/*ENDIGNORE*/;
 }
 /*ENDIF:ARGUMENTS*/

@@ -13,7 +13,7 @@ export class GraphtonSettings {
         settings.defaultUrl = defaultUrl;
     }
 }
-import axios from "axios";
+import axios from 'axios';
 class GraphtonBaseQuery {
     queryArgs;
     constructor(queryArgs) {
@@ -40,7 +40,7 @@ class GraphtonBaseQuery {
     async execute(requestOptions = {}) {
         let response = await axios.post(requestOptions?.url || settings.defaultUrl, { query: this.toQuery() }, {
             headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
                 ...settings.defaultHeaders,
                 ...requestOptions?.headers
             },
@@ -51,7 +51,7 @@ class GraphtonBaseQuery {
         };
     }
 }
-import { Query } from "../../example/graphtonGeneratedTypescript";
+import { Query } from '../../example/graphtonGeneratedTypescript';
 class GraphtonBaseReturnTypeBuilder {
     querySimpleFields = new Set([]);
     queryObjectFields = {};
@@ -124,7 +124,7 @@ class GraphtonBaseReturnTypeBuilder {
      */
     toReturnTypeString() {
         if (this.querySimpleFields.size < 1 && Object.values(this.queryObjectFields).length < 1) {
-            return ``;
+            return '';
         }
         let returnTypeString = ['{', ...this.querySimpleFields];
         for (const [objectType, objectField] of Object.entries(this.queryObjectFields)) {
@@ -139,14 +139,14 @@ class GraphtonBaseReturnTypeBuilder {
 }
 (Query.users());
 class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
-    availableSimpleFields = new Set(["id", "name", "age"]);
+    availableSimpleFields = new Set(['id', 'name', 'age']);
     typeName = 'User';
-    queryObjectFieldBuilders = { "posts": PostReturnTypeBuilder, "friends": UserReturnTypeBuilder };
+    queryObjectFieldBuilders = { 'posts': PostReturnTypeBuilder, 'friends': UserReturnTypeBuilder };
 }
 class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
-    availableSimpleFields = new Set(["id", "text"]);
+    availableSimpleFields = new Set(['id', 'text']);
     typeName = 'Post';
-    queryObjectFieldBuilders = { "author": UserReturnTypeBuilder, "repatedPosts": PostReturnTypeBuilder };
+    queryObjectFieldBuilders = { 'author': UserReturnTypeBuilder, 'repatedPosts': PostReturnTypeBuilder };
 }
 // REGION: Queries
 export class Query {
@@ -161,8 +161,8 @@ export class Query {
     }
 }
 class UsersQuery extends GraphtonBaseQuery {
-    queryName = "users";
-    rootType = "query";
+    queryName = 'users';
+    rootType = 'query';
     returnType = new UserReturnTypeBuilder();
     /**
      * Function to build the required fields for that query
@@ -181,8 +181,8 @@ class UsersQuery extends GraphtonBaseQuery {
     }
 }
 class UserQuery extends GraphtonBaseQuery {
-    queryName = "user";
-    rootType = "query";
+    queryName = 'user';
+    rootType = 'query';
     returnType = new UserReturnTypeBuilder();
     /**
      * Function to build the required fields for that query
@@ -201,8 +201,8 @@ class UserQuery extends GraphtonBaseQuery {
     }
 }
 class UserExistsQuery extends GraphtonBaseQuery {
-    queryName = "userExists";
-    rootType = "query";
+    queryName = 'userExists';
+    rootType = 'query';
     returnType = null;
     /**
      * Execute the query and get the results
@@ -225,8 +225,8 @@ export class Mutation {
     }
 }
 class CreateUserMutation extends GraphtonBaseQuery {
-    queryName = "createUser";
-    rootType = "mutation";
+    queryName = 'createUser';
+    rootType = 'mutation';
     returnType = new UserReturnTypeBuilder();
     /**
      * Function to build the required fields for that query
@@ -245,8 +245,8 @@ class CreateUserMutation extends GraphtonBaseQuery {
     }
 }
 class UpdateUserMutation extends GraphtonBaseQuery {
-    queryName = "updateUser";
-    rootType = "mutation";
+    queryName = 'updateUser';
+    rootType = 'mutation';
     returnType = new UserReturnTypeBuilder();
     /**
      * Function to build the required fields for that query
@@ -265,8 +265,8 @@ class UpdateUserMutation extends GraphtonBaseQuery {
     }
 }
 class DeleteUserMutation extends GraphtonBaseQuery {
-    queryName = "deleteUser";
-    rootType = "mutation";
+    queryName = 'deleteUser';
+    rootType = 'mutation';
     returnType = new UserReturnTypeBuilder();
     /**
      * Function to build the required fields for that query

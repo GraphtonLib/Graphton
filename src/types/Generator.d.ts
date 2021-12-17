@@ -10,5 +10,5 @@ export interface ReturnTypeInfo {
     notNull: boolean,
     isListOf: boolean,
     listNotNull?: boolean,
-    kind: 'simple'|'object',
+    kind: 'scalar'|'enum'|'object',
 }

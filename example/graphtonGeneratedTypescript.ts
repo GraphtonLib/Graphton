@@ -20,30 +20,38 @@ export class GraphtonSettings {
     }
 }
 
-import axios, {AxiosResponse} from 'axios';
+import type {AxiosResponse} from 'axios';
 
-type GraphQLServerEndpoint = string;
-type Headers = Record<string, string>;
+export type GraphQLServerEndpoint = string;
+export type Headers = Record<string, string>;
 
-interface RequestOptions {
+export interface RequestOptions {
     headers?: Headers,
     url?: GraphQLServerEndpoint
 }
-interface QueryResponse {
+export interface QueryResponse {
     data: Record<string, unknown>,
     response: AxiosResponse
 }
-
- class GraphtonEnum<T extends string> {
-    public readonly enumValue: T;
-    constructor(enumValue: T) {
-        this.enumValue = enumValue;
-    }
+export interface ReturnTypeInfo {
+    type: string,
+    notNull: boolean,
+    isListOf: boolean,
+    listNotNull?: boolean,
+    kind: 'scalar'|'enum'|'object',
+}
+export type AvailableFieldBuilderConstructor<T> = {
+    [Property in keyof T]: new() => T[Property]
+}
+export type QueryObjectFields<T> = {
+    [Property in keyof T]?: T[Property]
 }
 
- type RootType = 'query'|'mutation';
+import axios from 'axios';
 
- abstract class GraphtonBaseQuery<T> {
+type RootType = 'query'|'mutation';
+
+abstract class GraphtonBaseQuery<T> {
     protected abstract queryName: string;
     protected abstract rootType: RootType;
     protected abstract returnType: GraphtonBaseReturnTypeBuilder<any, any> | null;
@@ -60,7 +68,7 @@ interface QueryResponse {
 
     protected argify(argValue: unknown): string {
         if(argValue instanceof GraphtonEnum) {
-            return `${argValue.enumValue}`;
+            return `${argValue}`;
         }
         if(Array.isArray(argValue)) {
             return `[${argValue.map(v=>this.argify(v))}]`;
@@ -97,13 +105,6 @@ interface QueryResponse {
             response
         }
     }
-}
-
-type AvailableFieldBuilderConstructor<T> = {
-    [Property in keyof T]: new() => T[Property]
-}
-type QueryObjectFields<T> = {
-    [Property in keyof T]?: T[Property]
 }
 
 abstract class GraphtonBaseReturnTypeBuilder<ObjectField extends Record<keyof ObjectField, GraphtonBaseReturnTypeBuilder<any,any>>, SimpleField> {
@@ -213,48 +214,107 @@ abstract class GraphtonBaseReturnTypeBuilder<ObjectField extends Record<keyof Ob
     }
 }
 
+abstract class GraphtonEnum {
+    protected constructor(
+        public readonly value: string,
+    ) {}
+
+    valueOf() {
+        return this.value;
+    }
+
+    toString() {
+        return this.valueOf();
+    }
+}
+
 // REGION: Types
 export interface User {
-  id?: number,
-  name?: string,
+  id?: string,
+  username?: string,
   age?: (number | null),
-  role?: Role,
+  role?: keyof typeof Role.possibleValues,
   posts?: Post[],
   friends?: User[],
 }
 export interface Post {
-  id?: number,
+  id?: string,
   author?: User,
   text?: string,
   relatedPosts?: Post[],
 }
-export interface UserInput {
-  column?: string,
+export interface UserOrderInput {
+  column?: UserSortColumn,
   order?: SortOrder,
 }
-export type Role = GraphtonEnum<'ADMIN'>|GraphtonEnum<'USER'>|GraphtonEnum<'GUEST'>;
-export const Role = {
-  ADMIN: new GraphtonEnum('ADMIN'),
-  USER: new GraphtonEnum('USER'),
-  GUEST: new GraphtonEnum('GUEST')
-}
-export type SortOrder = GraphtonEnum<'ASC'>|GraphtonEnum<'DESC'>;
-export const SortOrder = {
-  ASC: new GraphtonEnum('ASC'),
-  DESC: new GraphtonEnum('DESC')
+
+export class Role extends GraphtonEnum {
+    static readonly ADMIN: Role = new Role('ADMIN');
+    static readonly USER: Role = new Role('USER');
+    static readonly GUEST: Role = new Role('GUEST');
+    static readonly possibleValues = {ADMIN:Role.ADMIN,USER:Role.USER,GUEST:Role.GUEST};
+
+    private constructor(value: keyof typeof Role.possibleValues) {
+        super(value);
+    }
+
+    public static parse(value: keyof typeof Role.possibleValues): Role {
+        return Role.possibleValues[value];
+    }
+
+    public static list(): Role[] {
+        return Object.values(Role.possibleValues);
+    }
 }
 
-interface UserReturnTypeBuilderObjectBuilder {'posts':PostReturnTypeBuilder,'friends':UserReturnTypeBuilder}
-type UserReturnTypeSimpleField = 'id'|'name'|'age'|'role';
+export class SortOrder extends GraphtonEnum {
+    static readonly ASC: SortOrder = new SortOrder('ASC');
+    static readonly DESC: SortOrder = new SortOrder('DESC');
+    static readonly possibleValues = {ASC:SortOrder.ASC,DESC:SortOrder.DESC};
+
+    private constructor(value: keyof typeof SortOrder.possibleValues) {
+        super(value);
+    }
+
+    public static parse(value: keyof typeof SortOrder.possibleValues): SortOrder {
+        return SortOrder.possibleValues[value];
+    }
+
+    public static list(): SortOrder[] {
+        return Object.values(SortOrder.possibleValues);
+    }
+}
+
+export class UserSortColumn extends GraphtonEnum {
+    static readonly id: UserSortColumn = new UserSortColumn('id');
+    static readonly username: UserSortColumn = new UserSortColumn('username');
+    static readonly age: UserSortColumn = new UserSortColumn('age');
+    static readonly possibleValues = {id:UserSortColumn.id,username:UserSortColumn.username,age:UserSortColumn.age};
+
+    private constructor(value: keyof typeof UserSortColumn.possibleValues) {
+        super(value);
+    }
+
+    public static parse(value: keyof typeof UserSortColumn.possibleValues): UserSortColumn {
+        return UserSortColumn.possibleValues[value];
+    }
+
+    public static list(): UserSortColumn[] {
+        return Object.values(UserSortColumn.possibleValues);
+    }
+}
+
+export interface UserReturnTypeBuilderObjectBuilder {'posts':PostReturnTypeBuilder,'friends':UserReturnTypeBuilder}
+export type UserReturnTypeSimpleField = 'id'|'username'|'age';
 
 class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder<UserReturnTypeBuilderObjectBuilder, UserReturnTypeSimpleField> {
-    protected availableSimpleFields: Set<UserReturnTypeSimpleField> = new Set(['id','name','age','role']);
+    protected availableSimpleFields: Set<UserReturnTypeSimpleField> = new Set(['id','username','age']);
     protected typeName = 'User';
     protected queryObjectFieldBuilders = {'posts':PostReturnTypeBuilder,'friends':UserReturnTypeBuilder};
 }
 
-interface PostReturnTypeBuilderObjectBuilder {'author':UserReturnTypeBuilder,'relatedPosts':PostReturnTypeBuilder}
-type PostReturnTypeSimpleField = 'id'|'text';
+export interface PostReturnTypeBuilderObjectBuilder {'author':UserReturnTypeBuilder,'relatedPosts':PostReturnTypeBuilder}
+export type PostReturnTypeSimpleField = 'id'|'text';
 
 class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder<PostReturnTypeBuilderObjectBuilder, PostReturnTypeSimpleField> {
     protected availableSimpleFields: Set<PostReturnTypeSimpleField> = new Set(['id','text']);
@@ -278,7 +338,7 @@ export class Query {
   }
 }
 
-interface UsersQueryResponse {
+export interface UsersQueryResponse {
     data: {
         users: User[]
     };
@@ -329,15 +389,15 @@ class UsersQuery extends GraphtonBaseQuery<Record<string, never>> {
 
 }
 
-interface UsersOrderedQueryResponse {
+export interface UsersOrderedQueryResponse {
     data: {
         usersOrdered: User[]
     };
     response: AxiosResponse;
 }
 
-interface UsersOrderedQueryArguments {
-    orderBy?: (UserInput | null)[];
+export interface UsersOrderedQueryArguments {
+    orderBy?: (UserOrderInput | null)[];
 }
 
 class UsersOrderedQuery extends GraphtonBaseQuery<UsersOrderedQueryArguments> {
@@ -389,15 +449,15 @@ class UsersOrderedQuery extends GraphtonBaseQuery<UsersOrderedQueryArguments> {
 
 }
 
-interface UserQueryResponse {
+export interface UserQueryResponse {
     data: {
         user?: (User | null)
     };
     response: AxiosResponse;
 }
 
-interface UserQueryArguments {
-    id: number;
+export interface UserQueryArguments {
+    id: string;
 }
 
 class UserQuery extends GraphtonBaseQuery<UserQueryArguments> {
@@ -449,15 +509,15 @@ class UserQuery extends GraphtonBaseQuery<UserQueryArguments> {
 
 }
 
-interface UserExistsQueryResponse {
+export interface UserExistsQueryResponse {
     data: {
         userExists: boolean
     };
     response: AxiosResponse;
 }
 
-interface UserExistsQueryArguments {
-    id: number;
+export interface UserExistsQueryArguments {
+    id: string;
 }
 
 class UserExistsQuery extends GraphtonBaseQuery<UserExistsQueryArguments> {
@@ -513,15 +573,16 @@ export class Mutation {
   }
 }
 
-interface CreateUserMutationResponse {
+export interface CreateUserMutationResponse {
     data: {
         createUser: User
     };
     response: AxiosResponse;
 }
 
-interface CreateUserMutationArguments {
-    name: string;
+export interface CreateUserMutationArguments {
+    username: string;
+    role: Role;
     age?: (number | null);
 }
 
@@ -574,16 +635,17 @@ class CreateUserMutation extends GraphtonBaseQuery<CreateUserMutationArguments> 
 
 }
 
-interface UpdateUserMutationResponse {
+export interface UpdateUserMutationResponse {
     data: {
         updateUser: User
     };
     response: AxiosResponse;
 }
 
-interface UpdateUserMutationArguments {
-    id: number;
-    name?: (string | null);
+export interface UpdateUserMutationArguments {
+    id: string;
+    username?: (string | null);
+    role?: (Role | null);
     age?: (number | null);
 }
 
@@ -636,15 +698,15 @@ class UpdateUserMutation extends GraphtonBaseQuery<UpdateUserMutationArguments> 
 
 }
 
-interface DeleteUserMutationResponse {
+export interface DeleteUserMutationResponse {
     data: {
         deleteUser: User
     };
     response: AxiosResponse;
 }
 
-interface DeleteUserMutationArguments {
-    id: number;
+export interface DeleteUserMutationArguments {
+    id: string;
 }
 
 class DeleteUserMutation extends GraphtonBaseQuery<DeleteUserMutationArguments> {
