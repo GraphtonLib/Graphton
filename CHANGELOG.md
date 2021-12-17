@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.5.0](https://github.com/GraphtonLib/Graphton/compare/v0.4.1...v0.5.0) (2021-12-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* Returned enums are now (typed) strings, but when they are input (args) they need to be an instance of the enum to ensure correct query building.
+
+### Features
+
+* Rework of Enum types ([d2544b8](https://github.com/GraphtonLib/Graphton/commit/d2544b86d4b7a541fbfd73cc22e8cbb5d3ec8509))
+
 ### [0.4.1](https://github.com/GraphtonLib/Graphton/compare/v0.4.0...v0.4.1) (2021-12-16)
 
 
