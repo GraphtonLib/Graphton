@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.6.0](https://github.com/GraphtonLib/Graphton/compare/v0.5.0...v0.6.0) (2022-01-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **refactor:** Rename the following methods: `with => select`, `withRelated => with`, `withoutRelated => without`
+* **deprecated:** If you were using without() to remove fields from selection, flip your condition and use .select() to *add* the field instead of removing it later.
+
+### Features
+
+* **deprecated:** Removes the without() method from ReturnTypeBuilder ([588e103](https://github.com/GraphtonLib/Graphton/commit/588e10386bb95cd036415c58201d078abf739ca3))
+* **refactor:** Renamed with to select, withRelated to with and withoutRelated to without to be more in line with Laravel Eloquent ([dbeec50](https://github.com/GraphtonLib/Graphton/commit/dbeec50400e11dd5140c7c70200b50c768b768d1))
+
 ## [0.5.0](https://github.com/GraphtonLib/Graphton/compare/v0.4.1...v0.5.0) (2021-12-17)
 
 
