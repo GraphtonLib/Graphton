@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.6.1](https://github.com/GraphtonLib/Graphton/compare/v0.6.0...v0.6.1) (2022-01-04)
+
+
+### Bug Fixes
+
+* Fix a bug where ReturnTypeBuilder.except did not grab from the available fields ([8a5ea32](https://github.com/GraphtonLib/Graphton/commit/8a5ea32489574a1aae68a524fde3629fb32f5f6f))
+
 ## [0.6.0](https://github.com/GraphtonLib/Graphton/compare/v0.5.0...v0.6.0) (2022-01-04)
 
 
