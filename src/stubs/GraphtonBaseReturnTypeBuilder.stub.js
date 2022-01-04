@@ -19,7 +19,7 @@
     /**
      * Select `...fieldNames` to be returned
      */
-    with(...fieldNames) {
+    select(...fieldNames) {
         for (const fieldName of fieldNames) {
             if (!this.availableSimpleFields.has(fieldName)) {
                 console.warn(`Field "${fieldName}" might not exist in type "${this.typeName}"!`);
@@ -29,30 +29,21 @@
         return this;
     }
     /**
-     * Remove `...fieldNames` from selection
-     */
-    without(...fieldNames) {
-        for (const fieldName of fieldNames) {
-            this.querySimpleFields.delete(fieldName);
-        }
-        return this;
-    }
-    /**
-     * Alias for .all().without(...fieldNames)
+     * Select everything except `...fieldNames`
      */
     except(...fieldNames) {
-        return this.all().without(...fieldNames);
+        return this.clear().select(...[...this.querySimpleFields].filter(f => fieldNames.indexOf(f) > -1));
     }
     /**
-     * Alias for .clear().with(...fieldNames)
+     * Select `...fieldNames` and remove the rest
      */
     only(...fieldNames) {
-        return this.clear().with(...fieldNames);
+        return this.clear().select(...fieldNames);
     }
     /**
      * Add the `relatedType` OBJECT field, selecting the fields for that type using the `buildFields` closure
      */
-    withRelated(relatedType, buildFields) {
+    with(relatedType, buildFields) {
         const relatedReturnType = new this.queryObjectFieldBuilders[relatedType]();
         buildFields(relatedReturnType);
         this.queryObjectFields[relatedType] = relatedReturnType;
@@ -62,7 +53,7 @@
      * Remove the `relatedType` OBJECT field
      * Selected fields for `relatedType` will be removed!
      */
-    withoutRelated(relatedType) {
+    without(relatedType) {
         delete this.queryObjectFields[relatedType];
         return this;
     }

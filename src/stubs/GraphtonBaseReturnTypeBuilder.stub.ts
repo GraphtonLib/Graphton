@@ -28,7 +28,7 @@ import {AvailableFieldBuilderConstructor, QueryObjectFields} from './GraphtonTyp
     /**
      * Select `...fieldNames` to be returned
      */
-    public with(...fieldNames: SimpleField[]): this {
+    public select(...fieldNames: SimpleField[]): this {
         for(const fieldName of fieldNames) {
             if(!this.availableSimpleFields.has(fieldName)) {
                 console.warn(`Field "${fieldName}" might not exist in type "${this.typeName}"!`);
@@ -41,34 +41,23 @@ import {AvailableFieldBuilderConstructor, QueryObjectFields} from './GraphtonTyp
     }
 
     /**
-     * Remove `...fieldNames` from selection
-     */
-    public without(...fieldNames: SimpleField[]): this {
-        for(const fieldName of fieldNames) {
-            this.querySimpleFields.delete(fieldName);
-        }
-
-        return this;
-    }
-
-    /**
-     * Alias for .all().without(...fieldNames)
+     * Select everything except `...fieldNames`
      */
     public except(...fieldNames: SimpleField[]): this {
-        return this.all().without(...fieldNames);
+        return this.clear().select(...[...this.querySimpleFields].filter(f => fieldNames.indexOf(f) > -1));
     }
 
     /**
-     * Alias for .clear().with(...fieldNames)
+     * Select `...fieldNames` and remove the rest
      */
     public only(...fieldNames: SimpleField[]): this {
-        return this.clear().with(...fieldNames);
+        return this.clear().select(...fieldNames);
     }
 
     /**
      * Add the `relatedType` OBJECT field, selecting the fields for that type using the `buildFields` closure
      */
-    public withRelated<ObjectFieldName extends keyof ObjectField>(relatedType: ObjectFieldName, buildFields: (r: ObjectField[ObjectFieldName]) => void): this {
+    public with<ObjectFieldName extends keyof ObjectField>(relatedType: ObjectFieldName, buildFields: (r: ObjectField[ObjectFieldName]) => void): this {
         const relatedReturnType = new this.queryObjectFieldBuilders[relatedType]();
         buildFields(relatedReturnType);
         this.queryObjectFields[relatedType] = relatedReturnType;
@@ -80,7 +69,7 @@ import {AvailableFieldBuilderConstructor, QueryObjectFields} from './GraphtonTyp
      * Remove the `relatedType` OBJECT field
      * Selected fields for `relatedType` will be removed!
      */
-    public withoutRelated<ObjectFieldName extends keyof ObjectField>(relatedType: ObjectFieldName): this {
+    public without<ObjectFieldName extends keyof ObjectField>(relatedType: ObjectFieldName): this {
         delete this.queryObjectFields[relatedType];
 
         return this;

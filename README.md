@@ -95,7 +95,7 @@ yarn graphton generate -o ./src/lib/graphton.js https://example.com/graphql
 When the ts/js file is generated you can import the `Query` and `Mutation` factory instances from it. 
 
 ```typescript
-import {Query, Mutation} from "./graphton.generated.js";
+import {Query, Mutation} from './graphton.generated.js';
 ```
 
 > Note: the names `Query` and `Mutation` are configurable! See [CLI Usage & options](#CLI+Usage+&+options)
@@ -107,7 +107,7 @@ import {Query, Mutation} from "./graphton.generated.js";
 Starting a new query is fairly simple. Import `Query` from the generated file and call the method with the same name as the query you want to execute.
 
 ```typescript
-import {Query} from "./example/graphton.generated.js";
+import {Query} from './example/graphton.generated.js';
 const usersQuery = Query.users();
 const getFirstUserQuery = Query.user({id: 1});
 ```
@@ -117,13 +117,13 @@ const getFirstUserQuery = Query.user({id: 1});
 In GraphQL you have to define which fields you want to get in return. You do this with the queries ReturnTypeBuilder
 
 ```typescript
-import {Query} from "./example/graphton.generated.js";
+import {Query} from './example/graphton.generated.js';
 const usersQuery = Query.users().returnFields(r=>r.all());
 const getFirstUserQuery = Query.user({id: 1})
     .returnFields(r=>r
-        .with("id", "name")
-        .withRelated('posts', r=>r
-            .only("text")
+        .select('id', 'name')
+        .with('posts', r=>r
+            .only('text')
         )
     );
 ```
@@ -136,9 +136,9 @@ After building the query, you can directly execute it with the `get()` method.
 import {Query} from './example/graphton.generated.js';
 const firstUser = await Query.user({id: 1})
     .returnFields(r=>r
-        .with('id', 'name')
-        .withRelated('posts', r=>r
-            .only("text")
+        .select('id', 'name')
+        .with('posts', r=>r
+            .only('text')
         )
     )
     .get();
@@ -146,13 +146,13 @@ const firstUser = await Query.user({id: 1})
 // firstUser = {
 //     data: {
 //         id: 1,
-//         name: "User One",
+//         name: 'User One',
 //         posts: [
 //             {
-//                 text: "A sample post!"
+//                 text: 'A sample post!'
 //             },
 //             {
-//                 text: "Enother sample post"
+//                 text: 'Enother sample post'
 //             }
 //         ]
 //     },
@@ -167,15 +167,13 @@ Running mutations is about the same as running a query. The only diferences are:
  - You import `Mutation` instead of `Query`.
  - Instead of `.get()` you run `.do()`
 
-> `.get()` and `.do()` are both available on queries and mutations - but for readability you *get* a query result, and *do* a mutation on the server.
-
 ```typescript
-import {Mutation} from "./example/graphton.generated.js";
+import {Mutation} from './example/graphton.generated.js';
 const newUser = await Mutation.createUser({name: 'User Infinite'})
     .returnFields(r=>r.all())
     .do();
 const updatedUser = await Mutation.updateUser({id: 1, name: 'User NotOne', age: 12})
-    .returnFields(r=>r.except('name')) // All fields except "name"
+    .returnFields(r=>r.except('name')) // All fields except 'name'
     .do();
 ```
 
@@ -187,13 +185,13 @@ Return fields can be dynamically changed.
 import {Query} from './example/graphton.generated.js';
 const firstUserQuery = Query.user({id: 1})
     .returnFields(r=>r
-        .with('id', 'name')
+        .select('id', 'name')
     );
 
 if(getUserPosts) {
     firstUserQuery.returnFields(r=>r
-        .withRelated('posts', r=>r
-            .only("text")
+        .with('posts', r=>r
+            .only('text')
         )
     )
 }
@@ -205,7 +203,7 @@ You can change some of the settings, used for making the call to the server, lik
 
 ```typescript
 import {GraphtonSettings} from './example/graphton.generated.js';
-GraphtonSettings.setDefaultHeaders({"Authentication": "Bearer XXX"});
+GraphtonSettings.setDefaultHeaders({'Authentication': 'Bearer XXX'});
 ```
 
 ## Reference
@@ -294,28 +292,28 @@ Select all known fields te be returned
 
 Clear all selected fields.
 
-#### with
-> with(...fieldNames: $Field[]): this
+#### select
+> select(...fieldNames: $Field[]): this
 
 Select `...fieldNames` to be returned
 
 #### except
 > except(...fieldNames: $Field[]): this
 
-Alias for .all().without(...fieldNames)
+Select everything except `...fieldNames`
 
 #### only
 > only(...fieldNames: $Field[]): this
 
-Alias for .clear().with(...fieldNames)
+Select `...fieldNames` and remove the rest
 
-#### withRelated
-> withRelated(relatedType: $string, buildFields: (type: $GraphtonBaseReturnTypeBuilder) => void)
+#### with
+> with(relatedType: $string, buildFields: (type: $GraphtonBaseReturnTypeBuilder) => void)
 
 Add the `relatedType` OBJECT field, selecting the fields for that type using the `buildFields` closure
 
-#### withoutRelated
-> withoutRelated(relatedType: $string): void
+#### without
+> without(relatedType: $string): void
 
 Remove the `relatedType` OBJECT field. Selected fields for `relatedType` will be removed!
 
@@ -348,7 +346,7 @@ Alias:
 ```typescript
 $GraphtonEnum.VALUE;
 // Is the same as
-$GraphtonEnum.parse("VALUE");
+$GraphtonEnum.parse('VALUE');
 ```
 
 #### list
