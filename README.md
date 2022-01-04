@@ -197,12 +197,6 @@ if(getUserPosts) {
         )
     )
 }
-
-if(hideUserName) {
-    firstUserQuery.returnFields(r=>r
-        .without('name')
-    )
-}
 ```
 
 ### Global Settings
@@ -304,11 +298,6 @@ Clear all selected fields.
 > with(...fieldNames: $Field[]): this
 
 Select `...fieldNames` to be returned
-
-#### without
-> without(...fieldNames: $Field[]): this
-
-Remove `...fieldNames` from selection
 
 #### except
 > except(...fieldNames: $Field[]): this
