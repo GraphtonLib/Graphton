@@ -44,7 +44,7 @@ import {AvailableFieldBuilderConstructor, QueryObjectFields} from './GraphtonTyp
      * Select everything except `...fieldNames`
      */
     public except(...fieldNames: SimpleField[]): this {
-        return this.clear().select(...[...this.querySimpleFields].filter(f => fieldNames.indexOf(f) > -1));
+        return this.clear().select(...[...this.availableSimpleFields].filter(f => fieldNames.indexOf(f) < 0));
     }
 
     /**
