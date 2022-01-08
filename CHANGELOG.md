@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.6.2](https://github.com/GraphtonLib/Graphton/compare/v0.6.1...v0.6.2) (2022-01-08)
+
+
+### Features
+
+* Add option to generate subscriptions factory ([a3d3c41](https://github.com/GraphtonLib/Graphton/commit/a3d3c413950e414b42727e1c29b5472dd3313dbe))
+* Add options to customise the execution functions (get/do) to your own liking ([3102b17](https://github.com/GraphtonLib/Graphton/commit/3102b173143405244462d341ad6283c8ea9e2bc2))
+
 ### [0.6.1](https://github.com/GraphtonLib/Graphton/compare/v0.6.0...v0.6.1) (2022-01-04)
 
 
