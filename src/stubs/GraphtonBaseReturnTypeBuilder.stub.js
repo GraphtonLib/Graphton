@@ -32,7 +32,7 @@
      * Select everything except `...fieldNames`
      */
     except(...fieldNames) {
-        return this.clear().select(...[...this.querySimpleFields].filter(f => fieldNames.indexOf(f) > -1));
+        return this.clear().select(...[...this.availableSimpleFields].filter(f => fieldNames.indexOf(f) < 0));
     }
     /**
      * Select `...fieldNames` and remove the rest

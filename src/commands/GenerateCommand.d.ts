@@ -7,7 +7,6 @@ export default class GenerateCommand {
     private generateEnumTypes;
     private generateQueryFactory;
     private argsToMethodParameters;
-    private generateQueryClass;
     private toTypeAppend;
     private returnTypeInfo;
 }

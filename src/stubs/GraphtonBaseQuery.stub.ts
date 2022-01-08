@@ -11,7 +11,7 @@ const settings = {
 
 import axios from 'axios';
 
-/*IGNORE*/export /*ENDIGNORE*/type RootType = 'query'|'mutation'/*IGNORE*/|'/*ROOTTYPE*/'/*ENDIGNORE*/;
+/*IGNORE*/export /*ENDIGNORE*/type RootType = 'query'|'mutation'|'subscription'/*IGNORE*/|'/*ROOTTYPE*/'/*ENDIGNORE*/;
 
 /*IGNORE*/export /*ENDIGNORE*/abstract class GraphtonBaseQuery<T> {
     protected abstract queryName: string;

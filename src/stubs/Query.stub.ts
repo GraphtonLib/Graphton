@@ -11,12 +11,14 @@ interface RequestOptions {
 }
 /*ENDIGNORE*/
 
+/*IF:ADDEXECUTOR*/
 export interface _t_QUERYCLASSNAME_t_Response {
     data: {
         /*QUERYNAME*//*RETURNTYPE*/
     };
     response: AxiosResponse;
 }
+/*ENDIF:ADDEXECUTOR*/
 
 /*IF:ARGUMENTS*/
 export interface _t_ARGUMENTINTERFACENAME_t_ {
@@ -68,22 +70,13 @@ class _t_QUERYCLASSNAME_t_ extends GraphtonBaseQuery<_t_ARGUMENTINTERFACENAME_t_
     }
     /*ENDIF:RETURNTYPEOBJECT*/
 
-    /*IF:ADDGET*/
+    /*IF:ADDEXECUTOR*/
     /**
      * Execute the query and get the results
      * Only available on Query type requests
      */
-    async get(requestOptions: RequestOptions = {}): Promise<_t_QUERYCLASSNAME_t_Response> {
+    async /*IGNORE*/execute/*ENDIGNORE*//*EXECUTIONFUNCTIONNAME*/(requestOptions: RequestOptions = {}): Promise<_t_QUERYCLASSNAME_t_Response> {
         return <_t_QUERYCLASSNAME_t_Response>(await super.execute(requestOptions));
     }
     /*ENDIF:ADDGET*/
-    /*IF:ADDDO*/
-    /**
-     * Do the mutation on the server
-     * Only available on Mutation type requests
-     */
-    async do(requestOptions: RequestOptions = {}): Promise<_t_QUERYCLASSNAME_t_Response> {
-        return <_t_QUERYCLASSNAME_t_Response>(await super.execute(requestOptions));
-    }
-    /*ENDIF:ADDDO*/
 }

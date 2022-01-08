@@ -1,6 +1,6 @@
 import { GraphtonBaseReturnTypeBuilder } from './GraphtonBaseReturnTypeBuilder.stub';
 import { QueryResponse, RequestOptions } from './GraphtonTypes.stub';
-export declare type RootType = 'query' | 'mutation' | '/*ROOTTYPE*/';
+export declare type RootType = 'query' | 'mutation' | 'subscription' | '/*ROOTTYPE*/';
 export declare abstract class GraphtonBaseQuery<T> {
     protected abstract queryName: string;
     protected abstract rootType: RootType;

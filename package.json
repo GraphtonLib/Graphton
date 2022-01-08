@@ -31,8 +31,8 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "generate": "yarn generate:ts; yarn generate:js; yarn lint:fix --quiet example",
-    "generate:ts": "node src/graphton.js generate ./example/schema.json -o ./example/graphtonGeneratedTypescript.ts",
-    "generate:js": "node src/graphton.js generate ./example/schema.json -o ./example/graphtonGeneratedJavascript.js",
+    "generate:ts": "node src/graphton.js generate ./example/schema.json -o ./example/graphtonGeneratedTypescript.ts -s",
+    "generate:js": "node src/graphton.js generate ./example/schema.json -o ./example/graphtonGeneratedJavascript.js -s",
     "dev": "tsc --watch",
     "prod": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"

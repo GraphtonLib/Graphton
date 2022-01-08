@@ -69,14 +69,23 @@ export default class GenerateCommand {
         console.log('Generating query classes...');
         outContentSections.push(...[
             '// REGION: Queries',
-            ...this.generateQueryFactory('query', this.gqlSchema.types.find(t => t.name === this.gqlSchema?.queryType?.name)?.fields || [], options.exportQueryFactoryAs),
+            ...this.generateQueryFactory('query', this.gqlSchema.types.find(t => t.name === this.gqlSchema?.queryType?.name)?.fields || [], options.exportQueryFactoryAs, options.queryFunction),
         ]);
         console.log('Generating mutation classes...');
         outContentSections.push(...[
             '// REGION: Mutations',
-            ...this.generateQueryFactory('mutation', this.gqlSchema.types.find(t => t.name === this.gqlSchema?.mutationType?.name)?.fields || [], options.exportMutationFactoryAs),
+            ...this.generateQueryFactory('mutation', this.gqlSchema.types.find(t => t.name === this.gqlSchema?.mutationType?.name)?.fields || [], options.exportMutationFactoryAs, options.mutateFunction),
             '',
         ]);
+        if (options.exportSubscriptionFactoryAs !== false) {
+            const subscriptionFactoryName = options.exportSubscriptionFactoryAs !== true ? options.exportSubscriptionFactoryAs : 'Subscription';
+            console.log('Generating subscription classes...');
+            outContentSections.push(...[
+                '// REGION: Subscriptions',
+                ...this.generateQueryFactory('subscription', this.gqlSchema.types.find(t => t.name === this.gqlSchema?.subscriptionType?.name)?.fields || [], subscriptionFactoryName, options.subscribeFunction),
+                '',
+            ]);
+        }
         console.log('Trimming output...');
         let outContent = outContentSections.join('\n')
             .replaceAll(/\n.*?eslint-disable-next-line.*?\n/g, '\n')
@@ -145,7 +154,7 @@ export default class GenerateCommand {
             });
         }
     }
-    *generateQueryFactory(factoryType, queries, exportFactoryAs) {
+    *generateQueryFactory(factoryType, queries, exportFactoryAs, executionFunctionName = null) {
         yield `export class ${exportFactoryAs} {`;
         for (const query of queries) {
             if (query.args.length < 1) {
@@ -162,7 +171,33 @@ export default class GenerateCommand {
         yield '}';
         yield '';
         for (const query of queries) {
-            yield this.generateQueryClass(query, factoryType);
+            const returnTypeInfo = this.returnTypeInfo(query.type);
+            const params = this.argsToMethodParameters(query.args);
+            const queryClassName = `${pascalCase(query.name)}${pascalCase(factoryType)}`;
+            const includeInStub = [];
+            if (returnTypeInfo?.kind == 'object') {
+                includeInStub.push('RETURNTYPEOBJECT');
+            }
+            if (executionFunctionName) {
+                includeInStub.push('ADDEXECUTOR');
+            }
+            let argumentsInterfaceName = 'Record<string, never>';
+            if (params.typed.length > 0) {
+                includeInStub.push('ARGUMENTS');
+                argumentsInterfaceName = `${queryClassName}Arguments`;
+            }
+            yield fillStub('Query', {
+                'QUERYCLASSNAME': queryClassName,
+                'QUERYNAME': query.name,
+                'ARGUMENTINTERFACEPROPERTIES': params.typed.join(';\n    '),
+                'ARGUMENTINTERFACENAME': argumentsInterfaceName,
+                'ROOTTYPE': factoryType,
+                'RETURNTYPE': this.toTypeAppend(query.type, false),
+                'EXECUTIONFUNCTIONNAME': executionFunctionName || 'execute',
+                'RETURNTYPEBUILDER': returnTypeInfo?.kind == 'object'
+                    ? `${this.returnTypeInfo(query.type)?.type}ReturnTypeBuilder`
+                    : 'null',
+            }, includeInStub);
             yield '';
         }
     }
@@ -174,37 +209,6 @@ export default class GenerateCommand {
             untyped.push(arg.name);
         }
         return { typed, untyped };
-    }
-    generateQueryClass(query, rootType) {
-        const returnTypeInfo = this.returnTypeInfo(query.type);
-        const params = this.argsToMethodParameters(query.args);
-        const queryClassName = `${pascalCase(query.name)}${pascalCase(rootType)}`;
-        const includeInStub = [];
-        if (returnTypeInfo?.kind == 'object') {
-            includeInStub.push('RETURNTYPEOBJECT');
-        }
-        if (rootType == 'query') {
-            includeInStub.push('ADDGET');
-        }
-        if (rootType == 'mutation') {
-            includeInStub.push('ADDDO');
-        }
-        let argumentsInterfaceName = 'Record<string, never>';
-        if (params.typed.length > 0) {
-            includeInStub.push('ARGUMENTS');
-            argumentsInterfaceName = `${queryClassName}Arguments`;
-        }
-        return fillStub('Query', {
-            'QUERYCLASSNAME': queryClassName,
-            'QUERYNAME': query.name,
-            'ARGUMENTINTERFACEPROPERTIES': params.typed.join(';\n    '),
-            'ARGUMENTINTERFACENAME': argumentsInterfaceName,
-            'ROOTTYPE': rootType,
-            'RETURNTYPE': this.toTypeAppend(query.type, false),
-            'RETURNTYPEBUILDER': returnTypeInfo?.kind == 'object'
-                ? `${this.returnTypeInfo(query.type)?.type}ReturnTypeBuilder`
-                : 'null',
-        }, includeInStub);
     }
     toTypeAppend(type, isRootType = true, enumsAreStrings = true) {
         const typeInfo = this.returnTypeInfo(type);

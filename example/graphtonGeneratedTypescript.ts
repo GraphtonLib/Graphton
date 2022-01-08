@@ -49,7 +49,7 @@ export type QueryObjectFields<T> = {
 
 import axios from 'axios';
 
-type RootType = 'query'|'mutation';
+type RootType = 'query'|'mutation'|'subscription';
 
 abstract class GraphtonBaseQuery<T> {
     protected abstract queryName: string;
@@ -149,7 +149,7 @@ abstract class GraphtonBaseReturnTypeBuilder<ObjectField extends Record<keyof Ob
      * Select everything except `...fieldNames`
      */
     public except(...fieldNames: SimpleField[]): this {
-        return this.clear().select(...[...this.querySimpleFields].filter(f => fieldNames.indexOf(f) > -1));
+        return this.clear().select(...[...this.availableSimpleFields].filter(f => fieldNames.indexOf(f) < 0));
     }
 
     /**
@@ -615,8 +615,8 @@ class CreateUserMutation extends GraphtonBaseQuery<CreateUserMutationArguments> 
     }
 
     /**
-     * Do the mutation on the server
-     * Only available on Mutation type requests
+     * Execute the query and get the results
+     * Only available on Query type requests
      */
     async do(requestOptions: RequestOptions = {}): Promise<CreateUserMutationResponse> {
         return <CreateUserMutationResponse>(await super.execute(requestOptions));
@@ -678,8 +678,8 @@ class UpdateUserMutation extends GraphtonBaseQuery<UpdateUserMutationArguments> 
     }
 
     /**
-     * Do the mutation on the server
-     * Only available on Mutation type requests
+     * Execute the query and get the results
+     * Only available on Query type requests
      */
     async do(requestOptions: RequestOptions = {}): Promise<UpdateUserMutationResponse> {
         return <UpdateUserMutationResponse>(await super.execute(requestOptions));
@@ -738,11 +738,69 @@ class DeleteUserMutation extends GraphtonBaseQuery<DeleteUserMutationArguments> 
     }
 
     /**
-     * Do the mutation on the server
-     * Only available on Mutation type requests
+     * Execute the query and get the results
+     * Only available on Query type requests
      */
     async do(requestOptions: RequestOptions = {}): Promise<DeleteUserMutationResponse> {
         return <DeleteUserMutationResponse>(await super.execute(requestOptions));
+    }
+
+}
+
+// REGION: Subscriptions
+export class Subscription {
+  public static postAdded() {
+    return new PostAddedSubscription();
+  }
+}
+
+export interface PostAddedSubscriptionResponse {
+    data: {
+        postAdded: Post
+    };
+    response: AxiosResponse;
+}
+
+class PostAddedSubscription extends GraphtonBaseQuery<Record<string, never>> {
+    protected queryName = 'postAdded';
+    protected queryArgs: Partial<Record<string, never>> = {};
+    protected rootType: RootType = 'subscription';
+    protected returnType = new PostReturnTypeBuilder();
+
+    public setArgs(queryArgs: Partial<Record<string, never>>) {
+        this.queryArgs = {...this.queryArgs, ...queryArgs};
+    }
+
+    protected toArgString(): string {
+        const queryArgItems: string[] = [];
+        for(const [argKey, argValue] of Object.entries(this.queryArgs)) {
+            if (argValue) {
+                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            }
+        }
+
+        if(queryArgItems.length > 0) {
+            return `(${queryArgItems.join(', ')})`;
+        }
+
+        return '';
+    }
+
+    /**
+     * Function to build the required fields for that query
+     * Only available if the return type is an OBJECT
+     */
+    public returnFields(returnFieldsClosure: (r: PostReturnTypeBuilder) => void): this {
+        returnFieldsClosure(this.returnType);
+        return this;
+    }
+
+    /**
+     * Execute the query and get the results
+     * Only available on Query type requests
+     */
+    async subscribe(requestOptions: RequestOptions = {}): Promise<PostAddedSubscriptionResponse> {
+        return <PostAddedSubscriptionResponse>(await super.execute(requestOptions));
     }
 
 }

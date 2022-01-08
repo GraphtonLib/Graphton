@@ -94,7 +94,7 @@ class GraphtonBaseReturnTypeBuilder {
      * Select everything except `...fieldNames`
      */
     except(...fieldNames) {
-        return this.clear().select(...[...this.querySimpleFields].filter(f => fieldNames.indexOf(f) > -1));
+        return this.clear().select(...[...this.availableSimpleFields].filter(f => fieldNames.indexOf(f) < 0));
     }
     /**
      * Select `...fieldNames` and remove the rest
@@ -411,8 +411,8 @@ class CreateUserMutation extends GraphtonBaseQuery {
         return this;
     }
     /**
-     * Do the mutation on the server
-     * Only available on Mutation type requests
+     * Execute the query and get the results
+     * Only available on Query type requests
      */
     async do(requestOptions = {}) {
         return (await super.execute(requestOptions));
@@ -451,8 +451,8 @@ class UpdateUserMutation extends GraphtonBaseQuery {
         return this;
     }
     /**
-     * Do the mutation on the server
-     * Only available on Mutation type requests
+     * Execute the query and get the results
+     * Only available on Query type requests
      */
     async do(requestOptions = {}) {
         return (await super.execute(requestOptions));
@@ -491,10 +491,52 @@ class DeleteUserMutation extends GraphtonBaseQuery {
         return this;
     }
     /**
-     * Do the mutation on the server
-     * Only available on Mutation type requests
+     * Execute the query and get the results
+     * Only available on Query type requests
      */
     async do(requestOptions = {}) {
+        return (await super.execute(requestOptions));
+    }
+}
+// REGION: Subscriptions
+export class Subscription {
+    static postAdded() {
+        return new PostAddedSubscription();
+    }
+}
+class PostAddedSubscription extends GraphtonBaseQuery {
+    queryName = 'postAdded';
+    queryArgs = {};
+    rootType = 'subscription';
+    returnType = new PostReturnTypeBuilder();
+    setArgs(queryArgs) {
+        this.queryArgs = { ...this.queryArgs, ...queryArgs };
+    }
+    toArgString() {
+        const queryArgItems = [];
+        for (const [argKey, argValue] of Object.entries(this.queryArgs)) {
+            if (argValue) {
+                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            }
+        }
+        if (queryArgItems.length > 0) {
+            return `(${queryArgItems.join(', ')})`;
+        }
+        return '';
+    }
+    /**
+     * Function to build the required fields for that query
+     * Only available if the return type is an OBJECT
+     */
+    returnFields(returnFieldsClosure) {
+        returnFieldsClosure(this.returnType);
+        return this;
+    }
+    /**
+     * Execute the query and get the results
+     * Only available on Query type requests
+     */
+    async subscribe(requestOptions = {}) {
         return (await super.execute(requestOptions));
     }
 }

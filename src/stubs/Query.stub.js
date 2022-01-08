@@ -39,21 +39,12 @@ class _t_QUERYCLASSNAME_t_ extends GraphtonBaseQuery {
         return this;
     }
     /*ENDIF:RETURNTYPEOBJECT*/
-    /*IF:ADDGET*/
+    /*IF:ADDEXECUTOR*/
     /**
      * Execute the query and get the results
      * Only available on Query type requests
      */
-    async get(requestOptions = {}) {
-        return (await super.execute(requestOptions));
-    }
-    /*ENDIF:ADDGET*/
-    /*IF:ADDDO*/
-    /**
-     * Do the mutation on the server
-     * Only available on Mutation type requests
-     */
-    async do(requestOptions = {}) {
+    async /*IGNORE*/ execute /*ENDIGNORE*/ /*EXECUTIONFUNCTIONNAME*/(requestOptions = {}) {
         return (await super.execute(requestOptions));
     }
 }

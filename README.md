@@ -74,13 +74,17 @@ npm run graphton generate https://example.com/graphql
 Usage: graphton generate [options] <schemaUri>
 
 Arguments:
-  schemaUri                             URL to GraphQL endpoint or path to introspection json.
+  schemaUri                                 URL to GraphQL endpoint or path to introspection json.
 
 Options:
-  -o, --outputFile <path>               Path to the generated js/ts file (default: "./src/graphton.generated.ts")
-  -q, --exportQueryFactoryAs <name>     How you want to import your queries instance. (default: "Query")
-  -m, --exportMutationFactoryAs <name>  How you want to import your mutations instance. (default: "Mutation")
-  -h, --help                            display help for command
+  -o, --outputFile <path>                   Path to the generated js/ts file (default: "./src/graphton.generated.ts")
+  -q, --exportQueryFactoryAs <name>         How you want to import your query factory. (default: "Query")
+  -m, --exportMutationFactoryAs <name>      How you want to import your mutation factory. (default: "Mutation")
+  -s, --exportSubscriptionFactoryAs [name]  If you want a subscription factory, if no name provided "Subscription" will be used. (default: false)
+  -Q, --queryFunction <name>                The name of the function that posts the query. (default: "get")
+  -M, --mutateFunction <name>               The name of the function that posts the mutation. (default: "do")
+  -S, --subscribeFunction <name>            The name of the function that posts the subscription. (default: "subscribe")
+  -h, --help                                display help for command
 
 ```
 
@@ -99,6 +103,8 @@ import {Query, Mutation} from './graphton.generated.js';
 ```
 
 > Note: the names `Query` and `Mutation` are configurable! See [CLI Usage & options](#CLI+Usage+&+options)
+
+> Note: Since graphton does not handle subscriptions (yet?) since implementations can differ per-situation, subscription queries are optional. See [CLI Usage & options](#CLI+Usage+&+options) to how to generate them. You can use `getQuery` to output the query and use your own implementation.
 
 > For the following examples, the example graphql schema from [example/schema.graphql](example/schema.graphql) will be used.
 

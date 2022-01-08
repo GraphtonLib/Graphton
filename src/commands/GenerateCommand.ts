@@ -88,7 +88,8 @@ export default class GenerateCommand {
             ...this.generateQueryFactory(
                 'query',
                 this.gqlSchema.types.find(t => t.name === this.gqlSchema?.queryType?.name)?.fields || [],
-                options.exportQueryFactoryAs
+                options.exportQueryFactoryAs,
+                options.queryFunction
             ),
         ]);
 
@@ -98,10 +99,26 @@ export default class GenerateCommand {
             ...this.generateQueryFactory(
                 'mutation',
                 this.gqlSchema.types.find(t => t.name === this.gqlSchema?.mutationType?.name)?.fields || [],
-                options.exportMutationFactoryAs
+                options.exportMutationFactoryAs,
+                options.mutateFunction
             ),
             '',
         ]);
+
+        if(options.exportSubscriptionFactoryAs !== false) {
+            const subscriptionFactoryName = options.exportSubscriptionFactoryAs !== true ? options.exportSubscriptionFactoryAs : 'Subscription';
+            console.log('Generating subscription classes...');
+            outContentSections.push(...[
+                '// REGION: Subscriptions',
+                ...this.generateQueryFactory(
+                    'subscription',
+                    this.gqlSchema.types.find(t => t.name === this.gqlSchema?.subscriptionType?.name)?.fields || [],
+                    subscriptionFactoryName,
+                    options.subscribeFunction
+                ),
+                '',
+            ]);
+        }
 
         console.log('Trimming output...');
         let outContent = outContentSections.join('\n')
@@ -183,7 +200,7 @@ export default class GenerateCommand {
         }
     }
 
-    private *generateQueryFactory(factoryType: RootType, queries: Field[], exportFactoryAs: string): IterableIterator<string> {
+    private *generateQueryFactory(factoryType: RootType, queries: Field[], exportFactoryAs: string, executionFunctionName: string|null = null): IterableIterator<string> {
         yield `export class ${exportFactoryAs} {`;
 
         for(const query of queries) {
@@ -202,7 +219,35 @@ export default class GenerateCommand {
         yield '';
 
         for(const query of queries) {
-            yield this.generateQueryClass(query, factoryType);
+            const returnTypeInfo = this.returnTypeInfo(query.type);
+            const params = this.argsToMethodParameters(query.args);
+            const queryClassName = `${pascalCase(query.name)}${pascalCase(factoryType)}`;
+
+            const includeInStub: string[] = [];
+            if(returnTypeInfo?.kind == 'object') {
+                includeInStub.push('RETURNTYPEOBJECT');
+            }
+            if(executionFunctionName) {
+                includeInStub.push('ADDEXECUTOR');
+            }
+            let argumentsInterfaceName = 'Record<string, never>';
+            if(params.typed.length > 0) {
+                includeInStub.push('ARGUMENTS');
+                argumentsInterfaceName = `${queryClassName}Arguments`;
+            }
+
+            yield fillStub('Query', {
+                'QUERYCLASSNAME': queryClassName,
+                'QUERYNAME': query.name,
+                'ARGUMENTINTERFACEPROPERTIES': params.typed.join(';\n    '),
+                'ARGUMENTINTERFACENAME': argumentsInterfaceName,
+                'ROOTTYPE': factoryType,
+                'RETURNTYPE': this.toTypeAppend(query.type, false),
+                'EXECUTIONFUNCTIONNAME': executionFunctionName || 'execute',
+                'RETURNTYPEBUILDER': returnTypeInfo?.kind == 'object'
+                    ? `${this.returnTypeInfo(query.type)?.type}ReturnTypeBuilder`
+                    : 'null',
+            }, includeInStub);
             yield '';
         }
     }
@@ -216,40 +261,6 @@ export default class GenerateCommand {
             untyped.push(arg.name);
         }
         return {typed, untyped};
-    }
-
-    private generateQueryClass(query: Field, rootType: RootType): string {
-        const returnTypeInfo = this.returnTypeInfo(query.type);
-        const params = this.argsToMethodParameters(query.args);
-        const queryClassName = `${pascalCase(query.name)}${pascalCase(rootType)}`;
-
-        const includeInStub: string[] = [];
-        if(returnTypeInfo?.kind == 'object') {
-            includeInStub.push('RETURNTYPEOBJECT');
-        }
-        if(rootType == 'query') {
-            includeInStub.push('ADDGET');
-        }
-        if(rootType == 'mutation') {
-            includeInStub.push('ADDDO');
-        }
-        let argumentsInterfaceName = 'Record<string, never>';
-        if(params.typed.length > 0) {
-            includeInStub.push('ARGUMENTS');
-            argumentsInterfaceName = `${queryClassName}Arguments`;
-        }
-
-        return fillStub('Query', {
-            'QUERYCLASSNAME': queryClassName,
-            'QUERYNAME': query.name,
-            'ARGUMENTINTERFACEPROPERTIES': params.typed.join(';\n    '),
-            'ARGUMENTINTERFACENAME': argumentsInterfaceName,
-            'ROOTTYPE': rootType,
-            'RETURNTYPE': this.toTypeAppend(query.type, false),
-            'RETURNTYPEBUILDER': returnTypeInfo?.kind == 'object'
-                ? `${this.returnTypeInfo(query.type)?.type}ReturnTypeBuilder`
-                : 'null',
-        }, includeInStub);
     }
 
     private toTypeAppend(type: ReturnType, isRootType = true, enumsAreStrings = true): string {
