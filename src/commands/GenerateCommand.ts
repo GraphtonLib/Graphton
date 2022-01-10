@@ -3,7 +3,7 @@ import {introspectQuery} from '../graphql/query/introspect.js';
 import * as fs from 'fs';
 import {pascalCase} from 'change-case';
 import {Arg, Field, ReturnType, RootType, Schema, Type} from '../types/GraphQL';
-import {ReturnTypeInfo, GenerateCommandOptions} from '../types/Generator';
+import {GenerateCommandOptions, ReturnTypeInfo} from '../types/Generator';
 import axios from 'axios';
 
 import {default as ts} from 'typescript';
@@ -22,13 +22,13 @@ const scalarMap = (scalarType: string) => ({
 
 
 export default class GenerateCommand {
-    private gqlSchema: Schema|null = null;
+    private gqlSchema: Schema | null = null;
 
     async generate(schemaUri: string, options: GenerateCommandOptions) {
         const outContentSections: OutContentSection = [];
 
         try {
-            if(isUrl(schemaUri)) {
+            if (isUrl(schemaUri)) {
                 this.gqlSchema = (await axios.post(schemaUri, {query: introspectQuery}))?.data?.data?.__schema;
             } else if (fs.existsSync(schemaUri)) {
                 this.gqlSchema = JSON.parse(fs.readFileSync(schemaUri, {encoding: 'utf8'})).__schema;
@@ -37,7 +37,7 @@ export default class GenerateCommand {
             this.gqlSchema = null;
         }
 
-        if(!this.gqlSchema) {
+        if (!this.gqlSchema) {
             console.error(`Could not decode json schema from ${schemaUri}`);
             process.exit(1);
         }
@@ -50,9 +50,9 @@ export default class GenerateCommand {
 
         const types = this.gqlSchema.types
             .filter(type => !type.name.startsWith('__') && ignoreTypes.indexOf(type.name) < 0);
-        const objectTypes = types.filter(type=>type.kind === 'OBJECT');
-        const enumTypes = types.filter(type=>type.kind === 'ENUM');
-        const inputTypes = types.filter(type=>type.kind === 'INPUT_OBJECT');
+        const objectTypes = types.filter(type => type.kind === 'OBJECT');
+        const enumTypes = types.filter(type => type.kind === 'ENUM');
+        const inputTypes = types.filter(type => type.kind === 'INPUT_OBJECT');
 
         outContentSections.push(...[
             '/**',
@@ -72,6 +72,11 @@ export default class GenerateCommand {
             fillStub('GraphtonBaseQuery'),
             fillStub('GraphtonBaseReturnTypeBuilder'),
             fillStub('GraphtonBaseEnum'),
+            fillStub('GraphtonQueryTypeInterfaces', {
+                'QUERYFUNCTION': options.queryFunction,
+                'MUTATEFUNCTION': options.mutateFunction,
+                'SUBSCRIBEFUNCTION': options.subscribeFunction,
+            }, options.exportSubscriptionFactoryAs !== false ? ['SUBSCRIPTIONS'] : []),
         ]);
 
         console.log('Generating types & return type builders...');
@@ -105,7 +110,7 @@ export default class GenerateCommand {
             '',
         ]);
 
-        if(options.exportSubscriptionFactoryAs !== false) {
+        if (options.exportSubscriptionFactoryAs !== false) {
             const subscriptionFactoryName = options.exportSubscriptionFactoryAs !== true ? options.exportSubscriptionFactoryAs : 'Subscription';
             console.log('Generating subscription classes...');
             outContentSections.push(...[
@@ -128,7 +133,7 @@ export default class GenerateCommand {
             .replaceAll(/\n+$/g, '')
             .replaceAll(/\n{3,}/g, '\n\n');
 
-        if(options.outputFile.endsWith('.js')) {
+        if (options.outputFile.endsWith('.js')) {
             console.log('Transpiling output from TS to JS...');
 
             outContent = ts.transpileModule(outContent, {
@@ -147,19 +152,19 @@ export default class GenerateCommand {
 
 
         console.log(`Writing it all to ${options.outputFile}...`);
-        fs.writeFileSync(options.outputFile, outContent, {encoding:'utf8'});
+        fs.writeFileSync(options.outputFile, outContent, {encoding: 'utf8'});
         console.log('');
         console.log(`Generated ${options.outputFile}`);
         console.log('Now create something awesome!');
         console.log('');
     }
 
-    private *generateObjectTypes(types: Type[]): IterableIterator<string> {
-        for(const type of types) {
+    private* generateObjectTypes(types: Type[]): IterableIterator<string> {
+        for (const type of types) {
             yield `export interface ${type.name} {`;
 
             const isInputType = type.kind == 'INPUT_OBJECT';
-            for(const field of (isInputType ? type.inputFields : type.fields) || []) {
+            for (const field of (isInputType ? type.inputFields : type.fields) || []) {
                 yield `  ${field.name}${this.toTypeAppend(field.type, true, !isInputType)},`;
             }
 
@@ -167,17 +172,17 @@ export default class GenerateCommand {
         }
     }
 
-    private *generateReturnTypeBuilders(types: Type[]): IterableIterator<string> {
-        for(const type of types) {
+    private* generateReturnTypeBuilders(types: Type[]): IterableIterator<string> {
+        for (const type of types) {
             const returnTypes = (type.fields || [])
-                .map(f=>({name: f.name, info: this.returnTypeInfo(f.type)}))
-                .filter((f): f is {name: string, info: ReturnTypeInfo} => !!f.info);
+                .map(f => ({name: f.name, info: this.returnTypeInfo(f.type)}))
+                .filter((f): f is { name: string, info: ReturnTypeInfo } => !!f.info);
 
             yield fillStub('ReturnTypeBuilder', {
-                'SIMPLEFIELDLITERALS': returnTypes.filter(t=>t.info.kind=='scalar').map(t=>JSON.stringify(t.name)).join('|') || 'never',
-                'SIMPLEFIELDARRAY': JSON.stringify(returnTypes.filter(t=>t.info.kind=='scalar').map(t=>t.name)),
+                'SIMPLEFIELDLITERALS': returnTypes.filter(t => t.info.kind == 'scalar').map(t => JSON.stringify(t.name)).join('|') || 'never',
+                'SIMPLEFIELDARRAY': JSON.stringify(returnTypes.filter(t => t.info.kind == 'scalar').map(t => t.name)),
                 'OBJECTFIELDOBJECT': JSON.stringify(
-                    returnTypes.filter(t=>t.info.kind=='object')
+                    returnTypes.filter(t => t.info.kind == 'object')
                         .reduce((obj: Record<string, string>, t) => {
                             obj[t.name] = `${t.info.type}ReturnTypeBuilder`;
                             return obj;
@@ -188,29 +193,29 @@ export default class GenerateCommand {
         }
     }
 
-    private *generateEnumTypes(enumTypes: Type[]): IterableIterator<string> {
-        for(const enumType of enumTypes) {
+    private* generateEnumTypes(enumTypes: Type[]): IterableIterator<string> {
+        for (const enumType of enumTypes) {
             yield fillStub('Enum', {
                 'ENUMCLASSNAME': enumType.name,
-                'POSSIBLEVALUES': (enumType.enumValues || []).map(t=>`${t.name}:${enumType.name}.${t.name}`).join(','),
-                'ENUMVALUES': (enumType.enumValues || []).map(t=>`static readonly ${t.name}: ${enumType.name} = new ${enumType.name}(${JSON.stringify(t.name)});`).join('\n    '),
-                'STRINGVALUES': (enumType.enumValues || []).map(t=>`${JSON.stringify(t.name)}`).join('|'),
-                'LIST': (enumType.enumValues || []).map(t=>`${enumType.name}.${t.name}`).join(','),
+                'POSSIBLEVALUES': (enumType.enumValues || []).map(t => `${t.name}:${enumType.name}.${t.name}`).join(','),
+                'ENUMVALUES': (enumType.enumValues || []).map(t => `static readonly ${t.name}: ${enumType.name} = new ${enumType.name}(${JSON.stringify(t.name)});`).join('\n    '),
+                'STRINGVALUES': (enumType.enumValues || []).map(t => `${JSON.stringify(t.name)}`).join('|'),
+                'LIST': (enumType.enumValues || []).map(t => `${enumType.name}.${t.name}`).join(','),
             });
         }
     }
 
-    private *generateQueryFactory(factoryType: RootType, queries: Field[], exportFactoryAs: string, executionFunctionName: string|null = null): IterableIterator<string> {
+    private* generateQueryFactory(rootType: RootType, queries: Field[], exportFactoryAs: string, executionFunctionName: string | null = null): IterableIterator<string> {
         yield `export class ${exportFactoryAs} {`;
 
-        for(const query of queries) {
-            if(query.args.length < 1) {
+        for (const query of queries) {
+            if (query.args.length < 1) {
                 yield `  public static ${query.name}() {`;
-                yield `    return new ${pascalCase(query.name)}${pascalCase(factoryType)}();`;
+                yield `    return new ${pascalCase(query.name)}${pascalCase(rootType)}();`;
                 yield '  }';
             } else {
-                yield `  public static ${query.name}(queryArgs?: ${pascalCase(query.name)}${pascalCase(factoryType)}Arguments) {`;
-                yield `    return new ${pascalCase(query.name)}${pascalCase(factoryType)}(queryArgs);`;
+                yield `  public static ${query.name}(queryArgs?: ${pascalCase(query.name)}${pascalCase(rootType)}Arguments) {`;
+                yield `    return new ${pascalCase(query.name)}${pascalCase(rootType)}(queryArgs);`;
                 yield '  }';
             }
         }
@@ -218,20 +223,20 @@ export default class GenerateCommand {
         yield '}';
         yield '';
 
-        for(const query of queries) {
+        for (const query of queries) {
             const returnTypeInfo = this.returnTypeInfo(query.type);
             const params = this.argsToMethodParameters(query.args);
-            const queryClassName = `${pascalCase(query.name)}${pascalCase(factoryType)}`;
+            const queryClassName = `${pascalCase(query.name)}${pascalCase(rootType)}`;
 
             const includeInStub: string[] = [];
-            if(returnTypeInfo?.kind == 'object') {
+            if (returnTypeInfo?.kind == 'object') {
                 includeInStub.push('RETURNTYPEOBJECT');
             }
-            if(executionFunctionName) {
+            if (executionFunctionName) {
                 includeInStub.push('ADDEXECUTOR');
             }
             let argumentsInterfaceName = 'Record<string, never>';
-            if(params.typed.length > 0) {
+            if (params.typed.length > 0) {
                 includeInStub.push('ARGUMENTS');
                 argumentsInterfaceName = `${queryClassName}Arguments`;
             }
@@ -241,9 +246,14 @@ export default class GenerateCommand {
                 'QUERYNAME': query.name,
                 'ARGUMENTINTERFACEPROPERTIES': params.typed.join(';\n    '),
                 'ARGUMENTINTERFACENAME': argumentsInterfaceName,
-                'ROOTTYPE': factoryType,
+                'ROOTTYPE': rootType,
                 'RETURNTYPE': this.toTypeAppend(query.type, false),
                 'EXECUTIONFUNCTIONNAME': executionFunctionName || 'execute',
+                'IMPLEMENTS': ({
+                    mutation: `GraphtonMutation<${queryClassName}Response>`,
+                    query: `GraphtonQuery<${queryClassName}Response>`,
+                    subscription: `GraphtonSubscription<${queryClassName}Response>`
+                })[rootType],
                 'RETURNTYPEBUILDER': returnTypeInfo?.kind == 'object'
                     ? `${this.returnTypeInfo(query.type)?.type}ReturnTypeBuilder`
                     : 'null',
@@ -266,21 +276,21 @@ export default class GenerateCommand {
     private toTypeAppend(type: ReturnType, isRootType = true, enumsAreStrings = true): string {
         const typeInfo = this.returnTypeInfo(type);
 
-        if(!typeInfo) {
+        if (!typeInfo) {
             return '?: unknown'
         }
 
         let typeAppend = '';
 
-        if(!typeInfo.notNull) {
+        if (!typeInfo.notNull) {
             typeAppend += `?: (${scalarMap(typeInfo.type)} | null)`;
         } else {
-            typeAppend += `${isRootType?'?':''}: ${enumsAreStrings && typeInfo.kind === 'enum' ? `keyof typeof ${typeInfo.type}.possibleValues` : scalarMap(typeInfo.type)}`;
+            typeAppend += `${isRootType ? '?' : ''}: ${enumsAreStrings && typeInfo.kind === 'enum' ? `keyof typeof ${typeInfo.type}.possibleValues` : scalarMap(typeInfo.type)}`;
         }
 
-        if(typeInfo.isListOf) {
+        if (typeInfo.isListOf) {
             typeAppend += '[]';
-            if(!typeInfo.listNotNull) {
+            if (!typeInfo.listNotNull) {
                 typeAppend += ' | null';
             }
         }
@@ -288,7 +298,7 @@ export default class GenerateCommand {
         return typeAppend;
     }
 
-    private returnTypeInfo(type: ReturnType, returnTypeInfo?: ReturnTypeInfo): ReturnTypeInfo|null {
+    private returnTypeInfo(type: ReturnType, returnTypeInfo?: ReturnTypeInfo): ReturnTypeInfo | null {
         returnTypeInfo = returnTypeInfo || {
             isListOf: false,
             kind: 'scalar',
@@ -296,7 +306,7 @@ export default class GenerateCommand {
             type: ''
         };
 
-        switch(type?.kind || '') {
+        switch (type?.kind || '') {
             case 'OBJECT':
             case 'INPUT_OBJECT':
                 returnTypeInfo.type = type.name;
@@ -311,7 +321,7 @@ export default class GenerateCommand {
                 returnTypeInfo.kind = 'enum';
                 return returnTypeInfo;
             case 'NON_NULL':
-                if(returnTypeInfo.isListOf) {
+                if (returnTypeInfo.isListOf) {
                     returnTypeInfo.listNotNull = true;
                 } else {
                     returnTypeInfo.notNull = true;

@@ -58,6 +58,11 @@ export default class GenerateCommand {
             fillStub('GraphtonBaseQuery'),
             fillStub('GraphtonBaseReturnTypeBuilder'),
             fillStub('GraphtonBaseEnum'),
+            fillStub('GraphtonQueryTypeInterfaces', {
+                'QUERYFUNCTION': options.queryFunction,
+                'MUTATEFUNCTION': options.mutateFunction,
+                'SUBSCRIBEFUNCTION': options.subscribeFunction,
+            }, options.exportSubscriptionFactoryAs !== false ? ['SUBSCRIPTIONS'] : []),
         ]);
         console.log('Generating types & return type builders...');
         outContentSections.push(...[
@@ -154,17 +159,17 @@ export default class GenerateCommand {
             });
         }
     }
-    *generateQueryFactory(factoryType, queries, exportFactoryAs, executionFunctionName = null) {
+    *generateQueryFactory(rootType, queries, exportFactoryAs, executionFunctionName = null) {
         yield `export class ${exportFactoryAs} {`;
         for (const query of queries) {
             if (query.args.length < 1) {
                 yield `  public static ${query.name}() {`;
-                yield `    return new ${pascalCase(query.name)}${pascalCase(factoryType)}();`;
+                yield `    return new ${pascalCase(query.name)}${pascalCase(rootType)}();`;
                 yield '  }';
             }
             else {
-                yield `  public static ${query.name}(queryArgs?: ${pascalCase(query.name)}${pascalCase(factoryType)}Arguments) {`;
-                yield `    return new ${pascalCase(query.name)}${pascalCase(factoryType)}(queryArgs);`;
+                yield `  public static ${query.name}(queryArgs?: ${pascalCase(query.name)}${pascalCase(rootType)}Arguments) {`;
+                yield `    return new ${pascalCase(query.name)}${pascalCase(rootType)}(queryArgs);`;
                 yield '  }';
             }
         }
@@ -173,7 +178,7 @@ export default class GenerateCommand {
         for (const query of queries) {
             const returnTypeInfo = this.returnTypeInfo(query.type);
             const params = this.argsToMethodParameters(query.args);
-            const queryClassName = `${pascalCase(query.name)}${pascalCase(factoryType)}`;
+            const queryClassName = `${pascalCase(query.name)}${pascalCase(rootType)}`;
             const includeInStub = [];
             if (returnTypeInfo?.kind == 'object') {
                 includeInStub.push('RETURNTYPEOBJECT');
@@ -191,9 +196,14 @@ export default class GenerateCommand {
                 'QUERYNAME': query.name,
                 'ARGUMENTINTERFACEPROPERTIES': params.typed.join(';\n    '),
                 'ARGUMENTINTERFACENAME': argumentsInterfaceName,
-                'ROOTTYPE': factoryType,
+                'ROOTTYPE': rootType,
                 'RETURNTYPE': this.toTypeAppend(query.type, false),
                 'EXECUTIONFUNCTIONNAME': executionFunctionName || 'execute',
+                'IMPLEMENTS': ({
+                    mutation: `GraphtonMutation<${queryClassName}Response>`,
+                    query: `GraphtonQuery<${queryClassName}Response>`,
+                    subscription: `GraphtonSubscription<${queryClassName}Response>`
+                })[rootType],
                 'RETURNTYPEBUILDER': returnTypeInfo?.kind == 'object'
                     ? `${this.returnTypeInfo(query.type)?.type}ReturnTypeBuilder`
                     : 'null',

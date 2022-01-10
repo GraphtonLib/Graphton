@@ -3,7 +3,7 @@ import { GraphtonBaseQuery } from './GraphtonBaseQuery.stub.js';
 import { _t_TYPENAME_t_ReturnTypeBuilder as _t_RETURNTYPEBUILDER_t_ } from './ReturnTypeBuilder.stub.js';
 /*ENDIF:ARGUMENTS*/
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-class _t_QUERYCLASSNAME_t_ extends GraphtonBaseQuery {
+class _t_QUERYCLASSNAME_t_ extends GraphtonBaseQuery /*IF:ADDEXECUTOR*/ /*!implements!*/ /*IMPLEMENTS*/ /*ENDIF:ADDEXECUTOR*/ {
     queryName = '/*QUERYNAME*/';
     queryArgs = {};
     rootType = '/*ROOTTYPE*/';

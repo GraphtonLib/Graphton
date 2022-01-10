@@ -23,7 +23,8 @@ export function fillStub(stub, substitutions = {}, conditions = []) {
             .replaceAll(`/*ENDIF:${condition}*/`, '');
     }
     stubContent = stubContent.replaceAll(/\/\*IF:[A-Z]+?\*\/[^]*?\/\*ENDIF:[A-Z]+?\*\//g, '')
-        .replaceAll(/\/\*IGNORE\*\/[^]*?\/\*ENDIGNORE\*\//g, '');
+        .replaceAll(/\/\*IGNORE\*\/[^]*?\/\*ENDIGNORE\*\//g, '')
+        .replaceAll(/\/\*!(.*?)!\*\//g, '$1');
     stubContent = stubContent.replaceAll(/\/\*.*?\*\//g, '')
         .replaceAll(/'\/\*\*.*?\*\*\/'/g, '')
         .replaceAll(/_t_.*?_t_/g, '');

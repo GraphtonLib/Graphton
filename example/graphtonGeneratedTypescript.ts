@@ -217,6 +217,18 @@ abstract class GraphtonEnum {
     }
 }
 
+export interface GraphtonQuery<T> {
+    get(requestOptions: RequestOptions): Promise<T>;
+}
+
+export interface GraphtonMutation<T> {
+    do(requestOptions: RequestOptions): Promise<T>;
+}
+
+export interface GraphtonSubscription<T> {
+    subscribe(requestOptions: RequestOptions): Promise<T>;
+}
+
 // REGION: Types
 export interface User {
   id?: string,
@@ -334,7 +346,7 @@ export interface UsersQueryResponse {
     response: AxiosResponse;
 }
 
-class UsersQuery extends GraphtonBaseQuery<Record<string, never>> {
+class UsersQuery extends GraphtonBaseQuery<Record<string, never>> implements GraphtonQuery<UsersQueryResponse> {
     protected queryName = 'users';
     protected queryArgs: Partial<Record<string, never>> = {};
     protected rootType: RootType = 'query';
@@ -389,7 +401,7 @@ export interface UsersOrderedQueryArguments {
     orderBy?: (UserOrderInput | null)[];
 }
 
-class UsersOrderedQuery extends GraphtonBaseQuery<UsersOrderedQueryArguments> {
+class UsersOrderedQuery extends GraphtonBaseQuery<UsersOrderedQueryArguments> implements GraphtonQuery<UsersOrderedQueryResponse> {
     protected queryName = 'usersOrdered';
     protected queryArgs: Partial<UsersOrderedQueryArguments> = {};
     protected rootType: RootType = 'query';
@@ -449,7 +461,7 @@ export interface UserQueryArguments {
     id: string;
 }
 
-class UserQuery extends GraphtonBaseQuery<UserQueryArguments> {
+class UserQuery extends GraphtonBaseQuery<UserQueryArguments> implements GraphtonQuery<UserQueryResponse> {
     protected queryName = 'user';
     protected queryArgs: Partial<UserQueryArguments> = {};
     protected rootType: RootType = 'query';
@@ -509,7 +521,7 @@ export interface UserExistsQueryArguments {
     id: string;
 }
 
-class UserExistsQuery extends GraphtonBaseQuery<UserExistsQueryArguments> {
+class UserExistsQuery extends GraphtonBaseQuery<UserExistsQueryArguments> implements GraphtonQuery<UserExistsQueryResponse> {
     protected queryName = 'userExists';
     protected queryArgs: Partial<UserExistsQueryArguments> = {};
     protected rootType: RootType = 'query';
@@ -575,7 +587,7 @@ export interface CreateUserMutationArguments {
     age?: (number | null);
 }
 
-class CreateUserMutation extends GraphtonBaseQuery<CreateUserMutationArguments> {
+class CreateUserMutation extends GraphtonBaseQuery<CreateUserMutationArguments> implements GraphtonMutation<CreateUserMutationResponse> {
     protected queryName = 'createUser';
     protected queryArgs: Partial<CreateUserMutationArguments> = {};
     protected rootType: RootType = 'mutation';
@@ -638,7 +650,7 @@ export interface UpdateUserMutationArguments {
     age?: (number | null);
 }
 
-class UpdateUserMutation extends GraphtonBaseQuery<UpdateUserMutationArguments> {
+class UpdateUserMutation extends GraphtonBaseQuery<UpdateUserMutationArguments> implements GraphtonMutation<UpdateUserMutationResponse> {
     protected queryName = 'updateUser';
     protected queryArgs: Partial<UpdateUserMutationArguments> = {};
     protected rootType: RootType = 'mutation';
@@ -698,7 +710,7 @@ export interface DeleteUserMutationArguments {
     id: string;
 }
 
-class DeleteUserMutation extends GraphtonBaseQuery<DeleteUserMutationArguments> {
+class DeleteUserMutation extends GraphtonBaseQuery<DeleteUserMutationArguments> implements GraphtonMutation<DeleteUserMutationResponse> {
     protected queryName = 'deleteUser';
     protected queryArgs: Partial<DeleteUserMutationArguments> = {};
     protected rootType: RootType = 'mutation';
@@ -761,7 +773,7 @@ export interface PostAddedSubscriptionResponse {
     response: AxiosResponse;
 }
 
-class PostAddedSubscription extends GraphtonBaseQuery<Record<string, never>> {
+class PostAddedSubscription extends GraphtonBaseQuery<Record<string, never>> implements GraphtonSubscription<PostAddedSubscriptionResponse> {
     protected queryName = 'postAdded';
     protected queryArgs: Partial<Record<string, never>> = {};
     protected rootType: RootType = 'subscription';

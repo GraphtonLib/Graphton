@@ -27,7 +27,7 @@ export interface _t_ARGUMENTINTERFACENAME_t_ {
 /*ENDIF:ARGUMENTS*/
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-class _t_QUERYCLASSNAME_t_ extends GraphtonBaseQuery<_t_ARGUMENTINTERFACENAME_t_> {
+class _t_QUERYCLASSNAME_t_ extends GraphtonBaseQuery<_t_ARGUMENTINTERFACENAME_t_> /*IF:ADDEXECUTOR*//*!implements!*/ /*IMPLEMENTS*//*ENDIF:ADDEXECUTOR*/ {
     protected queryName = '/*QUERYNAME*/';
     protected queryArgs: Partial<_t_ARGUMENTINTERFACENAME_t_> = {};
     protected rootType: RootType = '/*ROOTTYPE*/';
@@ -78,5 +78,5 @@ class _t_QUERYCLASSNAME_t_ extends GraphtonBaseQuery<_t_ARGUMENTINTERFACENAME_t_
     async /*IGNORE*/execute/*ENDIGNORE*//*EXECUTIONFUNCTIONNAME*/(requestOptions: RequestOptions = {}): Promise<_t_QUERYCLASSNAME_t_Response> {
         return <_t_QUERYCLASSNAME_t_Response>(await super.execute(requestOptions));
     }
-    /*ENDIF:ADDGET*/
+    /*ENDIF:ADDEXECUTOR*/
 }
