@@ -14,8 +14,8 @@ import axios from 'axios';
 /*IGNORE*/export /*ENDIGNORE*/type RootType = 'query'|'mutation'|'subscription'/*IGNORE*/|'/*ROOTTYPE*/'/*ENDIGNORE*/;
 
 /*IGNORE*/export /*ENDIGNORE*/abstract class GraphtonBaseQuery<T> {
-    protected abstract queryName: string;
-    protected abstract rootType: RootType;
+    public abstract readonly queryName: string;
+    public abstract readonly rootType: RootType;
     protected abstract returnType: GraphtonBaseReturnTypeBuilder<any, any> | null;
 
     public abstract setArgs(queryArgs: Partial<T>): void;
@@ -63,7 +63,7 @@ import axios from 'axios';
         });
 
         return {
-            data: response.data.data,
+            ...response.data,
             response
         }
     }

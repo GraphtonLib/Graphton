@@ -8,7 +8,9 @@ export interface RequestOptions {
     url?: GraphQLServerEndpoint
 }
 export interface QueryResponse {
+    [key: string]: unknown,
     data: Record<string, unknown>,
+    extensions?: Record<string, unknown>,
     response: AxiosResponse
 }
 export interface ReturnTypeInfo {

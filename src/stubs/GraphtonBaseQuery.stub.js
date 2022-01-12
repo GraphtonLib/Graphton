@@ -44,7 +44,7 @@ import axios from 'axios';
             },
         });
         return {
-            data: response.data.data,
+            ...response.data,
             response
         };
     }

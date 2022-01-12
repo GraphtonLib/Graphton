@@ -30,7 +30,9 @@ export interface RequestOptions {
     url?: GraphQLServerEndpoint
 }
 export interface QueryResponse {
+    [key: string]: unknown,
     data: Record<string, unknown>,
+    extensions?: Record<string, unknown>,
     response: AxiosResponse
 }
 export interface ReturnTypeInfo {
@@ -52,8 +54,8 @@ import axios from 'axios';
 type RootType = 'query'|'mutation'|'subscription';
 
 abstract class GraphtonBaseQuery<T> {
-    protected abstract queryName: string;
-    protected abstract rootType: RootType;
+    public abstract readonly queryName: string;
+    public abstract readonly rootType: RootType;
     protected abstract returnType: GraphtonBaseReturnTypeBuilder<any, any> | null;
 
     public abstract setArgs(queryArgs: Partial<T>): void;
@@ -101,7 +103,7 @@ abstract class GraphtonBaseQuery<T> {
         });
 
         return {
-            data: response.data.data,
+            ...response.data,
             response
         }
     }
@@ -217,16 +219,21 @@ abstract class GraphtonEnum {
     }
 }
 
-export interface GraphtonQuery<T> {
-    get(requestOptions: RequestOptions): Promise<T>;
+export interface GraphtonQueryBuilder {
+    queryName: string;
+    rootType: RootType;
 }
 
-export interface GraphtonMutation<T> {
-    do(requestOptions: RequestOptions): Promise<T>;
+export interface GraphtonQuery<T> extends GraphtonQueryBuilder {
+    get(requestOptions?: RequestOptions): Promise<T>;
 }
 
-export interface GraphtonSubscription<T> {
-    subscribe(requestOptions: RequestOptions): Promise<T>;
+export interface GraphtonMutation<T> extends GraphtonQueryBuilder {
+    do(requestOptions?: RequestOptions): Promise<T>;
+}
+
+export interface GraphtonSubscription<T> extends GraphtonQueryBuilder {
+    subscribe(requestOptions?: RequestOptions): Promise<T>;
 }
 
 // REGION: Types
@@ -339,17 +346,16 @@ export class Query {
   }
 }
 
-export interface UsersQueryResponse {
+export interface UsersQueryResponse extends QueryResponse {
     data: {
         users: User[]
     };
-    response: AxiosResponse;
 }
 
 class UsersQuery extends GraphtonBaseQuery<Record<string, never>> implements GraphtonQuery<UsersQueryResponse> {
-    protected queryName = 'users';
+    public readonly queryName = 'users';
+    public readonly rootType: RootType = 'query';
     protected queryArgs: Partial<Record<string, never>> = {};
-    protected rootType: RootType = 'query';
     protected returnType = new UserReturnTypeBuilder();
 
     public setArgs(queryArgs: Partial<Record<string, never>>) {
@@ -390,11 +396,10 @@ class UsersQuery extends GraphtonBaseQuery<Record<string, never>> implements Gra
 
 }
 
-export interface UsersOrderedQueryResponse {
+export interface UsersOrderedQueryResponse extends QueryResponse {
     data: {
         usersOrdered: User[]
     };
-    response: AxiosResponse;
 }
 
 export interface UsersOrderedQueryArguments {
@@ -402,9 +407,9 @@ export interface UsersOrderedQueryArguments {
 }
 
 class UsersOrderedQuery extends GraphtonBaseQuery<UsersOrderedQueryArguments> implements GraphtonQuery<UsersOrderedQueryResponse> {
-    protected queryName = 'usersOrdered';
+    public readonly queryName = 'usersOrdered';
+    public readonly rootType: RootType = 'query';
     protected queryArgs: Partial<UsersOrderedQueryArguments> = {};
-    protected rootType: RootType = 'query';
     protected returnType = new UserReturnTypeBuilder();
 
     constructor(queryArgs?: UsersOrderedQueryArguments) {
@@ -450,11 +455,10 @@ class UsersOrderedQuery extends GraphtonBaseQuery<UsersOrderedQueryArguments> im
 
 }
 
-export interface UserQueryResponse {
+export interface UserQueryResponse extends QueryResponse {
     data: {
         user?: (User | null)
     };
-    response: AxiosResponse;
 }
 
 export interface UserQueryArguments {
@@ -462,9 +466,9 @@ export interface UserQueryArguments {
 }
 
 class UserQuery extends GraphtonBaseQuery<UserQueryArguments> implements GraphtonQuery<UserQueryResponse> {
-    protected queryName = 'user';
+    public readonly queryName = 'user';
+    public readonly rootType: RootType = 'query';
     protected queryArgs: Partial<UserQueryArguments> = {};
-    protected rootType: RootType = 'query';
     protected returnType = new UserReturnTypeBuilder();
 
     constructor(queryArgs?: UserQueryArguments) {
@@ -510,11 +514,10 @@ class UserQuery extends GraphtonBaseQuery<UserQueryArguments> implements Graphto
 
 }
 
-export interface UserExistsQueryResponse {
+export interface UserExistsQueryResponse extends QueryResponse {
     data: {
         userExists: boolean
     };
-    response: AxiosResponse;
 }
 
 export interface UserExistsQueryArguments {
@@ -522,9 +525,9 @@ export interface UserExistsQueryArguments {
 }
 
 class UserExistsQuery extends GraphtonBaseQuery<UserExistsQueryArguments> implements GraphtonQuery<UserExistsQueryResponse> {
-    protected queryName = 'userExists';
+    public readonly queryName = 'userExists';
+    public readonly rootType: RootType = 'query';
     protected queryArgs: Partial<UserExistsQueryArguments> = {};
-    protected rootType: RootType = 'query';
     protected returnType =  null;
 
     constructor(queryArgs?: UserExistsQueryArguments) {
@@ -574,11 +577,10 @@ export class Mutation {
   }
 }
 
-export interface CreateUserMutationResponse {
+export interface CreateUserMutationResponse extends QueryResponse {
     data: {
         createUser: User
     };
-    response: AxiosResponse;
 }
 
 export interface CreateUserMutationArguments {
@@ -588,9 +590,9 @@ export interface CreateUserMutationArguments {
 }
 
 class CreateUserMutation extends GraphtonBaseQuery<CreateUserMutationArguments> implements GraphtonMutation<CreateUserMutationResponse> {
-    protected queryName = 'createUser';
+    public readonly queryName = 'createUser';
+    public readonly rootType: RootType = 'mutation';
     protected queryArgs: Partial<CreateUserMutationArguments> = {};
-    protected rootType: RootType = 'mutation';
     protected returnType = new UserReturnTypeBuilder();
 
     constructor(queryArgs?: CreateUserMutationArguments) {
@@ -636,11 +638,10 @@ class CreateUserMutation extends GraphtonBaseQuery<CreateUserMutationArguments> 
 
 }
 
-export interface UpdateUserMutationResponse {
+export interface UpdateUserMutationResponse extends QueryResponse {
     data: {
         updateUser: User
     };
-    response: AxiosResponse;
 }
 
 export interface UpdateUserMutationArguments {
@@ -651,9 +652,9 @@ export interface UpdateUserMutationArguments {
 }
 
 class UpdateUserMutation extends GraphtonBaseQuery<UpdateUserMutationArguments> implements GraphtonMutation<UpdateUserMutationResponse> {
-    protected queryName = 'updateUser';
+    public readonly queryName = 'updateUser';
+    public readonly rootType: RootType = 'mutation';
     protected queryArgs: Partial<UpdateUserMutationArguments> = {};
-    protected rootType: RootType = 'mutation';
     protected returnType = new UserReturnTypeBuilder();
 
     constructor(queryArgs?: UpdateUserMutationArguments) {
@@ -699,11 +700,10 @@ class UpdateUserMutation extends GraphtonBaseQuery<UpdateUserMutationArguments> 
 
 }
 
-export interface DeleteUserMutationResponse {
+export interface DeleteUserMutationResponse extends QueryResponse {
     data: {
         deleteUser: User
     };
-    response: AxiosResponse;
 }
 
 export interface DeleteUserMutationArguments {
@@ -711,9 +711,9 @@ export interface DeleteUserMutationArguments {
 }
 
 class DeleteUserMutation extends GraphtonBaseQuery<DeleteUserMutationArguments> implements GraphtonMutation<DeleteUserMutationResponse> {
-    protected queryName = 'deleteUser';
+    public readonly queryName = 'deleteUser';
+    public readonly rootType: RootType = 'mutation';
     protected queryArgs: Partial<DeleteUserMutationArguments> = {};
-    protected rootType: RootType = 'mutation';
     protected returnType = new UserReturnTypeBuilder();
 
     constructor(queryArgs?: DeleteUserMutationArguments) {
@@ -766,17 +766,16 @@ export class Subscription {
   }
 }
 
-export interface PostAddedSubscriptionResponse {
+export interface PostAddedSubscriptionResponse extends QueryResponse {
     data: {
         postAdded: Post
     };
-    response: AxiosResponse;
 }
 
 class PostAddedSubscription extends GraphtonBaseQuery<Record<string, never>> implements GraphtonSubscription<PostAddedSubscriptionResponse> {
-    protected queryName = 'postAdded';
+    public readonly queryName = 'postAdded';
+    public readonly rootType: RootType = 'subscription';
     protected queryArgs: Partial<Record<string, never>> = {};
-    protected rootType: RootType = 'subscription';
     protected returnType = new PostReturnTypeBuilder();
 
     public setArgs(queryArgs: Partial<Record<string, never>>) {

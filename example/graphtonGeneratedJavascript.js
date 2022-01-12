@@ -56,7 +56,7 @@ class GraphtonBaseQuery {
             },
         });
         return {
-            data: response.data.data,
+            ...response.data,
             response
         };
     }
@@ -220,8 +220,8 @@ export class Query {
 }
 class UsersQuery extends GraphtonBaseQuery {
     queryName = 'users';
-    queryArgs = {};
     rootType = 'query';
+    queryArgs = {};
     returnType = new UserReturnTypeBuilder();
     setArgs(queryArgs) {
         this.queryArgs = { ...this.queryArgs, ...queryArgs };
@@ -256,8 +256,8 @@ class UsersQuery extends GraphtonBaseQuery {
 }
 class UsersOrderedQuery extends GraphtonBaseQuery {
     queryName = 'usersOrdered';
-    queryArgs = {};
     rootType = 'query';
+    queryArgs = {};
     returnType = new UserReturnTypeBuilder();
     constructor(queryArgs) {
         super();
@@ -296,8 +296,8 @@ class UsersOrderedQuery extends GraphtonBaseQuery {
 }
 class UserQuery extends GraphtonBaseQuery {
     queryName = 'user';
-    queryArgs = {};
     rootType = 'query';
+    queryArgs = {};
     returnType = new UserReturnTypeBuilder();
     constructor(queryArgs) {
         super();
@@ -336,8 +336,8 @@ class UserQuery extends GraphtonBaseQuery {
 }
 class UserExistsQuery extends GraphtonBaseQuery {
     queryName = 'userExists';
-    queryArgs = {};
     rootType = 'query';
+    queryArgs = {};
     returnType = null;
     constructor(queryArgs) {
         super();
@@ -380,8 +380,8 @@ export class Mutation {
 }
 class CreateUserMutation extends GraphtonBaseQuery {
     queryName = 'createUser';
-    queryArgs = {};
     rootType = 'mutation';
+    queryArgs = {};
     returnType = new UserReturnTypeBuilder();
     constructor(queryArgs) {
         super();
@@ -420,8 +420,8 @@ class CreateUserMutation extends GraphtonBaseQuery {
 }
 class UpdateUserMutation extends GraphtonBaseQuery {
     queryName = 'updateUser';
-    queryArgs = {};
     rootType = 'mutation';
+    queryArgs = {};
     returnType = new UserReturnTypeBuilder();
     constructor(queryArgs) {
         super();
@@ -460,8 +460,8 @@ class UpdateUserMutation extends GraphtonBaseQuery {
 }
 class DeleteUserMutation extends GraphtonBaseQuery {
     queryName = 'deleteUser';
-    queryArgs = {};
     rootType = 'mutation';
+    queryArgs = {};
     returnType = new UserReturnTypeBuilder();
     constructor(queryArgs) {
         super();
@@ -506,8 +506,8 @@ export class Subscription {
 }
 class PostAddedSubscription extends GraphtonBaseQuery {
     queryName = 'postAdded';
-    queryArgs = {};
     rootType = 'subscription';
+    queryArgs = {};
     returnType = new PostReturnTypeBuilder();
     setArgs(queryArgs) {
         this.queryArgs = { ...this.queryArgs, ...queryArgs };

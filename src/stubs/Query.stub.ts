@@ -4,7 +4,7 @@ import {_t_TYPENAME_t_ReturnTypeBuilder as _t_RETURNTYPEBUILDER_t_} from './Retu
 
 type GraphQLServerEndpoint = string;
 type Headers = Record<string, string>;
-import {AxiosResponse} from 'axios';
+import {QueryResponse} from './GraphtonTypes.stub';
 interface RequestOptions {
     headers?: Headers,
     url?: GraphQLServerEndpoint
@@ -12,11 +12,10 @@ interface RequestOptions {
 /*ENDIGNORE*/
 
 /*IF:ADDEXECUTOR*/
-export interface _t_QUERYCLASSNAME_t_Response {
+export interface _t_QUERYCLASSNAME_t_Response extends QueryResponse {
     data: {
         /*QUERYNAME*//*RETURNTYPE*/
     };
-    response: AxiosResponse;
 }
 /*ENDIF:ADDEXECUTOR*/
 
@@ -28,9 +27,9 @@ export interface _t_ARGUMENTINTERFACENAME_t_ {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 class _t_QUERYCLASSNAME_t_ extends GraphtonBaseQuery<_t_ARGUMENTINTERFACENAME_t_> /*IF:ADDEXECUTOR*//*!implements!*/ /*IMPLEMENTS*//*ENDIF:ADDEXECUTOR*/ {
-    protected queryName = '/*QUERYNAME*/';
+    public readonly queryName = '/*QUERYNAME*/';
+    public readonly rootType: RootType = '/*ROOTTYPE*/';
     protected queryArgs: Partial<_t_ARGUMENTINTERFACENAME_t_> = {};
-    protected rootType: RootType = '/*ROOTTYPE*/';
     protected returnType = /*IF:RETURNTYPEOBJECT*/new/*ENDIF:RETURNTYPEOBJECT*/ _t_RETURNTYPEBUILDER_t_/*IF:RETURNTYPEOBJECT*/()/*ENDIF:RETURNTYPEOBJECT*/;
 
     /*IF:ARGUMENTS*/
