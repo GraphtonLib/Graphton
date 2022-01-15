@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.6.3](https://github.com/GraphtonLib/Graphton/compare/v0.6.2...v0.6.3) (2022-01-15)
+
+
+### Features
+
+* Add exported types for the three different query types ([ed675b2](https://github.com/GraphtonLib/Graphton/commit/ed675b29856458892f3688e7931af36f801e1129))
+* Added more usable exported types ([13d91b8](https://github.com/GraphtonLib/Graphton/commit/13d91b87a6a342a30a3d361fff9f41ab238ec8d3))
+
 ### [0.6.2](https://github.com/GraphtonLib/Graphton/compare/v0.6.1...v0.6.2) (2022-01-08)
 
 
