@@ -33,6 +33,7 @@ export interface QueryResponse {
     [key: string]: unknown,
     data: Record<string, unknown>,
     extensions?: Record<string, unknown>,
+    errors?: Record<string, unknown>[],
     response: AxiosResponse
 }
 export interface ReturnTypeInfo {
@@ -102,10 +103,16 @@ abstract class GraphtonBaseQuery<T> {
             },
         });
 
-        return {
+        const returnData = {
             ...response.data,
             response
+        };
+
+        if(returnData.errors) {
+            return Promise.reject(returnData);
         }
+
+        return returnData;
     }
 }
 

@@ -5,8 +5,8 @@ import { _t_TYPENAME_t_ReturnTypeBuilder as _t_RETURNTYPEBUILDER_t_ } from './Re
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 class _t_QUERYCLASSNAME_t_ extends GraphtonBaseQuery /*IF:ADDEXECUTOR*/ /*!implements!*/ /*IMPLEMENTS*/ /*ENDIF:ADDEXECUTOR*/ {
     queryName = '/*QUERYNAME*/';
-    queryArgs = {};
     rootType = '/*ROOTTYPE*/';
+    queryArgs = {};
     returnType = /*IF:RETURNTYPEOBJECT*/ new /*ENDIF:RETURNTYPEOBJECT*/ _t_RETURNTYPEBUILDER_t_ /*IF:RETURNTYPEOBJECT*/() /*ENDIF:RETURNTYPEOBJECT*/;
     /*IF:ARGUMENTS*/
     constructor(queryArgs) {

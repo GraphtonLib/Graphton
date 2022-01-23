@@ -55,10 +55,14 @@ class GraphtonBaseQuery {
                 ...requestOptions?.headers
             },
         });
-        return {
+        const returnData = {
             ...response.data,
             response
         };
+        if (returnData.errors) {
+            return Promise.reject(returnData);
+        }
+        return returnData;
     }
 }
 class GraphtonBaseReturnTypeBuilder {
