@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.6.4](https://github.com/GraphtonLib/Graphton/compare/v0.6.3...v0.6.4) (2022-01-23)
+
+
+### Features
+
+* Adds errors response as promise rejection ([8c1296d](https://github.com/GraphtonLib/Graphton/commit/8c1296d5eca9b283cf2a8bcdcc8685e961fbeb41))
+
 ### [0.6.3](https://github.com/GraphtonLib/Graphton/compare/v0.6.2...v0.6.3) (2022-01-15)
 
 
