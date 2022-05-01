@@ -28,9 +28,9 @@
     "FUNDING.yml"
   ],
   "scripts": {
-    "lint": "eslint",
-    "lint:fix": "eslint --fix",
-    "generate": "yarn generate:ts; yarn generate:js; yarn lint:fix --quiet example",
+    "lint": "prettier --check .",
+    "lint:fix": "prettier --write .",
+    "generate": "yarn generate:ts; yarn generate:js; prettier --write example",
     "generate:ts": "node src/graphton.js generate ./example/schema.json -o ./example/graphtonGeneratedTypescript.ts -s -d Date=any Time=number",
     "generate:js": "node src/graphton.js generate ./example/schema.json -o ./example/graphtonGeneratedJavascript.js -s -d Date=any Time=number",
     "dev": "tsc --watch",
