@@ -46,8 +46,7 @@ import axios from 'axios';
             return JSON.stringify(argValue);
         }
 
-        console.warn(`Unsure how to argify ${argValue} (of type ${typeof argValue}).`);
-        return '';
+        throw new Error(`Unsure how to argify ${argValue} (of type ${typeof argValue}).`);
     }
 
     /**

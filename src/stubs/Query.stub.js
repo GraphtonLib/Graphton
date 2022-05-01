@@ -20,8 +20,11 @@ class _t_QUERYCLASSNAME_t_ extends GraphtonBaseQuery /*IF:ADDEXECUTOR*/ /*!imple
     toArgString() {
         const queryArgItems = [];
         for (const [argKey, argValue] of Object.entries(this.queryArgs)) {
-            if (argValue) {
+            try {
                 queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            }
+            catch (e) {
+                console.warn(e);
             }
         }
         if (queryArgItems.length > 0) {

@@ -46,8 +46,10 @@ class _t_QUERYCLASSNAME_t_ extends GraphtonBaseQuery<_t_ARGUMENTINTERFACENAME_t_
     protected toArgString(): string {
         const queryArgItems: string[] = [];
         for(const [argKey, argValue] of Object.entries(this.queryArgs)) {
-            if (argValue) {
+            try {
                 queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+            } catch (e) {
+                console.warn(e);
             }
         }
 

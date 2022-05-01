@@ -29,8 +29,7 @@ import axios from 'axios';
         if (typeof argValue === 'string' || typeof argValue === 'number' || typeof argValue === 'boolean' || argValue === null) {
             return JSON.stringify(argValue);
         }
-        console.warn(`Unsure how to argify ${argValue} (of type ${typeof argValue}).`);
-        return '';
+        throw new Error(`Unsure how to argify ${argValue} (of type ${typeof argValue}).`);
     }
     /**
      * Execute the query
