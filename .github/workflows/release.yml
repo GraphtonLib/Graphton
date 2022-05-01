@@ -46,9 +46,10 @@ jobs:
         run: yarn standard-version --dry-run | sed -n '/^---$/,/^---$/p' | sed '1d;$d' | tee RELEASE_CHANGELOG.md
 
       - name: Set changelog, version and tag
-        run: [[ ! -z "$FORCE_VERSION_TYPE" ]] && yarn standard-version --as-version $FORCE_VERSION_TYPE|| yarn standard-version
         env:
           FORCE_VERSION_TYPE: ${{ github.event.inputs.forceVersionType }}
+        run: |
+          [[ ! -z "$FORCE_VERSION_TYPE" ]] && yarn standard-version --as-version $FORCE_VERSION_TYPE|| yarn standard-version
 
       - name: Grab new version for release
         run: echo "RELEASE_VERSION=$(node -e "console.log(require('./package.json').version);")" >> $GITHUB_ENV
