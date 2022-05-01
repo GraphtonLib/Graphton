@@ -15,7 +15,7 @@ A JS/TS generator that builds a GraphQL query builder for your API
 ## Index
 
 - [Installing](#installing)
-  - [Yarn (recommended)](#yarn-recommended)
+  - [Yarn](#yarn)
   - [npm](#npm)
 - [CLI Usage & options](#cli-usage--options)
   - [Example CLI usage](#example-cli-usage)
@@ -51,7 +51,7 @@ A JS/TS generator that builds a GraphQL query builder for your API
 
 You can install Graphton to your dev-dependencies using a package manager.
 
-#### Yarn (recommended)
+#### Yarn
 
 ```bash
 yarn add -D @graphtonlib/grapton
@@ -83,8 +83,8 @@ Options:
   -Q, --queryFunction <name>                The name of the function that posts the query. (default: "get")
   -M, --mutateFunction <name>               The name of the function that posts the mutation. (default: "do")
   -S, --subscribeFunction <name>            The name of the function that posts the subscription. (default: "subscribe")
-  -h, --help                                display help for command
-
+  -d, --defineScalar <scalars...>           Define custom scalars and their TS type. Use this if you don't want (some) scalars to be typed as string by default. (eg. --defineScalar Date=number Time=any)
+  -h, --help                                display help for command                            display help for command
 ```
 
 ### Example CLI usage

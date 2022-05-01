@@ -7,7 +7,7 @@ export interface GenerateCommandOptions {
   queryFunction: string;
   mutateFunction: string;
   subscribeFunction: string;
-  defineScalar: string[];
+  defineScalar?: string[];
 }
 
 export interface ReturnTypeInfo {

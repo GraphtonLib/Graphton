@@ -6,335 +6,374 @@
 
 // REGION: Base classes
 const settings = {
-    defaultHeaders: {},
-    defaultUrl: ''
-}
+  defaultHeaders: {},
+  defaultUrl: "",
+};
 
 export class GraphtonSettings {
-    public static setDefaultHeaders(headers: Record<string, string>): void {
-        settings.defaultHeaders = headers;
-    }
+  public static setDefaultHeaders(headers: Record<string, string>): void {
+    settings.defaultHeaders = headers;
+  }
 
-    public static setDefaultUrl(defaultUrl: string): void {
-        settings.defaultUrl = defaultUrl;
-    }
+  public static setDefaultUrl(defaultUrl: string): void {
+    settings.defaultUrl = defaultUrl;
+  }
 }
 
-import type {AxiosResponse} from 'axios';
+import type { AxiosResponse } from "axios";
 
 export type GraphQLServerEndpoint = string;
 export type Headers = Record<string, string>;
 
 export interface RequestOptions {
-    headers?: Headers,
-    url?: GraphQLServerEndpoint
+  headers?: Headers;
+  url?: GraphQLServerEndpoint;
 }
 export interface QueryResponse {
-    [key: string]: unknown,
-    data: Record<string, unknown>,
-    extensions?: Record<string, unknown>,
-    errors?: Record<string, unknown>[],
-    response: AxiosResponse
+  [key: string]: unknown;
+  data: Record<string, unknown>;
+  extensions?: Record<string, unknown>;
+  errors?: Record<string, unknown>[];
+  response: AxiosResponse;
 }
 export interface ReturnTypeInfo {
-    type: string,
-    notNull: boolean,
-    isListOf: boolean,
-    listNotNull?: boolean,
-    kind: 'scalar'|'enum'|'object',
+  type: string;
+  notNull: boolean;
+  isListOf: boolean;
+  listNotNull?: boolean;
+  kind: "scalar" | "enum" | "object";
 }
 export type AvailableFieldBuilderConstructor<T> = {
-    [Property in keyof T]: new() => T[Property]
-}
+  [Property in keyof T]: new () => T[Property];
+};
 export type QueryObjectFields<T> = {
-    [Property in keyof T]?: T[Property]
-}
+  [Property in keyof T]?: T[Property];
+};
 
-import axios from 'axios';
+import axios from "axios";
 
-type RootType = 'query'|'mutation'|'subscription';
+type RootType = "query" | "mutation" | "subscription";
 
 abstract class GraphtonBaseQuery<T> {
-    public abstract readonly queryName: string;
-    public abstract readonly rootType: RootType;
-    protected abstract returnType: GraphtonBaseReturnTypeBuilder<any, any> | null;
+  public abstract readonly queryName: string;
+  public abstract readonly rootType: RootType;
+  protected abstract returnType: GraphtonBaseReturnTypeBuilder<any, any> | null;
 
-    public abstract setArgs(queryArgs: Partial<T>): void;
-    protected abstract toArgString(): string;
+  public abstract setArgs(queryArgs: Partial<T>): void;
+  protected abstract toArgString(): string;
 
-    /**
-     * Transform builder to graphql query string
-     */
-    public toQuery(): string {
-        return `${this.rootType} ${this.queryName} { ${this.queryName}${this.toArgString()} ${this.returnType?.toReturnTypeString()||''} }`;
+  /**
+   * Transform builder to graphql query string
+   */
+  public toQuery(): string {
+    return `${this.rootType} ${this.queryName} { ${this.queryName}${this.toArgString()} ${
+      this.returnType?.toReturnTypeString() || ""
+    } }`;
+  }
+
+  protected argify(argValue: unknown): string {
+    if (argValue instanceof GraphtonEnum) {
+      return `${argValue}`;
+    }
+    if (Array.isArray(argValue)) {
+      return `[${argValue.map((v) => this.argify(v))}]`;
+    }
+    if (typeof argValue === "object" && !Array.isArray(argValue) && argValue !== null) {
+      const decoded: string[] = [];
+      for (const [key, value] of Object.entries(argValue)) {
+        decoded.push(`${key}: ${this.argify(value)}`);
+      }
+      return `{${decoded.join(",")}}`;
+    }
+    if (
+      typeof argValue === "string" ||
+      typeof argValue === "number" ||
+      typeof argValue === "boolean" ||
+      argValue === null
+    ) {
+      return JSON.stringify(argValue);
     }
 
-    protected argify(argValue: unknown): string {
-        if(argValue instanceof GraphtonEnum) {
-            return `${argValue}`;
-        }
-        if(Array.isArray(argValue)) {
-            return `[${argValue.map(v=>this.argify(v))}]`;
-        }
-        if(typeof argValue === 'object' && !Array.isArray(argValue) && argValue !== null) {
-            const decoded: string[] = [];
-            for(const [key, value] of Object.entries(argValue)) {
-                decoded.push(`${key}: ${this.argify(value)}`);
-            }
-            return `{${decoded.join(',')}}`;
-        }
-        if(typeof argValue === 'string' || typeof argValue === 'number' || typeof argValue === 'boolean' || argValue === null) {
-            return JSON.stringify(argValue);
-        }
+    throw new Error(`Unsure how to argify ${argValue} (of type ${typeof argValue}).`);
+  }
 
-        console.warn(`Unsure how to argify ${argValue} (of type ${typeof argValue}).`);
-        return '';
+  /**
+   * Execute the query
+   */
+  protected async execute(requestOptions: RequestOptions = {}): Promise<QueryResponse> {
+    const response = await axios.post(
+      requestOptions?.url || settings.defaultUrl,
+      { query: this.toQuery() },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          ...settings.defaultHeaders,
+          ...requestOptions?.headers,
+        },
+      }
+    );
+
+    const returnData = {
+      ...response.data,
+      response,
+    };
+
+    if (returnData.errors) {
+      return Promise.reject(returnData);
     }
 
-    /**
-     * Execute the query
-     */
-    protected async execute(requestOptions: RequestOptions = {}): Promise<QueryResponse> {
-        const response = await axios.post(requestOptions?.url || settings.defaultUrl, {query: this.toQuery()}, {
-            headers: {
-                'Content-Type': 'application/json',
-                ...settings.defaultHeaders,
-                ...requestOptions?.headers
-            },
-        });
-
-        const returnData = {
-            ...response.data,
-            response
-        };
-
-        if(returnData.errors) {
-            return Promise.reject(returnData);
-        }
-
-        return returnData;
-    }
+    return returnData;
+  }
 }
 
-abstract class GraphtonBaseReturnTypeBuilder<ObjectField extends Record<keyof ObjectField, GraphtonBaseReturnTypeBuilder<any,any>>, SimpleField> {
-    protected abstract availableSimpleFields: Set<SimpleField>;
-    protected querySimpleFields: Set<SimpleField> = new Set([]);
-    protected queryObjectFields: QueryObjectFields<ObjectField> = {};
-    protected abstract queryObjectFieldBuilders: AvailableFieldBuilderConstructor<ObjectField>;
-    protected abstract typeName: string;
+abstract class GraphtonBaseReturnTypeBuilder<
+  ObjectField extends Record<keyof ObjectField, GraphtonBaseReturnTypeBuilder<any, any>>,
+  SimpleField
+> {
+  protected abstract availableSimpleFields: Set<SimpleField>;
+  protected querySimpleFields: Set<SimpleField> = new Set([]);
+  protected queryObjectFields: QueryObjectFields<ObjectField> = {};
+  protected abstract queryObjectFieldBuilders: AvailableFieldBuilderConstructor<ObjectField>;
+  protected abstract typeName: string;
 
-    /**
-     * Select all known fields te be returned
-     */
-    public all(): this {
-        this.querySimpleFields = new Set(this.availableSimpleFields);
-        return this;
+  /**
+   * Select all known fields te be returned
+   */
+  public all(): this {
+    this.querySimpleFields = new Set(this.availableSimpleFields);
+    return this;
+  }
+
+  /**
+   * Clear all selected fields.
+   */
+  public clear(): this {
+    this.querySimpleFields.clear();
+    return this;
+  }
+
+  /**
+   * Select `...fieldNames` to be returned
+   */
+  public select(...fieldNames: SimpleField[]): this {
+    for (const fieldName of fieldNames) {
+      if (!this.availableSimpleFields.has(fieldName)) {
+        console.warn(`Field "${fieldName}" might not exist in type "${this.typeName}"!`);
+      }
+
+      this.querySimpleFields.add(fieldName);
     }
 
-    /**
-     * Clear all selected fields.
-     */
-    public clear(): this {
-        this.querySimpleFields.clear();
-        return this;
+    return this;
+  }
+
+  /**
+   * Select everything except `...fieldNames`
+   */
+  public except(...fieldNames: SimpleField[]): this {
+    return this.clear().select(...[...this.availableSimpleFields].filter((f) => fieldNames.indexOf(f) < 0));
+  }
+
+  /**
+   * Select `...fieldNames` and remove the rest
+   */
+  public only(...fieldNames: SimpleField[]): this {
+    return this.clear().select(...fieldNames);
+  }
+
+  /**
+   * Add the `relatedType` OBJECT field, selecting the fields for that type using the `buildFields` closure
+   */
+  public with<ObjectFieldName extends keyof ObjectField>(
+    relatedType: ObjectFieldName,
+    buildFields: (r: ObjectField[ObjectFieldName]) => void
+  ): this {
+    const relatedReturnType = new this.queryObjectFieldBuilders[relatedType]();
+    buildFields(relatedReturnType);
+    this.queryObjectFields[relatedType] = relatedReturnType;
+
+    return this;
+  }
+
+  /**
+   * Remove the `relatedType` OBJECT field
+   * Selected fields for `relatedType` will be removed!
+   */
+  public without<ObjectFieldName extends keyof ObjectField>(relatedType: ObjectFieldName): this {
+    delete this.queryObjectFields[relatedType];
+
+    return this;
+  }
+
+  /**
+   * Compile the selected fields to a GraphQL selection.
+   */
+  public toReturnTypeString(): string {
+    if (this.querySimpleFields.size < 1 && Object.values(this.queryObjectFields).length < 1) {
+      return "";
     }
 
-    /**
-     * Select `...fieldNames` to be returned
-     */
-    public select(...fieldNames: SimpleField[]): this {
-        for(const fieldName of fieldNames) {
-            if(!this.availableSimpleFields.has(fieldName)) {
-                console.warn(`Field "${fieldName}" might not exist in type "${this.typeName}"!`);
-            }
+    const returnTypeString = ["{", ...this.querySimpleFields];
 
-            this.querySimpleFields.add(fieldName);
-        }
-
-        return this;
+    for (const [objectType, objectField] of Object.entries(this.queryObjectFields)) {
+      const objectFieldReturnTypeString = (<GraphtonBaseReturnTypeBuilder<any, any>>objectField).toReturnTypeString();
+      if (objectFieldReturnTypeString.length > 0) {
+        returnTypeString.push(objectType, objectFieldReturnTypeString);
+      }
     }
 
-    /**
-     * Select everything except `...fieldNames`
-     */
-    public except(...fieldNames: SimpleField[]): this {
-        return this.clear().select(...[...this.availableSimpleFields].filter(f => fieldNames.indexOf(f) < 0));
-    }
+    returnTypeString.push("}");
 
-    /**
-     * Select `...fieldNames` and remove the rest
-     */
-    public only(...fieldNames: SimpleField[]): this {
-        return this.clear().select(...fieldNames);
-    }
-
-    /**
-     * Add the `relatedType` OBJECT field, selecting the fields for that type using the `buildFields` closure
-     */
-    public with<ObjectFieldName extends keyof ObjectField>(relatedType: ObjectFieldName, buildFields: (r: ObjectField[ObjectFieldName]) => void): this {
-        const relatedReturnType = new this.queryObjectFieldBuilders[relatedType]();
-        buildFields(relatedReturnType);
-        this.queryObjectFields[relatedType] = relatedReturnType;
-
-        return this;
-    }
-
-    /**
-     * Remove the `relatedType` OBJECT field
-     * Selected fields for `relatedType` will be removed!
-     */
-    public without<ObjectFieldName extends keyof ObjectField>(relatedType: ObjectFieldName): this {
-        delete this.queryObjectFields[relatedType];
-
-        return this;
-    }
-
-    /**
-     * Compile the selected fields to a GraphQL selection.
-     */
-    public toReturnTypeString(): string {
-        if(this.querySimpleFields.size < 1 && Object.values(this.queryObjectFields).length < 1) {
-            return '';
-        }
-
-        const returnTypeString = ['{', ...this.querySimpleFields];
-
-        for(const [objectType, objectField] of Object.entries(this.queryObjectFields)) {
-            const objectFieldReturnTypeString = (<GraphtonBaseReturnTypeBuilder<any,any>>objectField).toReturnTypeString();
-            if(objectFieldReturnTypeString.length > 0) {
-                returnTypeString.push(objectType, objectFieldReturnTypeString);
-            }
-        }
-
-        returnTypeString.push('}');
-
-        return returnTypeString.join(' ');
-    }
+    return returnTypeString.join(" ");
+  }
 }
 
 abstract class GraphtonEnum {
-    protected constructor(
-        public readonly value: string,
-    ) {}
+  protected constructor(public readonly value: string) {}
 
-    valueOf() {
-        return this.value;
-    }
+  valueOf() {
+    return this.value;
+  }
 
-    toString() {
-        return this.valueOf();
-    }
+  toString() {
+    return this.valueOf();
+  }
 }
 
 export interface GraphtonQueryBuilder {
-    queryName: string;
-    rootType: RootType;
+  queryName: string;
+  rootType: RootType;
 }
 
 export interface GraphtonQuery<T> extends GraphtonQueryBuilder {
-    get(requestOptions?: RequestOptions): Promise<T>;
+  get(requestOptions?: RequestOptions): Promise<T>;
 }
 
 export interface GraphtonMutation<T> extends GraphtonQueryBuilder {
-    do(requestOptions?: RequestOptions): Promise<T>;
+  do(requestOptions?: RequestOptions): Promise<T>;
 }
 
 export interface GraphtonSubscription<T> extends GraphtonQueryBuilder {
-    subscribe(requestOptions?: RequestOptions): Promise<T>;
+  subscribe(requestOptions?: RequestOptions): Promise<T>;
 }
 
 // REGION: Types
-export interface User {
-  id?: string,
-  username?: string,
-  age?: (number | null),
-  role?: keyof typeof Role.possibleValues,
-  posts?: Post[],
-  friends?: User[],
-}
-export interface Post {
-  id?: string,
-  author?: User,
-  text?: string,
-  relatedPosts?: Post[],
-}
-export interface UserOrderInput {
-  column?: UserSortColumn,
-  order?: SortOrder,
-}
+export type Date = any;
+export type Time = number;
+export type User = {
+  id?: string;
+  username?: string;
+  age?: number | null;
+  role?: keyof typeof Role.possibleValues;
+  posts?: Post[];
+  friends?: User[];
+};
+export type Post = {
+  id?: string;
+  author?: User;
+  text?: string;
+  posted_at_date?: Date;
+  posted_at_time?: Time;
+  relatedPosts?: Post[];
+};
+export type UserOrderInput = {
+  column?: UserSortColumn;
+  order?: SortOrder;
+};
 
 export class Role extends GraphtonEnum {
-    static readonly ADMIN: Role = new Role('ADMIN');
-    static readonly USER: Role = new Role('USER');
-    static readonly GUEST: Role = new Role('GUEST');
-    static readonly possibleValues = {ADMIN:Role.ADMIN,USER:Role.USER,GUEST:Role.GUEST};
+  static readonly ADMIN: Role = new Role("ADMIN");
+  static readonly USER: Role = new Role("USER");
+  static readonly GUEST: Role = new Role("GUEST");
+  static readonly possibleValues = { ADMIN: Role.ADMIN, USER: Role.USER, GUEST: Role.GUEST };
 
-    private constructor(value: keyof typeof Role.possibleValues) {
-        super(value);
-    }
+  private constructor(value: keyof typeof Role.possibleValues) {
+    super(value);
+  }
 
-    public static parse(value: keyof typeof Role.possibleValues): Role {
-        return Role.possibleValues[value];
-    }
+  public static parse(value: keyof typeof Role.possibleValues): Role {
+    return Role.possibleValues[value];
+  }
 
-    public static list(): Role[] {
-        return Object.values(Role.possibleValues);
-    }
+  public static list(): Role[] {
+    return Object.values(Role.possibleValues);
+  }
 }
 
 export class SortOrder extends GraphtonEnum {
-    static readonly ASC: SortOrder = new SortOrder('ASC');
-    static readonly DESC: SortOrder = new SortOrder('DESC');
-    static readonly possibleValues = {ASC:SortOrder.ASC,DESC:SortOrder.DESC};
+  static readonly ASC: SortOrder = new SortOrder("ASC");
+  static readonly DESC: SortOrder = new SortOrder("DESC");
+  static readonly possibleValues = { ASC: SortOrder.ASC, DESC: SortOrder.DESC };
 
-    private constructor(value: keyof typeof SortOrder.possibleValues) {
-        super(value);
-    }
+  private constructor(value: keyof typeof SortOrder.possibleValues) {
+    super(value);
+  }
 
-    public static parse(value: keyof typeof SortOrder.possibleValues): SortOrder {
-        return SortOrder.possibleValues[value];
-    }
+  public static parse(value: keyof typeof SortOrder.possibleValues): SortOrder {
+    return SortOrder.possibleValues[value];
+  }
 
-    public static list(): SortOrder[] {
-        return Object.values(SortOrder.possibleValues);
-    }
+  public static list(): SortOrder[] {
+    return Object.values(SortOrder.possibleValues);
+  }
 }
 
 export class UserSortColumn extends GraphtonEnum {
-    static readonly id: UserSortColumn = new UserSortColumn('id');
-    static readonly username: UserSortColumn = new UserSortColumn('username');
-    static readonly age: UserSortColumn = new UserSortColumn('age');
-    static readonly possibleValues = {id:UserSortColumn.id,username:UserSortColumn.username,age:UserSortColumn.age};
+  static readonly id: UserSortColumn = new UserSortColumn("id");
+  static readonly username: UserSortColumn = new UserSortColumn("username");
+  static readonly age: UserSortColumn = new UserSortColumn("age");
+  static readonly possibleValues = {
+    id: UserSortColumn.id,
+    username: UserSortColumn.username,
+    age: UserSortColumn.age,
+  };
 
-    private constructor(value: keyof typeof UserSortColumn.possibleValues) {
-        super(value);
-    }
+  private constructor(value: keyof typeof UserSortColumn.possibleValues) {
+    super(value);
+  }
 
-    public static parse(value: keyof typeof UserSortColumn.possibleValues): UserSortColumn {
-        return UserSortColumn.possibleValues[value];
-    }
+  public static parse(value: keyof typeof UserSortColumn.possibleValues): UserSortColumn {
+    return UserSortColumn.possibleValues[value];
+  }
 
-    public static list(): UserSortColumn[] {
-        return Object.values(UserSortColumn.possibleValues);
-    }
+  public static list(): UserSortColumn[] {
+    return Object.values(UserSortColumn.possibleValues);
+  }
 }
 
-export interface UserReturnTypeBuilderObjectBuilder {'posts':PostReturnTypeBuilder,'friends':UserReturnTypeBuilder}
-export type UserReturnTypeSimpleField = 'id'|'username'|'age';
+export interface UserReturnTypeBuilderObjectBuilder {
+  posts: PostReturnTypeBuilder;
+  friends: UserReturnTypeBuilder;
+}
+export type UserReturnTypeSimpleField = "id" | "username" | "age";
 
-class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder<UserReturnTypeBuilderObjectBuilder, UserReturnTypeSimpleField> {
-    protected availableSimpleFields: Set<UserReturnTypeSimpleField> = new Set(['id','username','age']);
-    protected typeName = 'User';
-    protected queryObjectFieldBuilders = {'posts':PostReturnTypeBuilder,'friends':UserReturnTypeBuilder};
+class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder<
+  UserReturnTypeBuilderObjectBuilder,
+  UserReturnTypeSimpleField
+> {
+  protected availableSimpleFields: Set<UserReturnTypeSimpleField> = new Set(["id", "username", "age"]);
+  protected typeName = "User";
+  protected queryObjectFieldBuilders = { posts: PostReturnTypeBuilder, friends: UserReturnTypeBuilder };
 }
 
-export interface PostReturnTypeBuilderObjectBuilder {'author':UserReturnTypeBuilder,'relatedPosts':PostReturnTypeBuilder}
-export type PostReturnTypeSimpleField = 'id'|'text';
+export interface PostReturnTypeBuilderObjectBuilder {
+  author: UserReturnTypeBuilder;
+  relatedPosts: PostReturnTypeBuilder;
+}
+export type PostReturnTypeSimpleField = "id" | "text" | "posted_at_date" | "posted_at_time";
 
-class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder<PostReturnTypeBuilderObjectBuilder, PostReturnTypeSimpleField> {
-    protected availableSimpleFields: Set<PostReturnTypeSimpleField> = new Set(['id','text']);
-    protected typeName = 'Post';
-    protected queryObjectFieldBuilders = {'author':UserReturnTypeBuilder,'relatedPosts':PostReturnTypeBuilder};
+class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder<
+  PostReturnTypeBuilderObjectBuilder,
+  PostReturnTypeSimpleField
+> {
+  protected availableSimpleFields: Set<PostReturnTypeSimpleField> = new Set([
+    "id",
+    "text",
+    "posted_at_date",
+    "posted_at_time",
+  ]);
+  protected typeName = "Post";
+  protected queryObjectFieldBuilders = { author: UserReturnTypeBuilder, relatedPosts: PostReturnTypeBuilder };
 }
 
 // REGION: Queries
@@ -354,221 +393,231 @@ export class Query {
 }
 
 export interface UsersQueryResponse extends QueryResponse {
-    data: {
-        users: User[]
-    };
+  data: {
+    users: User[];
+  };
 }
 
 class UsersQuery extends GraphtonBaseQuery<Record<string, never>> implements GraphtonQuery<UsersQueryResponse> {
-    public readonly queryName = 'users';
-    public readonly rootType: RootType = 'query';
-    protected queryArgs: Partial<Record<string, never>> = {};
-    protected returnType = new UserReturnTypeBuilder();
+  public readonly queryName = "users";
+  public readonly rootType: RootType = "query";
+  protected queryArgs: Partial<Record<string, never>> = {};
+  protected returnType = new UserReturnTypeBuilder();
 
-    public setArgs(queryArgs: Partial<Record<string, never>>) {
-        this.queryArgs = {...this.queryArgs, ...queryArgs};
+  public setArgs(queryArgs: Partial<Record<string, never>>) {
+    this.queryArgs = { ...this.queryArgs, ...queryArgs };
+  }
+
+  protected toArgString(): string {
+    const queryArgItems: string[] = [];
+    for (const [argKey, argValue] of Object.entries(this.queryArgs)) {
+      try {
+        queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+      } catch (e) {
+        console.warn(e);
+      }
     }
 
-    protected toArgString(): string {
-        const queryArgItems: string[] = [];
-        for(const [argKey, argValue] of Object.entries(this.queryArgs)) {
-            if (argValue) {
-                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
-            }
-        }
-
-        if(queryArgItems.length > 0) {
-            return `(${queryArgItems.join(', ')})`;
-        }
-
-        return '';
+    if (queryArgItems.length > 0) {
+      return `(${queryArgItems.join(", ")})`;
     }
 
-    /**
-     * Function to build the required fields for that query
-     * Only available if the return type is an OBJECT
-     */
-    public returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this {
-        returnFieldsClosure(this.returnType);
-        return this;
-    }
+    return "";
+  }
 
-    /**
-     * Execute the query and get the results
-     * Only available on Query type requests
-     */
-    async get(requestOptions: RequestOptions = {}): Promise<UsersQueryResponse> {
-        return <UsersQueryResponse>(await super.execute(requestOptions));
-    }
+  /**
+   * Function to build the required fields for that query
+   * Only available if the return type is an OBJECT
+   */
+  public returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this {
+    returnFieldsClosure(this.returnType);
+    return this;
+  }
 
+  /**
+   * Execute the query and get the results
+   * Only available on Query type requests
+   */
+  async get(requestOptions: RequestOptions = {}): Promise<UsersQueryResponse> {
+    return <UsersQueryResponse>await super.execute(requestOptions);
+  }
 }
 
 export interface UsersOrderedQueryResponse extends QueryResponse {
-    data: {
-        usersOrdered: User[]
-    };
+  data: {
+    usersOrdered: User[];
+  };
 }
 
 export interface UsersOrderedQueryArguments {
-    orderBy?: (UserOrderInput | null)[];
+  orderBy?: (UserOrderInput | null)[];
 }
 
-class UsersOrderedQuery extends GraphtonBaseQuery<UsersOrderedQueryArguments> implements GraphtonQuery<UsersOrderedQueryResponse> {
-    public readonly queryName = 'usersOrdered';
-    public readonly rootType: RootType = 'query';
-    protected queryArgs: Partial<UsersOrderedQueryArguments> = {};
-    protected returnType = new UserReturnTypeBuilder();
+class UsersOrderedQuery
+  extends GraphtonBaseQuery<UsersOrderedQueryArguments>
+  implements GraphtonQuery<UsersOrderedQueryResponse>
+{
+  public readonly queryName = "usersOrdered";
+  public readonly rootType: RootType = "query";
+  protected queryArgs: Partial<UsersOrderedQueryArguments> = {};
+  protected returnType = new UserReturnTypeBuilder();
 
-    constructor(queryArgs?: UsersOrderedQueryArguments) {
-        super();
-        queryArgs && this.setArgs(queryArgs);
+  constructor(queryArgs?: UsersOrderedQueryArguments) {
+    super();
+    queryArgs && this.setArgs(queryArgs);
+  }
+
+  public setArgs(queryArgs: Partial<UsersOrderedQueryArguments>) {
+    this.queryArgs = { ...this.queryArgs, ...queryArgs };
+  }
+
+  protected toArgString(): string {
+    const queryArgItems: string[] = [];
+    for (const [argKey, argValue] of Object.entries(this.queryArgs)) {
+      try {
+        queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+      } catch (e) {
+        console.warn(e);
+      }
     }
 
-    public setArgs(queryArgs: Partial<UsersOrderedQueryArguments>) {
-        this.queryArgs = {...this.queryArgs, ...queryArgs};
+    if (queryArgItems.length > 0) {
+      return `(${queryArgItems.join(", ")})`;
     }
 
-    protected toArgString(): string {
-        const queryArgItems: string[] = [];
-        for(const [argKey, argValue] of Object.entries(this.queryArgs)) {
-            if (argValue) {
-                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
-            }
-        }
+    return "";
+  }
 
-        if(queryArgItems.length > 0) {
-            return `(${queryArgItems.join(', ')})`;
-        }
+  /**
+   * Function to build the required fields for that query
+   * Only available if the return type is an OBJECT
+   */
+  public returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this {
+    returnFieldsClosure(this.returnType);
+    return this;
+  }
 
-        return '';
-    }
-
-    /**
-     * Function to build the required fields for that query
-     * Only available if the return type is an OBJECT
-     */
-    public returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this {
-        returnFieldsClosure(this.returnType);
-        return this;
-    }
-
-    /**
-     * Execute the query and get the results
-     * Only available on Query type requests
-     */
-    async get(requestOptions: RequestOptions = {}): Promise<UsersOrderedQueryResponse> {
-        return <UsersOrderedQueryResponse>(await super.execute(requestOptions));
-    }
-
+  /**
+   * Execute the query and get the results
+   * Only available on Query type requests
+   */
+  async get(requestOptions: RequestOptions = {}): Promise<UsersOrderedQueryResponse> {
+    return <UsersOrderedQueryResponse>await super.execute(requestOptions);
+  }
 }
 
 export interface UserQueryResponse extends QueryResponse {
-    data: {
-        user?: (User | null)
-    };
+  data: {
+    user?: User | null;
+  };
 }
 
 export interface UserQueryArguments {
-    id: string;
+  id: string;
 }
 
 class UserQuery extends GraphtonBaseQuery<UserQueryArguments> implements GraphtonQuery<UserQueryResponse> {
-    public readonly queryName = 'user';
-    public readonly rootType: RootType = 'query';
-    protected queryArgs: Partial<UserQueryArguments> = {};
-    protected returnType = new UserReturnTypeBuilder();
+  public readonly queryName = "user";
+  public readonly rootType: RootType = "query";
+  protected queryArgs: Partial<UserQueryArguments> = {};
+  protected returnType = new UserReturnTypeBuilder();
 
-    constructor(queryArgs?: UserQueryArguments) {
-        super();
-        queryArgs && this.setArgs(queryArgs);
+  constructor(queryArgs?: UserQueryArguments) {
+    super();
+    queryArgs && this.setArgs(queryArgs);
+  }
+
+  public setArgs(queryArgs: Partial<UserQueryArguments>) {
+    this.queryArgs = { ...this.queryArgs, ...queryArgs };
+  }
+
+  protected toArgString(): string {
+    const queryArgItems: string[] = [];
+    for (const [argKey, argValue] of Object.entries(this.queryArgs)) {
+      try {
+        queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+      } catch (e) {
+        console.warn(e);
+      }
     }
 
-    public setArgs(queryArgs: Partial<UserQueryArguments>) {
-        this.queryArgs = {...this.queryArgs, ...queryArgs};
+    if (queryArgItems.length > 0) {
+      return `(${queryArgItems.join(", ")})`;
     }
 
-    protected toArgString(): string {
-        const queryArgItems: string[] = [];
-        for(const [argKey, argValue] of Object.entries(this.queryArgs)) {
-            if (argValue) {
-                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
-            }
-        }
+    return "";
+  }
 
-        if(queryArgItems.length > 0) {
-            return `(${queryArgItems.join(', ')})`;
-        }
+  /**
+   * Function to build the required fields for that query
+   * Only available if the return type is an OBJECT
+   */
+  public returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this {
+    returnFieldsClosure(this.returnType);
+    return this;
+  }
 
-        return '';
-    }
-
-    /**
-     * Function to build the required fields for that query
-     * Only available if the return type is an OBJECT
-     */
-    public returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this {
-        returnFieldsClosure(this.returnType);
-        return this;
-    }
-
-    /**
-     * Execute the query and get the results
-     * Only available on Query type requests
-     */
-    async get(requestOptions: RequestOptions = {}): Promise<UserQueryResponse> {
-        return <UserQueryResponse>(await super.execute(requestOptions));
-    }
-
+  /**
+   * Execute the query and get the results
+   * Only available on Query type requests
+   */
+  async get(requestOptions: RequestOptions = {}): Promise<UserQueryResponse> {
+    return <UserQueryResponse>await super.execute(requestOptions);
+  }
 }
 
 export interface UserExistsQueryResponse extends QueryResponse {
-    data: {
-        userExists: boolean
-    };
+  data: {
+    userExists: boolean;
+  };
 }
 
 export interface UserExistsQueryArguments {
-    id: string;
+  id: string;
 }
 
-class UserExistsQuery extends GraphtonBaseQuery<UserExistsQueryArguments> implements GraphtonQuery<UserExistsQueryResponse> {
-    public readonly queryName = 'userExists';
-    public readonly rootType: RootType = 'query';
-    protected queryArgs: Partial<UserExistsQueryArguments> = {};
-    protected returnType =  null;
+class UserExistsQuery
+  extends GraphtonBaseQuery<UserExistsQueryArguments>
+  implements GraphtonQuery<UserExistsQueryResponse>
+{
+  public readonly queryName = "userExists";
+  public readonly rootType: RootType = "query";
+  protected queryArgs: Partial<UserExistsQueryArguments> = {};
+  protected returnType = null;
 
-    constructor(queryArgs?: UserExistsQueryArguments) {
-        super();
-        queryArgs && this.setArgs(queryArgs);
+  constructor(queryArgs?: UserExistsQueryArguments) {
+    super();
+    queryArgs && this.setArgs(queryArgs);
+  }
+
+  public setArgs(queryArgs: Partial<UserExistsQueryArguments>) {
+    this.queryArgs = { ...this.queryArgs, ...queryArgs };
+  }
+
+  protected toArgString(): string {
+    const queryArgItems: string[] = [];
+    for (const [argKey, argValue] of Object.entries(this.queryArgs)) {
+      try {
+        queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+      } catch (e) {
+        console.warn(e);
+      }
     }
 
-    public setArgs(queryArgs: Partial<UserExistsQueryArguments>) {
-        this.queryArgs = {...this.queryArgs, ...queryArgs};
+    if (queryArgItems.length > 0) {
+      return `(${queryArgItems.join(", ")})`;
     }
 
-    protected toArgString(): string {
-        const queryArgItems: string[] = [];
-        for(const [argKey, argValue] of Object.entries(this.queryArgs)) {
-            if (argValue) {
-                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
-            }
-        }
+    return "";
+  }
 
-        if(queryArgItems.length > 0) {
-            return `(${queryArgItems.join(', ')})`;
-        }
-
-        return '';
-    }
-
-    /**
-     * Execute the query and get the results
-     * Only available on Query type requests
-     */
-    async get(requestOptions: RequestOptions = {}): Promise<UserExistsQueryResponse> {
-        return <UserExistsQueryResponse>(await super.execute(requestOptions));
-    }
-
+  /**
+   * Execute the query and get the results
+   * Only available on Query type requests
+   */
+  async get(requestOptions: RequestOptions = {}): Promise<UserExistsQueryResponse> {
+    return <UserExistsQueryResponse>await super.execute(requestOptions);
+  }
 }
 
 // REGION: Mutations
@@ -585,185 +634,197 @@ export class Mutation {
 }
 
 export interface CreateUserMutationResponse extends QueryResponse {
-    data: {
-        createUser: User
-    };
+  data: {
+    createUser: User;
+  };
 }
 
 export interface CreateUserMutationArguments {
-    username: string;
-    role: Role;
-    age?: (number | null);
+  username: string;
+  role: Role;
+  age?: number | null;
 }
 
-class CreateUserMutation extends GraphtonBaseQuery<CreateUserMutationArguments> implements GraphtonMutation<CreateUserMutationResponse> {
-    public readonly queryName = 'createUser';
-    public readonly rootType: RootType = 'mutation';
-    protected queryArgs: Partial<CreateUserMutationArguments> = {};
-    protected returnType = new UserReturnTypeBuilder();
+class CreateUserMutation
+  extends GraphtonBaseQuery<CreateUserMutationArguments>
+  implements GraphtonMutation<CreateUserMutationResponse>
+{
+  public readonly queryName = "createUser";
+  public readonly rootType: RootType = "mutation";
+  protected queryArgs: Partial<CreateUserMutationArguments> = {};
+  protected returnType = new UserReturnTypeBuilder();
 
-    constructor(queryArgs?: CreateUserMutationArguments) {
-        super();
-        queryArgs && this.setArgs(queryArgs);
+  constructor(queryArgs?: CreateUserMutationArguments) {
+    super();
+    queryArgs && this.setArgs(queryArgs);
+  }
+
+  public setArgs(queryArgs: Partial<CreateUserMutationArguments>) {
+    this.queryArgs = { ...this.queryArgs, ...queryArgs };
+  }
+
+  protected toArgString(): string {
+    const queryArgItems: string[] = [];
+    for (const [argKey, argValue] of Object.entries(this.queryArgs)) {
+      try {
+        queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+      } catch (e) {
+        console.warn(e);
+      }
     }
 
-    public setArgs(queryArgs: Partial<CreateUserMutationArguments>) {
-        this.queryArgs = {...this.queryArgs, ...queryArgs};
+    if (queryArgItems.length > 0) {
+      return `(${queryArgItems.join(", ")})`;
     }
 
-    protected toArgString(): string {
-        const queryArgItems: string[] = [];
-        for(const [argKey, argValue] of Object.entries(this.queryArgs)) {
-            if (argValue) {
-                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
-            }
-        }
+    return "";
+  }
 
-        if(queryArgItems.length > 0) {
-            return `(${queryArgItems.join(', ')})`;
-        }
+  /**
+   * Function to build the required fields for that query
+   * Only available if the return type is an OBJECT
+   */
+  public returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this {
+    returnFieldsClosure(this.returnType);
+    return this;
+  }
 
-        return '';
-    }
-
-    /**
-     * Function to build the required fields for that query
-     * Only available if the return type is an OBJECT
-     */
-    public returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this {
-        returnFieldsClosure(this.returnType);
-        return this;
-    }
-
-    /**
-     * Execute the query and get the results
-     * Only available on Query type requests
-     */
-    async do(requestOptions: RequestOptions = {}): Promise<CreateUserMutationResponse> {
-        return <CreateUserMutationResponse>(await super.execute(requestOptions));
-    }
-
+  /**
+   * Execute the query and get the results
+   * Only available on Query type requests
+   */
+  async do(requestOptions: RequestOptions = {}): Promise<CreateUserMutationResponse> {
+    return <CreateUserMutationResponse>await super.execute(requestOptions);
+  }
 }
 
 export interface UpdateUserMutationResponse extends QueryResponse {
-    data: {
-        updateUser: User
-    };
+  data: {
+    updateUser: User;
+  };
 }
 
 export interface UpdateUserMutationArguments {
-    id: string;
-    username?: (string | null);
-    role?: (Role | null);
-    age?: (number | null);
+  id: string;
+  username?: string | null;
+  role?: Role | null;
+  age?: number | null;
 }
 
-class UpdateUserMutation extends GraphtonBaseQuery<UpdateUserMutationArguments> implements GraphtonMutation<UpdateUserMutationResponse> {
-    public readonly queryName = 'updateUser';
-    public readonly rootType: RootType = 'mutation';
-    protected queryArgs: Partial<UpdateUserMutationArguments> = {};
-    protected returnType = new UserReturnTypeBuilder();
+class UpdateUserMutation
+  extends GraphtonBaseQuery<UpdateUserMutationArguments>
+  implements GraphtonMutation<UpdateUserMutationResponse>
+{
+  public readonly queryName = "updateUser";
+  public readonly rootType: RootType = "mutation";
+  protected queryArgs: Partial<UpdateUserMutationArguments> = {};
+  protected returnType = new UserReturnTypeBuilder();
 
-    constructor(queryArgs?: UpdateUserMutationArguments) {
-        super();
-        queryArgs && this.setArgs(queryArgs);
+  constructor(queryArgs?: UpdateUserMutationArguments) {
+    super();
+    queryArgs && this.setArgs(queryArgs);
+  }
+
+  public setArgs(queryArgs: Partial<UpdateUserMutationArguments>) {
+    this.queryArgs = { ...this.queryArgs, ...queryArgs };
+  }
+
+  protected toArgString(): string {
+    const queryArgItems: string[] = [];
+    for (const [argKey, argValue] of Object.entries(this.queryArgs)) {
+      try {
+        queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+      } catch (e) {
+        console.warn(e);
+      }
     }
 
-    public setArgs(queryArgs: Partial<UpdateUserMutationArguments>) {
-        this.queryArgs = {...this.queryArgs, ...queryArgs};
+    if (queryArgItems.length > 0) {
+      return `(${queryArgItems.join(", ")})`;
     }
 
-    protected toArgString(): string {
-        const queryArgItems: string[] = [];
-        for(const [argKey, argValue] of Object.entries(this.queryArgs)) {
-            if (argValue) {
-                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
-            }
-        }
+    return "";
+  }
 
-        if(queryArgItems.length > 0) {
-            return `(${queryArgItems.join(', ')})`;
-        }
+  /**
+   * Function to build the required fields for that query
+   * Only available if the return type is an OBJECT
+   */
+  public returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this {
+    returnFieldsClosure(this.returnType);
+    return this;
+  }
 
-        return '';
-    }
-
-    /**
-     * Function to build the required fields for that query
-     * Only available if the return type is an OBJECT
-     */
-    public returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this {
-        returnFieldsClosure(this.returnType);
-        return this;
-    }
-
-    /**
-     * Execute the query and get the results
-     * Only available on Query type requests
-     */
-    async do(requestOptions: RequestOptions = {}): Promise<UpdateUserMutationResponse> {
-        return <UpdateUserMutationResponse>(await super.execute(requestOptions));
-    }
-
+  /**
+   * Execute the query and get the results
+   * Only available on Query type requests
+   */
+  async do(requestOptions: RequestOptions = {}): Promise<UpdateUserMutationResponse> {
+    return <UpdateUserMutationResponse>await super.execute(requestOptions);
+  }
 }
 
 export interface DeleteUserMutationResponse extends QueryResponse {
-    data: {
-        deleteUser: User
-    };
+  data: {
+    deleteUser: User;
+  };
 }
 
 export interface DeleteUserMutationArguments {
-    id: string;
+  id: string;
 }
 
-class DeleteUserMutation extends GraphtonBaseQuery<DeleteUserMutationArguments> implements GraphtonMutation<DeleteUserMutationResponse> {
-    public readonly queryName = 'deleteUser';
-    public readonly rootType: RootType = 'mutation';
-    protected queryArgs: Partial<DeleteUserMutationArguments> = {};
-    protected returnType = new UserReturnTypeBuilder();
+class DeleteUserMutation
+  extends GraphtonBaseQuery<DeleteUserMutationArguments>
+  implements GraphtonMutation<DeleteUserMutationResponse>
+{
+  public readonly queryName = "deleteUser";
+  public readonly rootType: RootType = "mutation";
+  protected queryArgs: Partial<DeleteUserMutationArguments> = {};
+  protected returnType = new UserReturnTypeBuilder();
 
-    constructor(queryArgs?: DeleteUserMutationArguments) {
-        super();
-        queryArgs && this.setArgs(queryArgs);
+  constructor(queryArgs?: DeleteUserMutationArguments) {
+    super();
+    queryArgs && this.setArgs(queryArgs);
+  }
+
+  public setArgs(queryArgs: Partial<DeleteUserMutationArguments>) {
+    this.queryArgs = { ...this.queryArgs, ...queryArgs };
+  }
+
+  protected toArgString(): string {
+    const queryArgItems: string[] = [];
+    for (const [argKey, argValue] of Object.entries(this.queryArgs)) {
+      try {
+        queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+      } catch (e) {
+        console.warn(e);
+      }
     }
 
-    public setArgs(queryArgs: Partial<DeleteUserMutationArguments>) {
-        this.queryArgs = {...this.queryArgs, ...queryArgs};
+    if (queryArgItems.length > 0) {
+      return `(${queryArgItems.join(", ")})`;
     }
 
-    protected toArgString(): string {
-        const queryArgItems: string[] = [];
-        for(const [argKey, argValue] of Object.entries(this.queryArgs)) {
-            if (argValue) {
-                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
-            }
-        }
+    return "";
+  }
 
-        if(queryArgItems.length > 0) {
-            return `(${queryArgItems.join(', ')})`;
-        }
+  /**
+   * Function to build the required fields for that query
+   * Only available if the return type is an OBJECT
+   */
+  public returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this {
+    returnFieldsClosure(this.returnType);
+    return this;
+  }
 
-        return '';
-    }
-
-    /**
-     * Function to build the required fields for that query
-     * Only available if the return type is an OBJECT
-     */
-    public returnFields(returnFieldsClosure: (r: UserReturnTypeBuilder) => void): this {
-        returnFieldsClosure(this.returnType);
-        return this;
-    }
-
-    /**
-     * Execute the query and get the results
-     * Only available on Query type requests
-     */
-    async do(requestOptions: RequestOptions = {}): Promise<DeleteUserMutationResponse> {
-        return <DeleteUserMutationResponse>(await super.execute(requestOptions));
-    }
-
+  /**
+   * Execute the query and get the results
+   * Only available on Query type requests
+   */
+  async do(requestOptions: RequestOptions = {}): Promise<DeleteUserMutationResponse> {
+    return <DeleteUserMutationResponse>await super.execute(requestOptions);
+  }
 }
 
 // REGION: Subscriptions
@@ -774,51 +835,55 @@ export class Subscription {
 }
 
 export interface PostAddedSubscriptionResponse extends QueryResponse {
-    data: {
-        postAdded: Post
-    };
+  data: {
+    postAdded: Post;
+  };
 }
 
-class PostAddedSubscription extends GraphtonBaseQuery<Record<string, never>> implements GraphtonSubscription<PostAddedSubscriptionResponse> {
-    public readonly queryName = 'postAdded';
-    public readonly rootType: RootType = 'subscription';
-    protected queryArgs: Partial<Record<string, never>> = {};
-    protected returnType = new PostReturnTypeBuilder();
+class PostAddedSubscription
+  extends GraphtonBaseQuery<Record<string, never>>
+  implements GraphtonSubscription<PostAddedSubscriptionResponse>
+{
+  public readonly queryName = "postAdded";
+  public readonly rootType: RootType = "subscription";
+  protected queryArgs: Partial<Record<string, never>> = {};
+  protected returnType = new PostReturnTypeBuilder();
 
-    public setArgs(queryArgs: Partial<Record<string, never>>) {
-        this.queryArgs = {...this.queryArgs, ...queryArgs};
+  public setArgs(queryArgs: Partial<Record<string, never>>) {
+    this.queryArgs = { ...this.queryArgs, ...queryArgs };
+  }
+
+  protected toArgString(): string {
+    const queryArgItems: string[] = [];
+    for (const [argKey, argValue] of Object.entries(this.queryArgs)) {
+      try {
+        queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
+      } catch (e) {
+        console.warn(e);
+      }
     }
 
-    protected toArgString(): string {
-        const queryArgItems: string[] = [];
-        for(const [argKey, argValue] of Object.entries(this.queryArgs)) {
-            if (argValue) {
-                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
-            }
-        }
-
-        if(queryArgItems.length > 0) {
-            return `(${queryArgItems.join(', ')})`;
-        }
-
-        return '';
+    if (queryArgItems.length > 0) {
+      return `(${queryArgItems.join(", ")})`;
     }
 
-    /**
-     * Function to build the required fields for that query
-     * Only available if the return type is an OBJECT
-     */
-    public returnFields(returnFieldsClosure: (r: PostReturnTypeBuilder) => void): this {
-        returnFieldsClosure(this.returnType);
-        return this;
-    }
+    return "";
+  }
 
-    /**
-     * Execute the query and get the results
-     * Only available on Query type requests
-     */
-    async subscribe(requestOptions: RequestOptions = {}): Promise<PostAddedSubscriptionResponse> {
-        return <PostAddedSubscriptionResponse>(await super.execute(requestOptions));
-    }
+  /**
+   * Function to build the required fields for that query
+   * Only available if the return type is an OBJECT
+   */
+  public returnFields(returnFieldsClosure: (r: PostReturnTypeBuilder) => void): this {
+    returnFieldsClosure(this.returnType);
+    return this;
+  }
 
+  /**
+   * Execute the query and get the results
+   * Only available on Query type requests
+   */
+  async subscribe(requestOptions: RequestOptions = {}): Promise<PostAddedSubscriptionResponse> {
+    return <PostAddedSubscriptionResponse>await super.execute(requestOptions);
+  }
 }

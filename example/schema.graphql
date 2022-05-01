@@ -1,7 +1,11 @@
 schema {
   query: Query
   mutation: Mutation
+  subscription: Subscription
 }
+
+scalar Date
+scalar Time
 
 enum Role {
   ADMIN
@@ -22,6 +26,8 @@ type Post {
   id: ID!
   author: User!
   text: String!
+  posted_at_date: Date!
+  posted_at_time: Time!
   relatedPosts: [Post!]!
 }
 
