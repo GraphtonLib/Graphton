@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.6.5](https://github.com/GraphtonLib/Graphton/compare/v0.6.4...v0.6.5) (2022-05-01)
+
+
+### Features
+
+* Adds (alias) types for scalars and customization of custom scalar types ([ea75f69](https://github.com/GraphtonLib/Graphton/commit/ea75f69e767b5329bfe494a34877fa79e3fd00e2))
+
+
+### Bug Fixes
+
+* Add stacktrace to argify error ([c947e4b](https://github.com/GraphtonLib/Graphton/commit/c947e4bb11659602ffeeeb821a4593b4d93bc217))
+
 ### [0.6.4](https://github.com/GraphtonLib/Graphton/compare/v0.6.3...v0.6.4) (2022-01-23)
 
 ### Features
