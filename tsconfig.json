@@ -9,10 +9,6 @@
     "skipLibCheck": true,
     "declaration": true
   },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "**/*.d.ts"
-  ]
+  "include": ["src"],
+  "exclude": ["**/*.d.ts"]
 }

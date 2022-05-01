@@ -1,81 +1,81 @@
 export interface QueryType {
-    name: string;
+  name: string;
 }
 
 export interface MutationType {
-    name: string;
+  name: string;
 }
 
 export interface SubscriptionType {
-    name: string;
+  name: string;
 }
 
-export type RootType = 'mutation'|'query'|'subscription';
+export type RootType = "mutation" | "query" | "subscription";
 
 export interface ReturnType {
-    kind: string;
-    name: string;
-    ofType?: ReturnType;
+  kind: string;
+  name: string;
+  ofType?: ReturnType;
 }
 
 export interface Arg {
-    name: string;
-    description: string;
-    type: ReturnType;
-    defaultValue: string;
+  name: string;
+  description: string;
+  type: ReturnType;
+  defaultValue: string;
 }
 
 export interface Field {
-    name: string;
-    description: string;
-    args: Arg[];
-    type: ReturnType;
-    isDeprecated: boolean;
-    deprecationReason?: string;
+  name: string;
+  description: string;
+  args: Arg[];
+  type: ReturnType;
+  isDeprecated: boolean;
+  deprecationReason?: string;
 }
 
 export interface InputField {
-    name: string;
-    description: string;
-    type: ReturnType;
-    defaultValue?: unknown;
+  name: string;
+  description: string;
+  type: ReturnType;
+  defaultValue?: unknown;
 }
 
 export interface EnumValue {
-    name: string;
-    description: string;
-    isDeprecated: boolean;
-    deprecationReason?: string;
+  name: string;
+  description: string;
+  isDeprecated: boolean;
+  deprecationReason?: string;
 }
 
 export interface Type {
-    kind: string;
-    name: string;
-    description: string;
-    fields: Field[] | null;
-    inputFields: InputField[] | null;
-    interfaces: unknown[];
-    enumValues: EnumValue[] | null;
-    possibleTypes?: unknown;
+  kind: string;
+  name: string;
+  description: string;
+  fields: Field[] | null;
+  inputFields: InputField[] | null;
+  interfaces: unknown[];
+  enumValues: EnumValue[] | null;
+  possibleTypes?: unknown;
 }
 
 export interface Directive {
-    name: string;
-    description: string;
-    locations: string[];
-    args: Arg[];
+  name: string;
+  description: string;
+  locations: string[];
+  args: Arg[];
 }
 
 export interface Schema {
-    queryType: QueryType;
-    mutationType: MutationType;
-    subscriptionType: SubscriptionType;
-    types: Type[];
-    directives: Directive[];
+  queryType: QueryType;
+  mutationType: MutationType;
+  subscriptionType: SubscriptionType;
+  types: Type[];
+  directives: Directive[];
 }
 
 export interface RetrospectionResponse {
-    data: {
-        __schema: Schema
-    }
+  data: {
+    __schema: Schema;
+  };
 }

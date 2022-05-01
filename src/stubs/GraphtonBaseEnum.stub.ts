@@ -1,13 +1,11 @@
-/*IGNORE*/export /*ENDIGNORE*/abstract class GraphtonEnum {
-    protected constructor(
-        public readonly value: string,
-    ) {}
+/*IGNORE*/ export /*ENDIGNORE*/ abstract class GraphtonEnum {
+  protected constructor(public readonly value: string) {}
 
-    valueOf() {
-        return this.value;
-    }
+  valueOf() {
+    return this.value;
+  }
 
-    toString() {
-        return this.valueOf();
-    }
+  toString() {
+    return this.valueOf();
+  }
 }

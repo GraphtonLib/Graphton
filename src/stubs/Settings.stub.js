@@ -1,12 +1,12 @@
 const settings = {
-    defaultHeaders: {},
-    defaultUrl: '/*DEFAULTPOSTURL*/'
+  defaultHeaders: {},
+  defaultUrl: "/*DEFAULTPOSTURL*/",
 };
 export class GraphtonSettings {
-    static setDefaultHeaders(headers) {
-        settings.defaultHeaders = headers;
-    }
-    static setDefaultUrl(defaultUrl) {
-        settings.defaultUrl = defaultUrl;
-    }
+  static setDefaultHeaders(headers) {
+    settings.defaultHeaders = headers;
+  }
+  static setDefaultUrl(defaultUrl) {
+    settings.defaultUrl = defaultUrl;
+  }
 }
