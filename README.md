@@ -19,6 +19,7 @@ A JS/TS generator that builds a GraphQL query builder for your API
   - [npm](#npm)
 - [CLI Usage & options](#cli-usage--options)
   - [Example CLI usage](#example-cli-usage)
+  - [Tip: add to scripts](#tip-add-to-scripts)
 - [Using the generated file](#using-the-generated-file)
   - [Build a query](#build-a-query)
   - [Add returnfields](#add-returnfields)
@@ -27,19 +28,27 @@ A JS/TS generator that builds a GraphQL query builder for your API
   - [Dynamically changing return fields](#dynamically-changing-return-fields)
   - [Global Settings](#global-settings)
 - [Reference](#reference)
+  - [Note: abstraction](#note-abstraction)
   - [GraphtonBaseQuery](#graphtonbasequery)
+  - [constructor](#constructor)
     - [returnFields](#returnfields)
     - [toQuery](#toquery)
+    - [get](#get)
+    - [do](#do)
+    - [Type: RequestOptions](#type-requestoptions)
+    - [Type: QueryResponse](#type-queryresponse)
   - [GraphtonBaseReturnTypeBuilder](#graphtonbasereturntypebuilder)
     - [all](#all)
     - [clear](#clear)
-    - [with](#with)
-    - [without](#without)
+    - [select](#select)
     - [except](#except)
     - [only](#only)
-    - [withRelated](#withrelated)
-    - [withoutRelated](#withoutrelated)
+    - [with](#with)
+    - [without](#without)
     - [toReturnTypeString](#toreturntypestring)
+  - [GraphtonEnum](#graphtonenum)
+    - [parse](#parse)
+    - [list](#list)
   - [GraphtonSettings](#graphtonsettings)
     - [setDefaultHeaders](#setdefaultheaders)
     - [setDefaultUrl](#setdefaulturl)
@@ -91,6 +100,27 @@ Options:
 
 ```bash
 yarn graphton generate -o ./src/lib/graphton.js https://example.com/graphql
+```
+
+### Tip: add to scripts
+
+As you are creating a complete custom command to generate your SDK, it might become cumbersome to remember all the options you added to the command. It's a good idea to add it to your scripts object in your `package.json` so you and your team always use the same generator command.
+
+```json
+//package.json
+{
+  "scripts": {
+    "generate": "graphton generate -o ./src/lib/graphton.js https://example.com/graphql"
+  }
+}
+```
+
+Then generate the files using:
+
+```bash
+yarn generate
+# Or
+npm run generate
 ```
 
 ## Using the generated file
