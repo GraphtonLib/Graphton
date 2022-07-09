@@ -2,9 +2,9 @@
 import {AvailableFieldBuilderConstructor, QueryObjectFields} from './GraphtonTypes.stub';
 /*ENDIGNORE*/
 
-/*IGNORE*/export /*ENDIGNORE*/abstract class GraphtonBaseReturnTypeBuilder<ObjectField extends Record<keyof ObjectField, GraphtonBaseReturnTypeBuilder<any,any>>, SimpleField> {
-    protected abstract availableSimpleFields: Set<SimpleField>;
-    protected querySimpleFields: Set<SimpleField> = new Set([]);
+/*IGNORE*/export /*ENDIGNORE*/abstract class GraphtonBaseReturnTypeBuilder<ObjectField extends Record<keyof ObjectField, GraphtonBaseReturnTypeBuilder<any,any>>, ScalarProperty> {
+    protected abstract availableScalarProperties: Set<ScalarProperty>;
+    protected queryScalarProperties: Set<ScalarProperty> = new Set([]);
     protected queryObjectFields: QueryObjectFields<ObjectField> = {};
     protected abstract queryObjectFieldBuilders: AvailableFieldBuilderConstructor<ObjectField>;
     protected abstract typeName: string;
@@ -13,7 +13,7 @@ import {AvailableFieldBuilderConstructor, QueryObjectFields} from './GraphtonTyp
      * Select all known fields te be returned
      */
     public all(): this {
-        this.querySimpleFields = new Set(this.availableSimpleFields);
+        this.queryScalarProperties = new Set(this.availableScalarProperties);
         return this;
     }
 
@@ -21,20 +21,20 @@ import {AvailableFieldBuilderConstructor, QueryObjectFields} from './GraphtonTyp
      * Clear all selected fields.
      */
     public clear(): this {
-        this.querySimpleFields.clear();
+        this.queryScalarProperties.clear();
         return this;
     }
 
     /**
      * Select `...fieldNames` to be returned
      */
-    public select(...fieldNames: SimpleField[]): this {
+    public select(...fieldNames: ScalarProperty[]): this {
         for(const fieldName of fieldNames) {
-            if(!this.availableSimpleFields.has(fieldName)) {
+            if(!this.availableScalarProperties.has(fieldName)) {
                 console.warn(`Field "${fieldName}" might not exist in type "${this.typeName}"!`);
             }
 
-            this.querySimpleFields.add(fieldName);
+            this.queryScalarProperties.add(fieldName);
         }
 
         return this;
@@ -43,14 +43,14 @@ import {AvailableFieldBuilderConstructor, QueryObjectFields} from './GraphtonTyp
     /**
      * Select everything except `...fieldNames`
      */
-    public except(...fieldNames: SimpleField[]): this {
-        return this.clear().select(...[...this.availableSimpleFields].filter(f => fieldNames.indexOf(f) < 0));
+    public except(...fieldNames: ScalarProperty[]): this {
+        return this.clear().select(...[...this.availableScalarProperties].filter(f => fieldNames.indexOf(f) < 0));
     }
 
     /**
      * Select `...fieldNames` and remove the rest
      */
-    public only(...fieldNames: SimpleField[]): this {
+    public only(...fieldNames: ScalarProperty[]): this {
         return this.clear().select(...fieldNames);
     }
 
@@ -79,11 +79,11 @@ import {AvailableFieldBuilderConstructor, QueryObjectFields} from './GraphtonTyp
      * Compile the selected fields to a GraphQL selection.
      */
     public toReturnTypeString(): string {
-        if(this.querySimpleFields.size < 1 && Object.values(this.queryObjectFields).length < 1) {
+        if(this.queryScalarProperties.size < 1 && Object.values(this.queryObjectFields).length < 1) {
             return '';
         }
 
-        const returnTypeString = ['{', ...this.querySimpleFields];
+        const returnTypeString = ['{', ...this.queryScalarProperties];
 
         for(const [objectType, objectField] of Object.entries(this.queryObjectFields)) {
             const objectFieldReturnTypeString = (<GraphtonBaseReturnTypeBuilder<any,any>>objectField).toReturnTypeString();

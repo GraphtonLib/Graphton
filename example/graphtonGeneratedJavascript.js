@@ -76,20 +76,20 @@ class GraphtonBaseQuery {
   }
 }
 class GraphtonBaseReturnTypeBuilder {
-  querySimpleFields = new Set([]);
+  queryScalarProperties = new Set([]);
   queryObjectFields = {};
   /**
    * Select all known fields te be returned
    */
   all() {
-    this.querySimpleFields = new Set(this.availableSimpleFields);
+    this.queryScalarProperties = new Set(this.availableScalarProperties);
     return this;
   }
   /**
    * Clear all selected fields.
    */
   clear() {
-    this.querySimpleFields.clear();
+    this.queryScalarProperties.clear();
     return this;
   }
   /**
@@ -97,10 +97,10 @@ class GraphtonBaseReturnTypeBuilder {
    */
   select(...fieldNames) {
     for (const fieldName of fieldNames) {
-      if (!this.availableSimpleFields.has(fieldName)) {
+      if (!this.availableScalarProperties.has(fieldName)) {
         console.warn(`Field "${fieldName}" might not exist in type "${this.typeName}"!`);
       }
-      this.querySimpleFields.add(fieldName);
+      this.queryScalarProperties.add(fieldName);
     }
     return this;
   }
@@ -108,7 +108,7 @@ class GraphtonBaseReturnTypeBuilder {
    * Select everything except `...fieldNames`
    */
   except(...fieldNames) {
-    return this.clear().select(...[...this.availableSimpleFields].filter((f) => fieldNames.indexOf(f) < 0));
+    return this.clear().select(...[...this.availableScalarProperties].filter((f) => fieldNames.indexOf(f) < 0));
   }
   /**
    * Select `...fieldNames` and remove the rest
@@ -137,10 +137,10 @@ class GraphtonBaseReturnTypeBuilder {
    * Compile the selected fields to a GraphQL selection.
    */
   toReturnTypeString() {
-    if (this.querySimpleFields.size < 1 && Object.values(this.queryObjectFields).length < 1) {
+    if (this.queryScalarProperties.size < 1 && Object.values(this.queryObjectFields).length < 1) {
       return "";
     }
-    const returnTypeString = ["{", ...this.querySimpleFields];
+    const returnTypeString = ["{", ...this.queryScalarProperties];
     for (const [objectType, objectField] of Object.entries(this.queryObjectFields)) {
       const objectFieldReturnTypeString = objectField.toReturnTypeString();
       if (objectFieldReturnTypeString.length > 0) {
@@ -208,12 +208,12 @@ export class UserSortColumn extends GraphtonEnum {
   }
 }
 class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
-  availableSimpleFields = new Set(["id", "username", "age"]);
+  availableScalarProperties = new Set(["id", "username", "age", "role"]);
   typeName = "User";
   queryObjectFieldBuilders = { posts: PostReturnTypeBuilder, friends: UserReturnTypeBuilder };
 }
 class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder {
-  availableSimpleFields = new Set(["id", "text", "posted_at_date", "posted_at_time"]);
+  availableScalarProperties = new Set(["id", "text", "posted_at_date", "posted_at_time"]);
   typeName = "Post";
   queryObjectFieldBuilders = { author: UserReturnTypeBuilder, relatedPosts: PostReturnTypeBuilder };
 }

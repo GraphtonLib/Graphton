@@ -209,15 +209,15 @@ export default class GenerateCommand {
         .map((f) => ({ name: f.name, info: this.returnTypeInfo(f.type) }))
         .filter((f): f is { name: string; info: ReturnTypeInfo } => !!f.info);
 
-      let simpleFields = returnTypes.filter((t) => t.info.kind == "scalar").map((t) => t.name);
+      let scalarProperties = returnTypes.filter((t) => t.info.kind == "scalar").map((t) => t.name);
 
       yield fillStub("ReturnTypeBuilder", {
-        SIMPLEFIELDLITERALS:
+        SCALARPROPERTYLITERALS:
           returnTypes
             .filter((t) => t.info.kind == "scalar")
             .map((t) => JSON.stringify(t.name))
             .join("|") || "never",
-        SIMPLEFIELDARRAY: simpleFields.length > 0 ? JSON.stringify(simpleFields) : "",
+        SCALARPROPERTYARRAY: scalarProperties.length > 0 ? JSON.stringify(scalarProperties) : "",
         OBJECTFIELDOBJECT: JSON.stringify(
           returnTypes
             .filter((t) => t.info.kind == "object")

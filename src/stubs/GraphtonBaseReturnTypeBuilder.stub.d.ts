@@ -1,7 +1,7 @@
 import { AvailableFieldBuilderConstructor, QueryObjectFields } from './GraphtonTypes.stub';
-export declare abstract class GraphtonBaseReturnTypeBuilder<ObjectField extends Record<keyof ObjectField, GraphtonBaseReturnTypeBuilder<any, any>>, SimpleField> {
-    protected abstract availableSimpleFields: Set<SimpleField>;
-    protected querySimpleFields: Set<SimpleField>;
+export declare abstract class GraphtonBaseReturnTypeBuilder<ObjectField extends Record<keyof ObjectField, GraphtonBaseReturnTypeBuilder<any, any>>, ScalarProperty> {
+    protected abstract availableScalarProperties: Set<ScalarProperty>;
+    protected queryScalarProperties: Set<ScalarProperty>;
     protected queryObjectFields: QueryObjectFields<ObjectField>;
     protected abstract queryObjectFieldBuilders: AvailableFieldBuilderConstructor<ObjectField>;
     protected abstract typeName: string;
@@ -16,15 +16,15 @@ export declare abstract class GraphtonBaseReturnTypeBuilder<ObjectField extends 
     /**
      * Select `...fieldNames` to be returned
      */
-    select(...fieldNames: SimpleField[]): this;
+    select(...fieldNames: ScalarProperty[]): this;
     /**
      * Select everything except `...fieldNames`
      */
-    except(...fieldNames: SimpleField[]): this;
+    except(...fieldNames: ScalarProperty[]): this;
     /**
      * Select `...fieldNames` and remove the rest
      */
-    only(...fieldNames: SimpleField[]): this;
+    only(...fieldNames: ScalarProperty[]): this;
     /**
      * Add the `relatedType` OBJECT field, selecting the fields for that type using the `buildFields` closure
      */

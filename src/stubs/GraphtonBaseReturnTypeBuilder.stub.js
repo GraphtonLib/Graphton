@@ -1,19 +1,19 @@
 /*ENDIGNORE*/
 /*IGNORE*/ export /*ENDIGNORE*/ class GraphtonBaseReturnTypeBuilder {
-    querySimpleFields = new Set([]);
+    queryScalarProperties = new Set([]);
     queryObjectFields = {};
     /**
      * Select all known fields te be returned
      */
     all() {
-        this.querySimpleFields = new Set(this.availableSimpleFields);
+        this.queryScalarProperties = new Set(this.availableScalarProperties);
         return this;
     }
     /**
      * Clear all selected fields.
      */
     clear() {
-        this.querySimpleFields.clear();
+        this.queryScalarProperties.clear();
         return this;
     }
     /**
@@ -21,10 +21,10 @@
      */
     select(...fieldNames) {
         for (const fieldName of fieldNames) {
-            if (!this.availableSimpleFields.has(fieldName)) {
+            if (!this.availableScalarProperties.has(fieldName)) {
                 console.warn(`Field "${fieldName}" might not exist in type "${this.typeName}"!`);
             }
-            this.querySimpleFields.add(fieldName);
+            this.queryScalarProperties.add(fieldName);
         }
         return this;
     }
@@ -32,7 +32,7 @@
      * Select everything except `...fieldNames`
      */
     except(...fieldNames) {
-        return this.clear().select(...[...this.availableSimpleFields].filter(f => fieldNames.indexOf(f) < 0));
+        return this.clear().select(...[...this.availableScalarProperties].filter(f => fieldNames.indexOf(f) < 0));
     }
     /**
      * Select `...fieldNames` and remove the rest
@@ -61,10 +61,10 @@
      * Compile the selected fields to a GraphQL selection.
      */
     toReturnTypeString() {
-        if (this.querySimpleFields.size < 1 && Object.values(this.queryObjectFields).length < 1) {
+        if (this.queryScalarProperties.size < 1 && Object.values(this.queryObjectFields).length < 1) {
             return '';
         }
-        const returnTypeString = ['{', ...this.querySimpleFields];
+        const returnTypeString = ['{', ...this.queryScalarProperties];
         for (const [objectType, objectField] of Object.entries(this.queryObjectFields)) {
             const objectFieldReturnTypeString = objectField.toReturnTypeString();
             if (objectFieldReturnTypeString.length > 0) {

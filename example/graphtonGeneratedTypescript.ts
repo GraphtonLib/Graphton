@@ -128,10 +128,10 @@ abstract class GraphtonBaseQuery<T> {
 
 abstract class GraphtonBaseReturnTypeBuilder<
   ObjectField extends Record<keyof ObjectField, GraphtonBaseReturnTypeBuilder<any, any>>,
-  SimpleField
+  ScalarProperty
 > {
-  protected abstract availableSimpleFields: Set<SimpleField>;
-  protected querySimpleFields: Set<SimpleField> = new Set([]);
+  protected abstract availableScalarProperties: Set<ScalarProperty>;
+  protected queryScalarProperties: Set<ScalarProperty> = new Set([]);
   protected queryObjectFields: QueryObjectFields<ObjectField> = {};
   protected abstract queryObjectFieldBuilders: AvailableFieldBuilderConstructor<ObjectField>;
   protected abstract typeName: string;
@@ -140,7 +140,7 @@ abstract class GraphtonBaseReturnTypeBuilder<
    * Select all known fields te be returned
    */
   public all(): this {
-    this.querySimpleFields = new Set(this.availableSimpleFields);
+    this.queryScalarProperties = new Set(this.availableScalarProperties);
     return this;
   }
 
@@ -148,20 +148,20 @@ abstract class GraphtonBaseReturnTypeBuilder<
    * Clear all selected fields.
    */
   public clear(): this {
-    this.querySimpleFields.clear();
+    this.queryScalarProperties.clear();
     return this;
   }
 
   /**
    * Select `...fieldNames` to be returned
    */
-  public select(...fieldNames: SimpleField[]): this {
+  public select(...fieldNames: ScalarProperty[]): this {
     for (const fieldName of fieldNames) {
-      if (!this.availableSimpleFields.has(fieldName)) {
+      if (!this.availableScalarProperties.has(fieldName)) {
         console.warn(`Field "${fieldName}" might not exist in type "${this.typeName}"!`);
       }
 
-      this.querySimpleFields.add(fieldName);
+      this.queryScalarProperties.add(fieldName);
     }
 
     return this;
@@ -170,14 +170,14 @@ abstract class GraphtonBaseReturnTypeBuilder<
   /**
    * Select everything except `...fieldNames`
    */
-  public except(...fieldNames: SimpleField[]): this {
-    return this.clear().select(...[...this.availableSimpleFields].filter((f) => fieldNames.indexOf(f) < 0));
+  public except(...fieldNames: ScalarProperty[]): this {
+    return this.clear().select(...[...this.availableScalarProperties].filter((f) => fieldNames.indexOf(f) < 0));
   }
 
   /**
    * Select `...fieldNames` and remove the rest
    */
-  public only(...fieldNames: SimpleField[]): this {
+  public only(...fieldNames: ScalarProperty[]): this {
     return this.clear().select(...fieldNames);
   }
 
@@ -209,11 +209,11 @@ abstract class GraphtonBaseReturnTypeBuilder<
    * Compile the selected fields to a GraphQL selection.
    */
   public toReturnTypeString(): string {
-    if (this.querySimpleFields.size < 1 && Object.values(this.queryObjectFields).length < 1) {
+    if (this.queryScalarProperties.size < 1 && Object.values(this.queryObjectFields).length < 1) {
       return "";
     }
 
-    const returnTypeString = ["{", ...this.querySimpleFields];
+    const returnTypeString = ["{", ...this.queryScalarProperties];
 
     for (const [objectType, objectField] of Object.entries(this.queryObjectFields)) {
       const objectFieldReturnTypeString = (<GraphtonBaseReturnTypeBuilder<any, any>>objectField).toReturnTypeString();
@@ -345,13 +345,13 @@ export interface UserReturnTypeBuilderObjectBuilder {
   posts: PostReturnTypeBuilder;
   friends: UserReturnTypeBuilder;
 }
-export type UserReturnTypeSimpleField = "id" | "username" | "age";
+export type UserReturnTypeScalarProperty = "id" | "username" | "age" | "role";
 
 class UserReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder<
   UserReturnTypeBuilderObjectBuilder,
-  UserReturnTypeSimpleField
+  UserReturnTypeScalarProperty
 > {
-  protected availableSimpleFields: Set<UserReturnTypeSimpleField> = new Set(["id", "username", "age"]);
+  protected availableScalarProperties: Set<UserReturnTypeScalarProperty> = new Set(["id", "username", "age", "role"]);
   protected typeName = "User";
   protected queryObjectFieldBuilders = { posts: PostReturnTypeBuilder, friends: UserReturnTypeBuilder };
 }
@@ -360,13 +360,13 @@ export interface PostReturnTypeBuilderObjectBuilder {
   author: UserReturnTypeBuilder;
   relatedPosts: PostReturnTypeBuilder;
 }
-export type PostReturnTypeSimpleField = "id" | "text" | "posted_at_date" | "posted_at_time";
+export type PostReturnTypeScalarProperty = "id" | "text" | "posted_at_date" | "posted_at_time";
 
 class PostReturnTypeBuilder extends GraphtonBaseReturnTypeBuilder<
   PostReturnTypeBuilderObjectBuilder,
-  PostReturnTypeSimpleField
+  PostReturnTypeScalarProperty
 > {
-  protected availableSimpleFields: Set<PostReturnTypeSimpleField> = new Set([
+  protected availableScalarProperties: Set<PostReturnTypeScalarProperty> = new Set([
     "id",
     "text",
     "posted_at_date",
