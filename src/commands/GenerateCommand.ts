@@ -209,12 +209,12 @@ export default class GenerateCommand {
         .map((f) => ({ name: f.name, info: this.returnTypeInfo(f.type) }))
         .filter((f): f is { name: string; info: ReturnTypeInfo } => !!f.info);
 
-      let scalarProperties = returnTypes.filter((t) => t.info.kind == "scalar").map((t) => t.name);
+      let scalarProperties = returnTypes.filter((t) => ["scalar", "enum"].indexOf(t.info.kind) > -1);
 
       yield fillStub("ReturnTypeBuilder", {
         SCALARPROPERTYLITERALS:
           returnTypes
-            .filter((t) => t.info.kind == "scalar")
+            .filter((t) => ["scalar", "enum"].indexOf(t.info.kind) > -1)
             .map((t) => JSON.stringify(t.name))
             .join("|") || "never",
         SCALARPROPERTYARRAY: scalarProperties.length > 0 ? JSON.stringify(scalarProperties) : "",
