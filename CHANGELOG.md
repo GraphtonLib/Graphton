@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.6.7](https://github.com/GraphtonLib/Graphton/compare/v0.6.6...v0.6.7) (2022-07-09)
+
+
+### Bug Fixes
+
+* Bug where enum was ignored in return type builders ([31507e2](https://github.com/GraphtonLib/Graphton/commit/31507e2b98f15a35a9abfabacb4e12cd7aaade79))
+
 ### [0.6.6](https://github.com/GraphtonLib/Graphton/compare/v0.6.5...v0.6.6) (2022-05-01)
 
 ### [0.6.5](https://github.com/GraphtonLib/Graphton/compare/v0.6.4...v0.6.5) (2022-05-01)
