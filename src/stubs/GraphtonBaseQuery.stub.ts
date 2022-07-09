@@ -13,7 +13,7 @@ import axios from 'axios';
 
 /*IGNORE*/export /*ENDIGNORE*/type RootType = 'query'|'mutation'|'subscription'/*IGNORE*/|'/*ROOTTYPE*/'/*ENDIGNORE*/;
 
-/*IGNORE*/export /*ENDIGNORE*/abstract class GraphtonBaseQuery<T> {
+export abstract class GraphtonBaseQuery<T> {
     public abstract readonly queryName: string;
     public abstract readonly rootType: RootType;
     protected abstract returnType: GraphtonBaseReturnTypeBuilder<any, any> | null;

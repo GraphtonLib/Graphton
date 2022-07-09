@@ -5,7 +5,7 @@ const settings = {
 };
 /*ENDIGNORE*/
 import axios from 'axios';
-/*IGNORE*/ export /*ENDIGNORE*/ class GraphtonBaseQuery {
+export class GraphtonBaseQuery {
     /**
      * Transform builder to graphql query string
      */

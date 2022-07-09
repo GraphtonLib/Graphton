@@ -17,7 +17,7 @@ export class GraphtonSettings {
   }
 }
 import axios from "axios";
-class GraphtonBaseQuery {
+export class GraphtonBaseQuery {
   /**
    * Transform builder to graphql query string
    */
