@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.6.8](https://github.com/GraphtonLib/Graphton/compare/v0.6.7...v0.6.8) (2022-07-09)
+
+
+### Bug Fixes
+
+* Scalar Properties rendering full type definition instead of just the name ([50bd7e5](https://github.com/GraphtonLib/Graphton/commit/50bd7e598bd0cb478e21ae435d0d5747df8f45c5))
+* **security:** Force minimist ^1.2.6 ([049bdc6](https://github.com/GraphtonLib/Graphton/commit/049bdc6e8e689bc967acb3c1423bbcb30645491a))
+* **security:** Force minimist ^1.2.6 ([0308b50](https://github.com/GraphtonLib/Graphton/commit/0308b503a53b613c20b2890ae687b1726736be85))
+
 ### [0.6.7](https://github.com/GraphtonLib/Graphton/compare/v0.6.6...v0.6.7) (2022-07-09)
 
 
