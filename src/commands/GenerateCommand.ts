@@ -166,7 +166,7 @@ export default class GenerateCommand {
         compilerOptions: {
           target: ts.ScriptTarget.ESNext,
           module: ts.ModuleKind.ESNext,
-          moduleResolution: ts.ModuleResolutionKind.Node12,
+          moduleResolution: ts.ModuleResolutionKind.NodeJs,
           esModuleInterop: true,
           forceConsistentCasingInFileNames: true,
           strict: true,
@@ -209,7 +209,9 @@ export default class GenerateCommand {
         .map((f) => ({ name: f.name, info: this.returnTypeInfo(f.type) }))
         .filter((f): f is { name: string; info: ReturnTypeInfo } => !!f.info);
 
-      let scalarProperties = returnTypes.filter((t) => ["scalar", "enum"].indexOf(t.info.kind) > -1);
+      let scalarProperties = returnTypes
+        .filter((t) => ["scalar", "enum"].indexOf(t.info.kind) > -1)
+        .map((sp) => sp.name);
 
       yield fillStub("ReturnTypeBuilder", {
         SCALARPROPERTYLITERALS:
