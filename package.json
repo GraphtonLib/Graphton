@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com/GraphtonLib/Graphton.git"
   },
-  "packageManager": "yarn@3.1.1",
+  "packageManager": "yarn@3.2.1",
   "author": "Robbin \"Roboroads\" Schepers <robbin@deschepers.nl>",
   "license": "MIT",
   "homepage": "https://github.com/GraphtonLib/Graphton",
