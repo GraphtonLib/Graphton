@@ -38,15 +38,15 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
-    "@types/node": "^17.0.30",
-    "@types/prettier": "^2",
-    "prettier": "^2.6.2",
-    "standard-version": "^9.3.2"
+    "@types/node": "^18.0.3",
+    "@types/prettier": "^2.6.3",
+    "prettier": "^2.7.1",
+    "standard-version": "^9.5.0"
   },
   "dependencies": {
     "axios": "^0.27.2",
     "change-case": "^4.1.2",
-    "commander": "^9.2.0",
-    "typescript": "^4.6.4"
+    "commander": "^9.3.0",
+    "typescript": "^4.7.4"
   }
 }
