@@ -4,17 +4,9 @@
  * @see https://github.com/GraphtonLib/Graphton
  **/
 // REGION: Base classes
-const settings = {
-  defaultHeaders: {},
-  defaultUrl: "",
-};
 export class GraphtonSettings {
-  static setDefaultHeaders(headers) {
-    settings.defaultHeaders = headers;
-  }
-  static setDefaultUrl(defaultUrl) {
-    settings.defaultUrl = defaultUrl;
-  }
+  static headers = {};
+  static graphqlEndpoint = "";
 }
 import axios from "axios";
 export class GraphtonBaseQuery {
@@ -55,12 +47,12 @@ export class GraphtonBaseQuery {
    */
   async execute(requestOptions = {}) {
     const response = await axios.post(
-      requestOptions?.url || settings.defaultUrl,
+      requestOptions?.url || GraphtonSettings.graphqlEndpoint,
       { query: this.toQuery() },
       {
         headers: {
           "Content-Type": "application/json",
-          ...settings.defaultHeaders,
+          ...GraphtonSettings.headers,
           ...requestOptions?.headers,
         },
       }

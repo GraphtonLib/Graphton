@@ -2,11 +2,7 @@
 import {GraphtonBaseReturnTypeBuilder} from './GraphtonBaseReturnTypeBuilder.stub';
 import {GraphtonEnum} from './GraphtonBaseEnum.stub';
 import {QueryResponse, RequestOptions} from './GraphtonTypes.stub';
-
-const settings = {
-    defaultHeaders: {},
-    defaultUrl: ''
-};
+import { GraphtonSettings } from "./Settings.stub";
 /*ENDIGNORE*/
 
 import axios from 'axios';
@@ -53,10 +49,10 @@ export abstract class GraphtonBaseQuery<T> {
      * Execute the query
      */
     protected async execute(requestOptions: RequestOptions = {}): Promise<QueryResponse> {
-        const response = await axios.post(requestOptions?.url || settings.defaultUrl, {query: this.toQuery()}, {
+        const response = await axios.post(requestOptions?.url || GraphtonSettings.graphqlEndpoint, {query: this.toQuery()}, {
             headers: {
                 'Content-Type': 'application/json',
-                ...settings.defaultHeaders,
+                ...GraphtonSettings.headers,
                 ...requestOptions?.headers
             },
         });

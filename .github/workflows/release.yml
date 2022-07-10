@@ -3,15 +3,15 @@ on:
   workflow_dispatch:
     inputs:
       forceVersionType:
-        description: 'Force specific versioning type'
-        default: '-'
+        description: "Force specific versioning type"
+        default: "-"
         type: choice
         required: false
         options:
-          - '-'
-          - 'major'
-          - 'minor'
-          - 'patch'
+          - "-"
+          - "major"
+          - "minor"
+          - "patch"
 
 jobs:
   release:

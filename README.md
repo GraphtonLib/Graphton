@@ -388,21 +388,27 @@ Gives you a list of possible enums
 
 ### GraphtonSettings
 
-Use this to change the global settings used by Graphton on the fly!
+Graphton uses the static properties of this class, so you can customize these.
 
-#### setDefaultHeaders
+#### headers
 
-> static setDefaultHeaders(headers: Record<string, string>): void
+> public static headers = { };
 
 Set the headers for each following request to the server.
 
-#### setDefaultUrl
+```typescript
+GraphtonSettings.headers = { Authorization: "Bearer 123abc" };
+```
 
-> static setDefaultUrl(defaultUrl: string): void
+#### graphqlEndpoint
 
-Set the URL to the GraphQL server.
+> public static graphqlEndpoint: string = '<URL of retrospection>';
 
-> NOTE: If you generated the Graphton file from a URL, this will also be the URL that's set if you havn't called this function yet. Use this if your GraphQL server differs from the one you introspected from.
+Set the URL to the GraphQL endpoint, defaults to the URL used when generating the file.
+
+```typescript
+GraphtonSettings.graphqlEndpoint = "https://mycoolexample.app/graphql";
+```
 
 ## Links
 

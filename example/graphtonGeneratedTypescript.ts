@@ -5,19 +5,9 @@
  **/
 
 // REGION: Base classes
-const settings = {
-  defaultHeaders: {},
-  defaultUrl: "",
-};
-
 export class GraphtonSettings {
-  public static setDefaultHeaders(headers: Record<string, string>): void {
-    settings.defaultHeaders = headers;
-  }
-
-  public static setDefaultUrl(defaultUrl: string): void {
-    settings.defaultUrl = defaultUrl;
-  }
+  public static headers: Record<string, string> = {};
+  public static graphqlEndpoint: string = "";
 }
 
 import type { AxiosResponse } from "axios";
@@ -102,12 +92,12 @@ export abstract class GraphtonBaseQuery<T> {
    */
   protected async execute(requestOptions: RequestOptions = {}): Promise<QueryResponse> {
     const response = await axios.post(
-      requestOptions?.url || settings.defaultUrl,
+      requestOptions?.url || GraphtonSettings.graphqlEndpoint,
       { query: this.toQuery() },
       {
         headers: {
           "Content-Type": "application/json",
-          ...settings.defaultHeaders,
+          ...GraphtonSettings.headers,
           ...requestOptions?.headers,
         },
       }

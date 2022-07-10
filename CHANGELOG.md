@@ -6,40 +6,34 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.6.9](https://github.com/GraphtonLib/Graphton/compare/v0.6.8...v0.6.9) (2022-07-09)
 
-
 ### Bug Fixes
 
-* Export GraphtonBaseQuery ([e0507e4](https://github.com/GraphtonLib/Graphton/commit/e0507e45ce14c306265be9658d41447841f6336c))
+- Export GraphtonBaseQuery ([e0507e4](https://github.com/GraphtonLib/Graphton/commit/e0507e45ce14c306265be9658d41447841f6336c))
 
 ### [0.6.8](https://github.com/GraphtonLib/Graphton/compare/v0.6.7...v0.6.8) (2022-07-09)
 
-
 ### Bug Fixes
 
-* Scalar Properties rendering full type definition instead of just the name ([50bd7e5](https://github.com/GraphtonLib/Graphton/commit/50bd7e598bd0cb478e21ae435d0d5747df8f45c5))
-* **security:** Force minimist ^1.2.6 ([049bdc6](https://github.com/GraphtonLib/Graphton/commit/049bdc6e8e689bc967acb3c1423bbcb30645491a))
-* **security:** Force minimist ^1.2.6 ([0308b50](https://github.com/GraphtonLib/Graphton/commit/0308b503a53b613c20b2890ae687b1726736be85))
+- Scalar Properties rendering full type definition instead of just the name ([50bd7e5](https://github.com/GraphtonLib/Graphton/commit/50bd7e598bd0cb478e21ae435d0d5747df8f45c5))
+- **security:** Force minimist ^1.2.6 ([0308b50](https://github.com/GraphtonLib/Graphton/commit/0308b503a53b613c20b2890ae687b1726736be85))
 
 ### [0.6.7](https://github.com/GraphtonLib/Graphton/compare/v0.6.6...v0.6.7) (2022-07-09)
 
-
 ### Bug Fixes
 
-* Bug where enum was ignored in return type builders ([31507e2](https://github.com/GraphtonLib/Graphton/commit/31507e2b98f15a35a9abfabacb4e12cd7aaade79))
+- Bug where enum was ignored in return type builders ([31507e2](https://github.com/GraphtonLib/Graphton/commit/31507e2b98f15a35a9abfabacb4e12cd7aaade79))
 
 ### [0.6.6](https://github.com/GraphtonLib/Graphton/compare/v0.6.5...v0.6.6) (2022-05-01)
 
 ### [0.6.5](https://github.com/GraphtonLib/Graphton/compare/v0.6.4...v0.6.5) (2022-05-01)
 
-
 ### Features
 
-* Adds (alias) types for scalars and customization of custom scalar types ([ea75f69](https://github.com/GraphtonLib/Graphton/commit/ea75f69e767b5329bfe494a34877fa79e3fd00e2))
-
+- Adds (alias) types for scalars and customization of custom scalar types ([ea75f69](https://github.com/GraphtonLib/Graphton/commit/ea75f69e767b5329bfe494a34877fa79e3fd00e2))
 
 ### Bug Fixes
 
-* Add stacktrace to argify error ([c947e4b](https://github.com/GraphtonLib/Graphton/commit/c947e4bb11659602ffeeeb821a4593b4d93bc217))
+- Add stacktrace to argify error ([c947e4b](https://github.com/GraphtonLib/Graphton/commit/c947e4bb11659602ffeeeb821a4593b4d93bc217))
 
 ### [0.6.4](https://github.com/GraphtonLib/Graphton/compare/v0.6.3...v0.6.4) (2022-01-23)
 
