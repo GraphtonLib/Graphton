@@ -4,18 +4,13 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [0.7.0](https://github.com/GraphtonLib/Graphton/compare/v0.6.10...v0.7.0) (2022-07-10)
 
-
 ### ⚠ BREAKING CHANGES
 
-* Use GraphtonSettings.headers and GraphtonSettings.graphqlEndpoint instead of GraphtonSettings.setDefaultHeaders and GraphtonSettings.setDefaultUrl
-* GraphtonSettings now uses static properties instead of a floating const
+- Use GraphtonSettings.headers and GraphtonSettings.graphqlEndpoint instead of GraphtonSettings.setDefaultHeaders and GraphtonSettings.setDefaultUrl
 
 ### Bug Fixes
 
-* GraphtonSettings now uses static properties instead of a floating const ([7b532fa](https://github.com/GraphtonLib/Graphton/commit/7b532fa5f2a3f5f800090507a0c1d83fd7e19897))
-* GraphtonSettings now uses static properties instead of a floating const ([30787dd](https://github.com/GraphtonLib/Graphton/commit/30787dd484651a83d6c5f13d9162242a54974855))
-
-### [0.6.10](https://github.com/GraphtonLib/Graphton/compare/v0.6.9...v0.6.10) (2022-07-10)
+- GraphtonSettings now uses static properties instead of a floating const ([30787dd](https://github.com/GraphtonLib/Graphton/commit/30787dd484651a83d6c5f13d9162242a54974855))
 
 ### [0.6.9](https://github.com/GraphtonLib/Graphton/compare/v0.6.8...v0.6.9) (2022-07-09)
 
