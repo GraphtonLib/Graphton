@@ -1,8 +1,5 @@
 import { GraphtonEnum } from './GraphtonBaseEnum.stub';
-const settings = {
-    defaultHeaders: {},
-    defaultUrl: ''
-};
+import { GraphtonSettings } from "./Settings.stub";
 /*ENDIGNORE*/
 import axios from 'axios';
 export class GraphtonBaseQuery {
@@ -35,10 +32,10 @@ export class GraphtonBaseQuery {
      * Execute the query
      */
     async execute(requestOptions = {}) {
-        const response = await axios.post(requestOptions?.url || settings.defaultUrl, { query: this.toQuery() }, {
+        const response = await axios.post(requestOptions?.url || GraphtonSettings.graphqlEndpoint, { query: this.toQuery() }, {
             headers: {
                 'Content-Type': 'application/json',
-                ...settings.defaultHeaders,
+                ...GraphtonSettings.headers,
                 ...requestOptions?.headers
             },
         });
