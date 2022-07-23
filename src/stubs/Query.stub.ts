@@ -23,8 +23,7 @@ export interface _t_ArgumentType_t_ {
 class _t_QueryClassName_t_ extends GraphtonBaseQuery<_t_QueryClassName_t_Response> /*IF:AddExecutor*//*!implements!*/ /*Implements*//*ENDIF:AddExecutor*/ {
     public readonly queryName = '/*QueryName*/';
     public readonly rootType = '/*RootType*/';
-    protected readonly returnType = '/*ReturnTypeName*/';
-
+    /*IF:ReturnsObject*/protected readonly returnType = '/*ReturnTypeName*/';/*ENDIF:ReturnsObject*/
 
     /*IF:AddExecutor*/
     /**
@@ -38,6 +37,7 @@ class _t_QueryClassName_t_ extends GraphtonBaseQuery<_t_QueryClassName_t_Respons
 
 /*IF:Extends*/
 interface _t_QueryClassName_t_ extends /*Extends*//*IGNORE*/X/*ENDIGNORE*/ {
+    /*IF:ReturnsObject*/initGraphtonQueryReturnsObject(): void;/*ENDIF:ReturnsObject*/
     /*IF:ReturnsObject*/toReturnString(): string;/*ENDIF:ReturnsObject*/
     /*IF:HasArguments*/toArgString(): string;/*ENDIF:HasArguments*/
 }
