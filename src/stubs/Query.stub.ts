@@ -1,83 +1,45 @@
 /*IGNORE*/
-import {GraphtonBaseQuery, RootType} from './GraphtonBaseQuery.stub.js';
-import {_t_TYPENAME_t_ReturnTypeBuilder as _t_RETURNTYPEBUILDER_t_} from './ReturnTypeBuilder.stub.js'
+import { applyMixins, GraphtonBaseQuery, GraphtonQueryHasArguments } from "./GraphtonBaseQuery.stub";
+import { AxiosRequestConfig, AxiosResponse } from "axios";
 
-type GraphQLServerEndpoint = string;
-type Headers = Record<string, string>;
-import {QueryResponse} from './GraphtonTypes.stub';
-interface RequestOptions {
-    headers?: Headers,
-    url?: GraphQLServerEndpoint
-}
+class X {}
 /*ENDIGNORE*/
 
-/*IF:ADDEXECUTOR*/
-export interface _t_QUERYCLASSNAME_t_Response extends QueryResponse {
+/*IF:AddExecutor*/
+export interface _t_QueryClassName_t_Response {
     data: {
-        /*QUERYNAME*//*RETURNTYPE*/
+        /*QueryName*//*!: !*//*ReturnType*//*!;!*/
     };
 }
-/*ENDIF:ADDEXECUTOR*/
+/*ENDIF:AddExecutor*/
 
-/*IF:ARGUMENTS*/
-export interface _t_ARGUMENTINTERFACENAME_t_ {
-    /*ARGUMENTINTERFACEPROPERTIES*//*IGNORE*/[key: string]: string|boolean|number/*ENDIGNORE*/;
+/*IF:HasArguments*/
+export interface _t_ArgumentType_t_ {
+    /*ArgumentTypeFields*//*IGNORE*/[key: string]: string|boolean|number/*ENDIGNORE*/;
 }
-/*ENDIF:ARGUMENTS*/
+/*ENDIF:HasArguments*/
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-class _t_QUERYCLASSNAME_t_ extends GraphtonBaseQuery<_t_ARGUMENTINTERFACENAME_t_> /*IF:ADDEXECUTOR*//*!implements!*/ /*IMPLEMENTS*//*ENDIF:ADDEXECUTOR*/ {
-    public readonly queryName = '/*QUERYNAME*/';
-    public readonly rootType: RootType = '/*ROOTTYPE*/';
-    protected queryArgs: Partial<_t_ARGUMENTINTERFACENAME_t_> = {};
-    protected returnType = /*IF:RETURNTYPEOBJECT*/new/*ENDIF:RETURNTYPEOBJECT*/ _t_RETURNTYPEBUILDER_t_/*IF:RETURNTYPEOBJECT*/()/*ENDIF:RETURNTYPEOBJECT*/;
+class _t_QueryClassName_t_ extends GraphtonBaseQuery<_t_QueryClassName_t_Response> /*IF:AddExecutor*//*!implements!*/ /*Implements*//*ENDIF:AddExecutor*/ {
+    public readonly queryName = '/*QueryName*/';
+    public readonly rootType = '/*RootType*/';
+    protected readonly returnType = '/*ReturnTypeName*/';
 
-    /*IF:ARGUMENTS*/
-    constructor(queryArgs?: _t_ARGUMENTINTERFACENAME_t_) {
-        super();
-        queryArgs && this.setArgs(queryArgs);
-    }
-    /*ENDIF:ARGUMENTS*/
 
-    public setArgs(queryArgs: Partial<_t_ARGUMENTINTERFACENAME_t_>) {
-        this.queryArgs = {...this.queryArgs, ...queryArgs};
-    }
-
-    protected toArgString(): string {
-        const queryArgItems: string[] = [];
-        for(const [argKey, argValue] of Object.entries(this.queryArgs)) {
-            try {
-                queryArgItems.push(`${argKey}: ${this.argify(argValue)}`);
-            } catch (e) {
-                console.warn(e);
-            }
-        }
-
-        if(queryArgItems.length > 0) {
-            return `(${queryArgItems.join(', ')})`;
-        }
-
-        return '';
-    }
-
-    /*IF:RETURNTYPEOBJECT*/
-    /**
-     * Function to build the required fields for that query
-     * Only available if the return type is an OBJECT
-     */
-    public returnFields(returnFieldsClosure: (r: _t_RETURNTYPEBUILDER_t_) => void): this {
-        returnFieldsClosure(this.returnType);
-        return this;
-    }
-    /*ENDIF:RETURNTYPEOBJECT*/
-
-    /*IF:ADDEXECUTOR*/
+    /*IF:AddExecutor*/
     /**
      * Execute the query and get the results
-     * Only available on Query type requests
      */
-    async /*IGNORE*/execute/*ENDIGNORE*//*EXECUTIONFUNCTIONNAME*/(requestOptions: RequestOptions = {}): Promise<_t_QUERYCLASSNAME_t_Response> {
-        return <_t_QUERYCLASSNAME_t_Response>(await super.execute(requestOptions));
+    async /*IGNORE*/execute/*ENDIGNORE*//*ExecutionFunctionName*/(requestConfig: AxiosRequestConfig = {}): Promise<_t_QueryClassName_t_Response & { [p:string]: any; axiosResponse: AxiosResponse; }> {
+        return (await super.execute(requestConfig));
     }
-    /*ENDIF:ADDEXECUTOR*/
+    /*ENDIF:AddExecutor*/
 }
+
+/*IF:Extends*/
+interface _t_QueryClassName_t_ extends /*Extends*//*IGNORE*/X/*ENDIGNORE*/ {
+    /*IF:ReturnsObject*/toReturnString(): string;/*ENDIF:ReturnsObject*/
+    /*IF:HasArguments*/toArgString(): string;/*ENDIF:HasArguments*/
+}
+applyMixins(_t_QueryClassName_t_, [/*ExtendsWithoutGenerics*//*IGNORE*/X/*ENDIGNORE*/]);
+/*ENDIF:Extends*/

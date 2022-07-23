@@ -1,5 +1,5 @@
 /*IGNORE*/
-import {RequestOptions} from './GraphtonTypes.stub';
+import { AxiosRequestConfig } from "axios";
 import {RootType} from './GraphtonBaseQuery.stub';
 /*ENDIGNORE*/
 
@@ -9,15 +9,15 @@ export interface GraphtonQueryBuilder {
 }
 
 export interface GraphtonQuery<T> extends GraphtonQueryBuilder {
-    /*IGNORE*/execute/*ENDIGNORE*//*QUERYFUNCTION*/(requestOptions?: RequestOptions): Promise<T>;
+    /*IGNORE*/execute/*ENDIGNORE*//*QueryFunction*/(requestConfig?: AxiosRequestConfig): Promise<T>;
 }
 
 export interface GraphtonMutation<T> extends GraphtonQueryBuilder {
-    /*IGNORE*/execute/*ENDIGNORE*//*MUTATEFUNCTION*/(requestOptions?: RequestOptions): Promise<T>;
+    /*IGNORE*/execute/*ENDIGNORE*//*MutateFunction*/(requestConfig?: AxiosRequestConfig): Promise<T>;
 }
 
-/*IF:SUBSCRIPTIONS*/
+/*IF:Subscriptions*/
 export interface GraphtonSubscription<T> extends GraphtonQueryBuilder {
-    /*IGNORE*/execute/*ENDIGNORE*//*SUBSCRIBEFUNCTION*/(requestOptions?: RequestOptions): Promise<T>;
+    /*IGNORE*/execute/*ENDIGNORE*//*SubscribeFunction*/(requestConfig?: AxiosRequestConfig): Promise<T>;
 }
-/*ENDIF:SUBSCRIPTIONS*/
+/*ENDIF:Subscriptions*/

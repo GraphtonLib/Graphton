@@ -10,8 +10,6 @@
 
 A JS/TS generator that builds a GraphQL query builder for your API
 
-> Note: this package is still in development. There might still be features missing, or things broken. Please report [Feature Requests](https://github.com/GraphtonLib/Graphton/issues/new?assignees=&labels=bug&template=bug_report.md) or [Bug Reports](https://github.com/GraphtonLib/Graphton/issues/new?assignees=&labels=bug&template=bug_report.md) on the [Issue tab](https://github.com/GraphtonLib/Graphton/issues). Thanks!
-
 ## Index
 
 - [Installing](#installing)
@@ -93,7 +91,7 @@ Options:
   -M, --mutateFunction <name>               The name of the function that posts the mutation. (default: "do")
   -S, --subscribeFunction <name>            The name of the function that posts the subscription. (default: "subscribe")
   -d, --defineScalar <scalars...>           Define custom scalars and their TS type. Use this if you don't want (some) scalars to be typed as string by default. (eg. --defineScalar Date=number Time=any)
-  -h, --help                                display help for command                            display help for command
+  -h, --help                                display help for command
 ```
 
 ### Example CLI usage
@@ -149,14 +147,18 @@ const getFirstUserQuery = Query.user({ id: 1 });
 
 ### Add returnfields
 
-In GraphQL you have to define which fields you want to get in return. You do this with the queries ReturnTypeBuilder
+In GraphQL you have to define which fields you want to get in return. You define which ones by using `select`
 
 ```typescript
 import { Query } from "./example/graphton.generated.js";
 const usersQuery = Query.users().returnFields((r) => r.all());
-const getFirstUserQuery = Query.user({ id: 1 }).returnFields((r) =>
-  r.select("id", "name").with("posts", (r) => r.only("text"))
-);
+const getFirstUserQuery = Query.user({ id: 1 }).select({
+  id: {},
+  name: {},
+  posts: {
+    text: {},
+  },
+});
 ```
 
 ### Execute the query
@@ -166,7 +168,13 @@ After building the query, you can directly execute it with the `get()` method.
 ```typescript
 import { Query } from "./example/graphton.generated.js";
 const firstUser = await Query.user({ id: 1 })
-  .returnFields((r) => r.select("id", "name").with("posts", (r) => r.only("text")))
+  .select({
+    id: {},
+    name: {},
+    posts: {
+      text: {},
+    },
+  })
   .get();
 
 // firstUser = {
@@ -182,7 +190,7 @@ const firstUser = await Query.user({ id: 1 })
 //             }
 //         ]
 //     },
-//     response: /*AxiosReponse*/,
+//     axiosResponse: /*AxiosReponse*/,
 // }
 ```
 
@@ -196,10 +204,11 @@ Running mutations is about the same as running a query. The only diferences are:
 ```typescript
 import { Mutation } from "./example/graphton.generated.js";
 const newUser = await Mutation.createUser({ name: "User Infinite" })
-  .returnFields((r) => r.all())
+  .select({_all: {}}) // _all will expand automatically to return all shallow fields
   .do();
 const updatedUser = await Mutation.updateUser({ id: 1, name: "User NotOne", age: 12 })
-  .returnFields((r) => r.except("name")) // All fields except 'name'
+  .select({_all: {}}) // Selecting all shallow fields again
+  .deselect({name: {}}) // But removing name
   .do();
 ```
 
@@ -209,10 +218,18 @@ Return fields can be dynamically changed.
 
 ```typescript
 import { Query } from "./example/graphton.generated.js";
-const firstUserQuery = Query.user({ id: 1 }).returnFields((r) => r.select("id", "name"));
+const firstUserQuery = Query.user({ id: 1 }).select({
+  id: {},
+  name: {}
+});
 
 if (getUserPosts) {
-  firstUserQuery.returnFields((r) => r.with("posts", (r) => r.only("text")));
+  // Adds text of all posts to the query - does NOT replace the already selected id and name
+  firstUserQuery.select({
+    posts: {
+      text: {},
+    },
+  });
 }
 ```
 
@@ -222,16 +239,16 @@ You can change some of the settings, used for making the call to the server, lik
 
 ```typescript
 import { GraphtonSettings } from "./example/graphton.generated.js";
-GraphtonSettings.setDefaultHeaders({ Authentication: "Bearer XXX" });
+GraphtonSettings.headers = { Authentication: "Bearer XXX" };
 ```
 
 ## Reference
 
 ### Note: abstraction
 
-Most of the reference underneath here is **very abstract**, since we do not know how the external GraphQL schema looks like that you are going to use this on. Because of this, whenever you see a `$` next to something in this guide means that **it's a value or type that is replaced to accomodate your GraphQL schema**.
+Most of the reference underneath here is **very abstract**, since we do not know how the external GraphQL schema looks like which you are going to use this on. Because of this, whenever you see a `$` next to something in this guide means that **it's a value or type that is replaced to accomodate your GraphQL schema**.
 
-That said, if you use the .ts variant of the genered output, tsc or your IDE can tell you exactly where something goes wrong.
+That said, if you use the .ts variant of the generated output, tsc or your IDE can tell you exactly where something goes wrong.
 
 **This is why we recommend TypeScript**. The JavaScrips variant works just fine, but without any error correction or autocomplete it might be a little harder to do the thing you want to do.
 
@@ -239,117 +256,53 @@ That said, if you use the .ts variant of the genered output, tsc or your IDE can
 
 _GraphtonBaseQuery_ is abstract, the classes you will call are generated and extended from this base class.
 
-### constructor
+### setArgs
 
-> constructor(queryArgs?: $Record<string, number|string|boolean|null>)
+_Only available if the query has arguments_
 
-Create a new instance of a query with `queryArgs` as arguments for the query.
+Signature: `setArgs(queryArgs: $ArgumentType): this`
 
-#### returnFields
+Set the arguments for this query to `queryArgs` (overwriting previous arguments).
+
+#### select
 
 _Only available if the return type is an OBJECT_
 
-> returnFields(returnFieldsClosure: (r: $GraphtonBaseReturnTypeBuilder) => void): this
+`select(fields: Partial<$FieldSelectorType>): this`
 
-Function to build the required fields for that query.
+Add new fields to the return object (merges recursively).
+
+#### deselect
+
+_Only available if the return type is an OBJECT_
+
+Signature: `deselect(fields: Partial<$FieldSelectorType>): this`
+
+Removes selected fields from the query.
+
+> Note: _all will also remove objects instead of just the shallow fields.
 
 #### toQuery
 
-> toQuery(): string
+Signature: `toQuery(): string`
 
-Transform builder to graphql Query string
+Transform to graphql Query string.
 
 #### get
 
 _Only available on Query type requests_
 
-> get(requestOptions: RequestOptions = {}): Promise<QueryResponse>
+Signature: `get(requestConfig: AxiosRequestConfig = {}): Promise<QueryResponse & { [p:string]: any; axiosResponse: AxiosResponse; }>`
 
-Execute the query and get the results
+Execute the query and get the results.
 
 #### do
 
 _Only available on Mutation type requests_
 
-> do(requestOptions: RequestOptions = {}): Promise<QueryResponse>
+Signature: `do(requestConfig: AxiosRequestConfig = {}): Promise<QueryResponse & { [p:string]: any; axiosResponse: AxiosResponse; }>`
 
-Do the mutation on the server
-
-#### Type: RequestOptions
-
-> ```typescript
-> interface RequestOptions {
->   // Headers to include in this request to the server.
->   headers?: Record<string, string>;
->   // URL to the GraphQL endpoint (e.g. http://example.com/graphql)
->   url?: string;
-> }
-> ```
-
-#### Type: QueryResponse
-
-> ```typescript
-> interface QueryResponse {
->   // `data` changes to the actual return type in the generated file!
->   data: Record<string, any>;
->   // The Axios response from the server
->   response: AxiosResponse;
-> }
-> ```
-
-### GraphtonBaseReturnTypeBuilder
-
-_GraphtonBaseReturnTypeBuilder_ is abstract, the classes you will call are generated and extended from this base class.
-
-> Everything that's abstract and replaced are prefixed in this doc with $. Like `$Field`will be replaced for, for example,`'id'|'name'|'age'`
-
-#### all
-
-> all(): this
-
-Select all known fields te be returned
-
-#### clear
-
-> clear(): this
-
-Clear all selected fields.
-
-#### select
-
-> select(...fieldNames: $Field[]): this
-
-Select `...fieldNames` to be returned
-
-#### except
-
-> except(...fieldNames: $Field[]): this
-
-Select everything except `...fieldNames`
-
-#### only
-
-> only(...fieldNames: $Field[]): this
-
-Select `...fieldNames` and remove the rest
-
-#### with
-
-> with(relatedType: $string, buildFields: (type: $GraphtonBaseReturnTypeBuilder) => void)
-
-Add the `relatedType` OBJECT field, selecting the fields for that type using the `buildFields` closure
-
-#### without
-
-> without(relatedType: $string): void
-
-Remove the `relatedType` OBJECT field. Selected fields for `relatedType` will be removed!
-
-#### toReturnTypeString
-
-> toReturnTypeString(): string
-
-Compile the selected fields to a GraphQL selection.
+Do the mutation on the server.
 
 ### GraphtonEnum
 

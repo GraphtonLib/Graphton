@@ -1,4 +1,4 @@
-/*IGNORE*/export /*ENDIGNORE*/abstract class GraphtonEnum {
+/*IGNORE*/export /*ENDIGNORE*/abstract class GraphtonBaseEnum {
     protected constructor(
         public readonly value: string,
     ) {}

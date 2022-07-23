@@ -30,7 +30,7 @@ export function fillStub(stub: string, substitutions: Record<string, string> = {
   }
 
   stubContent = stubContent
-    .replaceAll(/\/\*IF:[A-Z]+?\*\/[^]*?\/\*ENDIF:[A-Z]+?\*\//g, "")
+    .replaceAll(/\/\*IF:([A-Za-z]+?)\*\/[^]*?\/\*ENDIF:\1\*\//g, "")
     .replaceAll(/\/\*IGNORE\*\/[^]*?\/\*ENDIGNORE\*\//g, "")
     .replaceAll(/\/\*!(.*?)!\*\//g, "$1");
 

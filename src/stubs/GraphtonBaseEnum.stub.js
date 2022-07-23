@@ -1,4 +1,4 @@
-/*IGNORE*/ export /*ENDIGNORE*/ class GraphtonEnum {
+/*IGNORE*/ export /*ENDIGNORE*/ class GraphtonBaseEnum {
     value;
     constructor(value) {
         this.value = value;

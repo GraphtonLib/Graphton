@@ -1,4 +1,4 @@
 export class GraphtonSettings {
     public static headers: Record<string, string> = {};
-    public static graphqlEndpoint: string = '/*DEFAULTPOSTURL*/';
+    public static graphqlEndpoint: string = '/*DefaultPostUrl*/';
 }

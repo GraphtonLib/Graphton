@@ -52,6 +52,7 @@ type Query {
   usersOrdered(orderBy: [UserOrderInput!]): [User!]!
   user(id: ID!): User
   userExists(id: ID!): Boolean!
+  healthCheck: Boolean!
 }
 
 type Mutation {

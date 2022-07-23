@@ -1,2 +1,2 @@
 export {};
-/*ENDIF:SUBSCRIPTIONS*/
+/*ENDIF:Subscriptions*/

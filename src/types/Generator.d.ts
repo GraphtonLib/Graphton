@@ -1,4 +1,6 @@
-export interface GenerateCommandOptions {
+import { IntrospectionNamedTypeRef } from "graphql/utilities";
+
+export type GenerateCommandOptions = {
   outputFile: string;
   types: boolean;
   exportQueryFactoryAs: string;
@@ -8,12 +10,18 @@ export interface GenerateCommandOptions {
   mutateFunction: string;
   subscribeFunction: string;
   defineScalar?: string[];
-}
+};
 
-export interface ReturnTypeInfo {
+export type ReturnTypeInfo = {
+  name: string;
   type: string;
   notNull: boolean;
   isListOf: boolean;
-  listNotNull?: boolean;
-  kind: "scalar" | "enum" | "object";
-}
+  listNotNull: boolean;
+  childKind: IntrospectionNamedTypeRef["kind"];
+};
+export type RootTypes = {
+  query?: string;
+  mutation?: string;
+  subscription?: string;
+};

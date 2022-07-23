@@ -2,11 +2,25 @@ import { fillStub, isUrl } from "../helpers/helpers.js";
 import { introspectQuery } from "../graphql/query/introspect.js";
 import * as fs from "fs";
 import { pascalCase } from "change-case";
-import { Arg, Field, ReturnType, RootType, Schema, Type } from "../types/GraphQL";
-import { GenerateCommandOptions, ReturnTypeInfo } from "../types/Generator";
+import { GenerateCommandOptions, ReturnTypeInfo, RootTypes } from "../types/Generator";
 import axios from "axios";
 
 import { default as ts } from "typescript";
+import {
+  IntrospectionEnumType,
+  IntrospectionField,
+  IntrospectionInputObjectType,
+  IntrospectionInputValue,
+  IntrospectionNamedTypeRef,
+  IntrospectionObjectType,
+  IntrospectionScalarType,
+  IntrospectionSchema,
+} from "graphql/utilities";
+import {
+  IntrospectionListTypeRef,
+  IntrospectionNonNullTypeRef,
+  IntrospectionTypeRef,
+} from "graphql/utilities/getIntrospectionQuery";
 
 type OutContentSection = string[];
 
@@ -20,7 +34,7 @@ const baseScalars: Record<string, string> = {
 const scalarMap = (scalarType: string) => baseScalars[scalarType] || scalarType;
 
 export default class GenerateCommand {
-  private gqlSchema: Schema | null = null;
+  private gqlSchema: IntrospectionSchema | null = null;
 
   async generate(schemaUri: string, options: GenerateCommandOptions) {
     const outContentSections: OutContentSection = [];
@@ -44,23 +58,22 @@ export default class GenerateCommand {
     if (!this.gqlSchema) {
       console.error(`Could not decode json schema from ${schemaUri}`);
       process.exit(1);
+      return;
     }
 
-    const ignoreTypes = [
-      this.gqlSchema.queryType?.name,
-      this.gqlSchema.mutationType?.name,
-      this.gqlSchema.subscriptionType?.name,
-    ];
+    const rootTypes: RootTypes = {
+      query: this.gqlSchema.queryType?.name,
+      mutation: this.gqlSchema.mutationType?.name,
+      subscription: this.gqlSchema.subscriptionType?.name,
+    };
 
     const types = this.gqlSchema.types.filter(
-      (type) => !type.name.startsWith("__") && ignoreTypes.indexOf(type.name) < 0
+      (type) => !type.name.startsWith("__") && Object.values(rootTypes).indexOf(type.name) < 0
     );
-    const objectTypes = types.filter((type) => type.kind === "OBJECT");
-    const enumTypes = types.filter((type) => type.kind === "ENUM");
-    const inputTypes = types.filter((type) => type.kind === "INPUT_OBJECT");
-    const scalarTypes = types.filter(
-      (type) => type.kind === "SCALAR" && Object.keys(baseScalars).indexOf(type.name) < 0
-    );
+    const objectTypes = types.filter((type): type is IntrospectionObjectType => type.kind === "OBJECT");
+    const enumTypes = types.filter((type): type is IntrospectionEnumType => type.kind === "ENUM");
+    const inputTypes = types.filter((type): type is IntrospectionInputObjectType => type.kind === "INPUT_OBJECT");
+    const scalarTypes = types.filter((type): type is IntrospectionScalarType => type.kind === "SCALAR");
 
     outContentSections.push(
       ...[
@@ -77,62 +90,71 @@ export default class GenerateCommand {
     outContentSections.push(
       ...[
         "// REGION: Base classes",
-        fillStub("Settings", { DEFAULTPOSTURL: isUrl(schemaUri) ? schemaUri : "" }),
-        fillStub("GraphtonTypes"),
+        fillStub("Settings", { DefaultPostUrl: isUrl(schemaUri) ? schemaUri : "" }),
         fillStub("GraphtonBaseQuery"),
-        fillStub("GraphtonBaseReturnTypeBuilder"),
         fillStub("GraphtonBaseEnum"),
         fillStub(
           "GraphtonQueryTypeInterfaces",
           {
-            QUERYFUNCTION: options.queryFunction,
-            MUTATEFUNCTION: options.mutateFunction,
-            SUBSCRIBEFUNCTION: options.subscribeFunction,
+            QueryFunction: options.queryFunction,
+            MutateFunction: options.mutateFunction,
+            SubscribeFunction: options.subscribeFunction,
           },
-          options.exportSubscriptionFactoryAs !== false ? ["SUBSCRIPTIONS"] : []
+          options.exportSubscriptionFactoryAs !== false ? ["Subscriptions"] : []
         ),
       ]
     );
 
-    console.log("Generating types & return type builders...");
+    console.log("Generating types...");
     outContentSections.push(
       ...[
         "// REGION: Types",
         ...this.generateScalarTypeAliases(scalarTypes, scalarOverrides),
-        ...this.generateObjectTypes([...objectTypes, ...inputTypes]),
+        ...this.generateObjectTypes(objectTypes),
+        ...this.generateInputObjectTypes(inputTypes),
         ...this.generateEnumTypes(enumTypes),
-        ...this.generateReturnTypeBuilders(objectTypes),
+        ...this.generateObjectTypeFieldSelectors(objectTypes),
       ]
     );
 
-    console.log("Generating query classes...");
-    outContentSections.push(
-      ...[
-        "// REGION: Queries",
-        ...this.generateQueryFactory(
-          "query",
-          this.gqlSchema.types.find((t) => t.name === this.gqlSchema?.queryType?.name)?.fields || [],
-          options.exportQueryFactoryAs,
-          options.queryFunction
-        ),
-      ]
-    );
+    if (rootTypes.query) {
+      console.log("Generating query classes...");
+      outContentSections.push(
+        ...[
+          "// REGION: Queries",
+          ...this.generateQueryFactory(
+            "query",
+            [
+              ...(this.gqlSchema.types.find((t): t is IntrospectionObjectType => t.name === rootTypes.query)?.fields ||
+                []),
+            ],
+            options.exportQueryFactoryAs,
+            options.queryFunction
+          ),
+        ]
+      );
+    }
 
-    console.log("Generating mutation classes...");
-    outContentSections.push(
-      ...[
-        "// REGION: Mutations",
-        ...this.generateQueryFactory(
-          "mutation",
-          this.gqlSchema.types.find((t) => t.name === this.gqlSchema?.mutationType?.name)?.fields || [],
-          options.exportMutationFactoryAs,
-          options.mutateFunction
-        ),
-        "",
-      ]
-    );
+    if (rootTypes.mutation) {
+      console.log("Generating mutation classes...");
+      outContentSections.push(
+        ...[
+          "// REGION: Mutations",
+          ...this.generateQueryFactory(
+            "mutation",
+            [
+              ...(this.gqlSchema.types.find((t): t is IntrospectionObjectType => t.name === rootTypes.mutation)
+                ?.fields || []),
+            ],
+            options.exportMutationFactoryAs,
+            options.mutateFunction
+          ),
+          "",
+        ]
+      );
+    }
 
-    if (options.exportSubscriptionFactoryAs !== false) {
+    if (options.exportSubscriptionFactoryAs !== false && rootTypes.subscription) {
       const subscriptionFactoryName =
         options.exportSubscriptionFactoryAs !== true ? options.exportSubscriptionFactoryAs : "Subscription";
       console.log("Generating subscription classes...");
@@ -141,7 +163,10 @@ export default class GenerateCommand {
           "// REGION: Subscriptions",
           ...this.generateQueryFactory(
             "subscription",
-            this.gqlSchema.types.find((t) => t.name === this.gqlSchema?.subscriptionType?.name)?.fields || [],
+            [
+              ...(this.gqlSchema.types.find((t): t is IntrospectionObjectType => t.name === rootTypes.subscription)
+                ?.fields || []),
+            ],
             subscriptionFactoryName,
             options.subscribeFunction
           ),
@@ -184,72 +209,81 @@ export default class GenerateCommand {
     console.log("");
   }
 
-  private *generateScalarTypeAliases(types: Type[], overrides: Record<string, string>): IterableIterator<string> {
+  private *generateScalarTypeAliases(
+    types: IntrospectionScalarType[],
+    overrides: Record<string, string>
+  ): IterableIterator<string> {
     for (const type of types) {
       yield `export type ${type.name} = ${overrides[type.name] || "string"};`;
     }
   }
 
-  private *generateObjectTypes(types: Type[]): IterableIterator<string> {
+  private *generateObjectTypes(types: IntrospectionObjectType[]): IterableIterator<string> {
+    let fieldObjectMap: Record<string, Record<string, string | null>> = {};
+    for (const type of types) {
+      fieldObjectMap[type.name] = {};
+      yield `export type ${type.name} = {`;
+      for (const field of type.fields || []) {
+        yield `  ${field.name}: ${this.typeToFieldType(field.type)};`;
+
+        let typeInfo = this.returnTypeInfo(field.type);
+        fieldObjectMap[type.name][field.name] =
+          ["SCALAR", "ENUM"].indexOf(typeInfo.childKind) > -1 ? null : typeInfo.name;
+      }
+      yield "};";
+    }
+
+    yield `const fieldObjectMap: Record<string, Record<string, string|null>> = ${JSON.stringify(fieldObjectMap)};`;
+  }
+
+  private *generateInputObjectTypes(types: IntrospectionInputObjectType[]): IterableIterator<string> {
     for (const type of types) {
       yield `export type ${type.name} = {`;
+      yield `  _all?: {};`;
 
-      const isInputType = type.kind == "INPUT_OBJECT";
-      for (const field of (isInputType ? type.inputFields : type.fields) || []) {
-        yield `  ${field.name}${this.toTypeAppend(field.type, true, !isInputType)},`;
+      for (const field of type.inputFields || []) {
+        yield `  ${field.name}?: ${this.typeToFieldType(field.type)};`;
       }
 
       yield "};";
     }
   }
 
-  private *generateReturnTypeBuilders(types: Type[]): IterableIterator<string> {
-    for (const type of types) {
-      const returnTypes = (type.fields || [])
-        .map((f) => ({ name: f.name, info: this.returnTypeInfo(f.type) }))
-        .filter((f): f is { name: string; info: ReturnTypeInfo } => !!f.info);
-
-      let scalarProperties = returnTypes
-        .filter((t) => ["scalar", "enum"].indexOf(t.info.kind) > -1)
-        .map((sp) => sp.name);
-
-      yield fillStub("ReturnTypeBuilder", {
-        SCALARPROPERTYLITERALS:
-          returnTypes
-            .filter((t) => ["scalar", "enum"].indexOf(t.info.kind) > -1)
-            .map((t) => JSON.stringify(t.name))
-            .join("|") || "never",
-        SCALARPROPERTYARRAY: scalarProperties.length > 0 ? JSON.stringify(scalarProperties) : "",
-        OBJECTFIELDOBJECT: JSON.stringify(
-          returnTypes
-            .filter((t) => t.info.kind == "object")
-            .reduce((obj: Record<string, string>, t) => {
-              obj[t.name] = `${t.info.type}ReturnTypeBuilder`;
-              return obj;
-            }, {})
-        ).replaceAll(/"([^"]*?ReturnTypeBuilder)"/g, "$1"),
-        TYPENAME: type.name,
+  private *generateEnumTypes(enumTypes: IntrospectionEnumType[]): IterableIterator<string> {
+    for (const enumType of enumTypes) {
+      yield fillStub("Enum", {
+        EnumClassName: enumType.name,
+        PossibleValues: (enumType.enumValues || []).map((t) => `${t.name}:${enumType.name}.${t.name}`).join(","),
+        EnumValues: (enumType.enumValues || [])
+          .map((t) => `static readonly ${t.name}: ${enumType.name} = new ${enumType.name}(${JSON.stringify(t.name)});`)
+          .join("\n    "),
       });
     }
   }
 
-  private *generateEnumTypes(enumTypes: Type[]): IterableIterator<string> {
-    for (const enumType of enumTypes) {
-      yield fillStub("Enum", {
-        ENUMCLASSNAME: enumType.name,
-        POSSIBLEVALUES: (enumType.enumValues || []).map((t) => `${t.name}:${enumType.name}.${t.name}`).join(","),
-        ENUMVALUES: (enumType.enumValues || [])
-          .map((t) => `static readonly ${t.name}: ${enumType.name} = new ${enumType.name}(${JSON.stringify(t.name)});`)
-          .join("\n    "),
-        STRINGVALUES: (enumType.enumValues || []).map((t) => `${JSON.stringify(t.name)}`).join("|"),
-        LIST: (enumType.enumValues || []).map((t) => `${enumType.name}.${t.name}`).join(","),
+  private *generateObjectTypeFieldSelectors(types: IntrospectionObjectType[]): IterableIterator<string> {
+    for (const type of types) {
+      let fields = type.fields.map((f) => {
+        let typeInfo = this.returnTypeInfo(f.type);
+        switch (typeInfo?.childKind || "") {
+          case "ENUM":
+          case "SCALAR":
+            return `${f.name}: {};`;
+          default:
+            return `${f.name}: ${typeInfo.name}FieldSelector;`;
+        }
       });
+
+      yield `export type ${type.name}FieldSelector = {`;
+      yield `  ${fields.join("\n  ")}`;
+      yield `};`;
     }
+    yield ``;
   }
 
   private *generateQueryFactory(
-    rootType: RootType,
-    queries: Field[],
+    rootType: keyof RootTypes,
+    queries: IntrospectionField[],
     exportFactoryAs: string,
     executionFunctionName: string | null = null
   ): IterableIterator<string> {
@@ -261,8 +295,8 @@ export default class GenerateCommand {
         yield `    return new ${pascalCase(query.name)}${pascalCase(rootType)}();`;
         yield "  }";
       } else {
-        yield `  public static ${query.name}(queryArgs?: ${pascalCase(query.name)}${pascalCase(rootType)}Arguments) {`;
-        yield `    return new ${pascalCase(query.name)}${pascalCase(rootType)}(queryArgs);`;
+        yield `  public static ${query.name}(queryArgs: ${pascalCase(query.name)}${pascalCase(rootType)}Arguments) {`;
+        yield `    return (new ${pascalCase(query.name)}${pascalCase(rootType)}()).setArgs(queryArgs);`;
         yield "  }";
       }
     }
@@ -274,51 +308,63 @@ export default class GenerateCommand {
       const returnTypeInfo = this.returnTypeInfo(query.type);
       const params = this.argsToMethodParameters(query.args);
       const queryClassName = `${pascalCase(query.name)}${pascalCase(rootType)}`;
+      let extendClasses = [`GraphtonBaseQuery<${queryClassName}Response>`];
+      let extendClassesWithoutGenerics = [`GraphtonBaseQuery`];
 
-      const includeInStub: string[] = [];
-      if (returnTypeInfo?.kind == "object") {
-        includeInStub.push("RETURNTYPEOBJECT");
-      }
+      const includeInStub: Set<string> = new Set();
       if (executionFunctionName) {
-        includeInStub.push("ADDEXECUTOR");
+        includeInStub.add("AddExecutor");
       }
-      let argumentsInterfaceName = "Record<string, never>";
+      let argumentType = "Record<string, never>";
       if (params.typed.length > 0) {
-        includeInStub.push("ARGUMENTS");
-        argumentsInterfaceName = `${queryClassName}Arguments`;
+        includeInStub.add("HasArguments");
+        includeInStub.add("Extends");
+        argumentType = `${queryClassName}Arguments`;
+        extendClasses.push(`GraphtonQueryHasArguments<${argumentType}>`);
+        extendClassesWithoutGenerics.push(`GraphtonQueryHasArguments`);
+      }
+      if (returnTypeInfo.childKind == "OBJECT") {
+        includeInStub.add("ReturnsObject");
+        includeInStub.add("Extends");
+        extendClasses.push(
+          `GraphtonQueryReturnsObject<${this.returnTypeInfo(query.type)?.name}FieldSelector, ${returnTypeInfo.name}>`
+        );
+        extendClassesWithoutGenerics.push(`GraphtonQueryReturnsObject`);
       }
 
+      const fillImplements = (type: string) =>
+        `${type}<${queryClassName}Response & { [p:string]: any; axiosResponse: AxiosResponse; }>`;
       yield fillStub(
         "Query",
         {
-          QUERYCLASSNAME: queryClassName,
-          QUERYNAME: query.name,
-          ARGUMENTINTERFACEPROPERTIES: params.typed.join(";\n    "),
-          ARGUMENTINTERFACENAME: argumentsInterfaceName,
-          ROOTTYPE: rootType,
-          RETURNTYPE: this.toTypeAppend(query.type, false),
-          EXECUTIONFUNCTIONNAME: executionFunctionName || "execute",
-          IMPLEMENTS: {
-            mutation: `GraphtonMutation<${queryClassName}Response>`,
-            query: `GraphtonQuery<${queryClassName}Response>`,
-            subscription: `GraphtonSubscription<${queryClassName}Response>`,
+          QueryClassName: queryClassName,
+          QueryName: query.name,
+          ArgumentTypeFields: params.typed.join(";\n    "),
+          ArgumentType: argumentType,
+          RootType: rootType,
+          ReturnType: this.typeToFieldType(query.type),
+          ExecutionFunctionName: executionFunctionName || "execute",
+          Implements: {
+            mutation: fillImplements("GraphtonMutation"),
+            query: fillImplements("GraphtonQuery"),
+            subscription: fillImplements("GraphtonSubscription"),
           }[rootType],
-          RETURNTYPEBUILDER:
-            returnTypeInfo?.kind == "object" ? `${this.returnTypeInfo(query.type)?.type}ReturnTypeBuilder` : "null",
+          Extends: extendClasses.join(", "),
+          ExtendsWithoutGenerics: extendClassesWithoutGenerics.join(", "),
         },
-        includeInStub
+        [...includeInStub]
       );
       yield "";
     }
   }
 
-  private argsToMethodParameters(args: Arg[]) {
+  private argsToMethodParameters(args: readonly IntrospectionInputValue[]) {
     const typed: string[] = [];
     const untyped: string[] = [];
 
     for (const arg of args) {
       typed.push(
-        `${arg.name}${this.toTypeAppend(arg.type, false, false)}${
+        `${arg.name}: ${this.typeToFieldType(arg.type)}${
           arg.defaultValue ? ` = ${JSON.stringify(arg.defaultValue)}` : ""
         }`
       );
@@ -327,70 +373,50 @@ export default class GenerateCommand {
     return { typed, untyped };
   }
 
-  private toTypeAppend(type: ReturnType, isRootType = true, enumsAreStrings = true): string {
-    const typeInfo = this.returnTypeInfo(type);
+  private typeToFieldType(typeRef: IntrospectionTypeRef): string {
+    const typeInfo = this.returnTypeInfo(typeRef);
 
     if (!typeInfo) {
-      return "?: unknown";
+      return "unknown";
     }
 
-    let typeAppend = "";
+    let notNull = !typeInfo.notNull ? "|null|undefined" : "";
+    let isListOf = typeInfo.isListOf ? "[]" : "";
+    let listNotNull = typeInfo.isListOf && !typeInfo.listNotNull ? "|null|undefined" : "";
 
-    if (!typeInfo.notNull) {
-      typeAppend += `?: (${scalarMap(typeInfo.type)} | null)`;
-    } else {
-      typeAppend += `${isRootType ? "?" : ""}: ${
-        enumsAreStrings && typeInfo.kind === "enum"
-          ? `keyof typeof ${typeInfo.type}.possibleValues`
-          : scalarMap(typeInfo.type)
-      }`;
-    }
-
-    if (typeInfo.isListOf) {
-      typeAppend += "[]";
-      if (!typeInfo.listNotNull) {
-        typeAppend += " | null";
-      }
-    }
-
-    return typeAppend;
+    return `(${typeInfo.name}${notNull})${isListOf}${listNotNull}`;
   }
 
-  private returnTypeInfo(type: ReturnType, returnTypeInfo?: ReturnTypeInfo): ReturnTypeInfo | null {
+  private returnTypeInfo(typeRef: IntrospectionTypeRef, returnTypeInfo?: ReturnTypeInfo): ReturnTypeInfo {
     returnTypeInfo = returnTypeInfo || {
-      isListOf: false,
-      kind: "scalar",
-      notNull: false,
+      name: "",
       type: "",
+      isListOf: false,
+      childKind: "SCALAR",
+      notNull: false,
+      listNotNull: false,
     };
 
-    switch (type?.kind || "") {
+    switch (typeRef?.kind || "") {
       case "OBJECT":
       case "INPUT_OBJECT":
-        returnTypeInfo.type = type.name;
-        returnTypeInfo.kind = "object";
-        return returnTypeInfo;
       case "SCALAR":
-        returnTypeInfo.type = type.name;
-        returnTypeInfo.kind = "scalar";
-        return returnTypeInfo;
       case "ENUM":
-        returnTypeInfo.type = type.name;
-        returnTypeInfo.kind = "enum";
+      case "INTERFACE":
+      case "UNION":
+        returnTypeInfo.name = (typeRef as IntrospectionNamedTypeRef).name;
+        returnTypeInfo.childKind = (typeRef as IntrospectionNamedTypeRef).kind;
         return returnTypeInfo;
       case "NON_NULL":
-        if (returnTypeInfo.isListOf) {
-          returnTypeInfo.listNotNull = true;
-        } else {
-          returnTypeInfo.notNull = true;
-        }
-        return type.ofType ? this.returnTypeInfo(type.ofType, returnTypeInfo) : null;
+        returnTypeInfo.notNull = true;
+        return this.returnTypeInfo((typeRef as IntrospectionNonNullTypeRef).ofType, returnTypeInfo);
       case "LIST":
         returnTypeInfo.isListOf = true;
-        return type.ofType ? this.returnTypeInfo(type.ofType, returnTypeInfo) : null;
-
-      default:
-        return null;
+        if (returnTypeInfo.notNull) {
+          returnTypeInfo.notNull = false;
+          returnTypeInfo.listNotNull = true;
+        }
+        return this.returnTypeInfo((typeRef as IntrospectionListTypeRef).ofType, returnTypeInfo);
     }
   }
 }
