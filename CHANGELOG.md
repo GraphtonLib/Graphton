@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.8.0](https://github.com/GraphtonLib/Graphton/compare/v0.7.0...v0.8.0) (2022-07-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* Selection of the returning fields/opject has been vastly improved, but also breaks your current Graphton queries! Check (UPGRADING.md)[https://github.com/GraphtonLib/Graphton/blob/main/UPGRADING.md] to help upgrading vrom v0.7 to v1.
+
+### Features
+
+* Change selection method from builder functions to GraphQL-ish object notation, removing ReturnTypeBuilders. ([a002ed6](https://github.com/GraphtonLib/Graphton/commit/a002ed68d9f126f07ad20663712e114b24cfa29b))
+
+
+### Bug Fixes
+
+* Initialization of the `selectedFields` property on the GraphtonQueryReturnsObject mixin now works ([ebe4070](https://github.com/GraphtonLib/Graphton/commit/ebe40701f69cfbf4b7e022d090d29164b28b22c7))
+* ObjectFieldSelector types now has the _all property instead of the InputObject types ([a7f2038](https://github.com/GraphtonLib/Graphton/commit/a7f20386db06ade47acf3a7b95c89015b2338da7))
+* returnType always being an empty string instead of the key of the lookup ([53c82bf](https://github.com/GraphtonLib/Graphton/commit/53c82bf0be1192b58526a2b2214f0ba385907a64))
+
 ## [0.7.0](https://github.com/GraphtonLib/Graphton/compare/v0.6.10...v0.7.0) (2022-07-10)
 
 ### ⚠ BREAKING CHANGES
