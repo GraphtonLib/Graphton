@@ -13,43 +13,33 @@ A JS/TS generator that builds a GraphQL query builder for your API
 ## Index
 
 - [Installing](#installing)
-  - [Yarn](#yarn)
-  - [npm](#npm)
+    - [Yarn](#yarn)
+    - [npm](#npm)
 - [CLI Usage & options](#cli-usage--options)
-  - [Example CLI usage](#example-cli-usage)
-  - [Tip: add to scripts](#tip-add-to-scripts)
+    - [Example CLI usage](#example-cli-usage)
+    - [Tip: add to scripts](#tip-add-to-scripts)
 - [Using the generated file](#using-the-generated-file)
-  - [Build a query](#build-a-query)
-  - [Add returnfields](#add-returnfields)
-  - [Execute the query](#execute-the-query)
-  - [Running a mutation](#running-a-mutation)
-  - [Dynamically changing return fields](#dynamically-changing-return-fields)
-  - [Global Settings](#global-settings)
+    - [Build a query](#build-a-query)
+    - [Add returnfields](#add-returnfields)
+    - [Execute the query](#execute-the-query)
+    - [Running a mutation](#running-a-mutation)
+    - [Dynamically changing return fields](#dynamically-changing-return-fields)
+    - [Global Settings](#global-settings)
 - [Reference](#reference)
-  - [Note: abstraction](#note-abstraction)
-  - [GraphtonBaseQuery](#graphtonbasequery)
-  - [constructor](#constructor)
-    - [returnFields](#returnfields)
-    - [toQuery](#toquery)
-    - [get](#get)
-    - [do](#do)
-    - [Type: RequestOptions](#type-requestoptions)
-    - [Type: QueryResponse](#type-queryresponse)
-  - [GraphtonBaseReturnTypeBuilder](#graphtonbasereturntypebuilder)
-    - [all](#all)
-    - [clear](#clear)
-    - [select](#select)
-    - [except](#except)
-    - [only](#only)
-    - [with](#with)
-    - [without](#without)
-    - [toReturnTypeString](#toreturntypestring)
-  - [GraphtonEnum](#graphtonenum)
-    - [parse](#parse)
-    - [list](#list)
-  - [GraphtonSettings](#graphtonsettings)
-    - [setDefaultHeaders](#setdefaultheaders)
-    - [setDefaultUrl](#setdefaulturl)
+    - [Note: abstraction](#note-abstraction)
+    - [GraphtonBaseQuery](#graphtonbasequery)
+    - [setArgs](#setargs)
+        - [select](#select)
+        - [deselect](#deselect)
+        - [toQuery](#toquery)
+        - [get](#get)
+        - [do](#do)
+    - [GraphtonEnum](#graphtonenum)
+        - [parse](#parse)
+        - [list](#list)
+    - [GraphtonSettings](#graphtonsettings)
+        - [headers](#headers)
+        - [graphqlEndpoint](#graphqlendpoint)
 - [Links](#links)
 - [Credits](#credits)
 - [Contributing](#contributing)
@@ -141,6 +131,7 @@ Starting a new query is fairly simple. Import `Query` from the generated file an
 
 ```typescript
 import { Query } from "./example/graphton.generated.js";
+
 const usersQuery = Query.users();
 const getFirstUserQuery = Query.user({ id: 1 });
 ```
@@ -151,6 +142,7 @@ In GraphQL you have to define which fields you want to get in return. You define
 
 ```typescript
 import { Query } from "./example/graphton.generated.js";
+
 const usersQuery = Query.users().returnFields((r) => r.all());
 const getFirstUserQuery = Query.user({ id: 1 }).select({
   id: {},
@@ -167,6 +159,7 @@ After building the query, you can directly execute it with the `get()` method.
 
 ```typescript
 import { Query } from "./example/graphton.generated.js";
+
 const firstUser = await Query.user({ id: 1 })
   .select({
     id: {},
@@ -203,12 +196,13 @@ Running mutations is about the same as running a query. The only diferences are:
 
 ```typescript
 import { Mutation } from "./example/graphton.generated.js";
+
 const newUser = await Mutation.createUser({ name: "User Infinite" })
-  .select({_all: {}}) // _all will expand automatically to return all shallow fields
+  .select({ _all: {} }) // _all will expand automatically to return all shallow fields
   .do();
 const updatedUser = await Mutation.updateUser({ id: 1, name: "User NotOne", age: 12 })
-  .select({_all: {}}) // Selecting all shallow fields again
-  .deselect({name: {}}) // But removing name
+  .select({ _all: {} }) // Selecting all shallow fields again
+  .deselect({ name: {} }) // But removing name
   .do();
 ```
 
@@ -218,6 +212,7 @@ Return fields can be dynamically changed.
 
 ```typescript
 import { Query } from "./example/graphton.generated.js";
+
 const firstUserQuery = Query.user({ id: 1 }).select({
   id: {},
   name: {}
@@ -239,6 +234,7 @@ You can change some of the settings, used for making the call to the server, lik
 
 ```typescript
 import { GraphtonSettings } from "./example/graphton.generated.js";
+
 GraphtonSettings.headers = { Authentication: "Bearer XXX" };
 ```
 
@@ -372,9 +368,9 @@ GraphtonSettings.graphqlEndpoint = "https://mycoolexample.app/graphql";
 
 - [Robbin "Roboroads" Schepers](https://github.com/Roboroads) - Creator / First contributor.
 - Other github projects:
-  - [laravel/laravel](https://github.com/laravel/laravel) - This plugin is inspired by the way Laravel Eloquent builds queries.
+    - [laravel/laravel](https://github.com/laravel/laravel) - This plugin is inspired by the way Laravel Eloquent builds queries.
 - [Contributors to this project](https://github.com/Roboroads/laravel-tinker/graphs/contributors)
-  - _I **will** name you seperately if your amount of contributions is exceptional_
+    - _I **will** name you seperately if your amount of contributions is exceptional_
 
 ## Contributing
 
