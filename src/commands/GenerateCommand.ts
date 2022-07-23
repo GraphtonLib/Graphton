@@ -343,6 +343,7 @@ export default class GenerateCommand {
           ArgumentType: argumentType,
           RootType: rootType,
           ReturnType: this.typeToFieldType(query.type),
+          ReturnTypeName: returnTypeInfo.name,
           ExecutionFunctionName: executionFunctionName || "execute",
           Implements: {
             mutation: fillImplements("GraphtonMutation"),
