@@ -5,6 +5,8 @@ export declare type RootType = 'query' | 'mutation' | 'subscription' | '/*RootTy
 export declare abstract class GraphtonBaseQuery<QueryResponse> {
     abstract readonly queryName: string;
     abstract readonly rootType: RootType;
+    constructor();
+    protected initGraphtonQueryReturnsObject(): void;
     /**
      * Get the return object format
      */
@@ -34,7 +36,8 @@ export declare abstract class GraphtonQueryReturnsObject<FieldSelectorType exten
     protected selectedFields: {
         root: Partial<FieldSelectorType>;
     };
-    protected abstract readonly returnType: keyof typeof fieldObjectMap;
+    protected readonly returnType: keyof typeof fieldObjectMap;
+    protected initGraphtonQueryReturnsObject(): void;
     /**
      * Select fields that should be returned
      */

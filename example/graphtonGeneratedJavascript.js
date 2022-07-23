@@ -21,6 +21,10 @@ function applyMixins(derivedCtor, constructors) {
   });
 }
 export class GraphtonBaseQuery {
+  constructor() {
+    this.initGraphtonQueryReturnsObject();
+  }
+  initGraphtonQueryReturnsObject() {}
   /**
    * Get the return object format
    */
@@ -71,7 +75,11 @@ export class GraphtonBaseQuery {
   }
 }
 export class GraphtonQueryReturnsObject {
-  selectedFields = { root: {} };
+  selectedFields;
+  returnType;
+  initGraphtonQueryReturnsObject() {
+    this.selectedFields = { root: {} };
+  }
   /**
    * Select fields that should be returned
    */
@@ -83,8 +91,8 @@ export class GraphtonQueryReturnsObject {
     for (let [field, subSelection] of Object.entries(fields)) {
       if (field === "_all") {
         Object.entries(fieldObjectMap[lookupType])
-          .filter(([k, v]) => v === null)
-          .forEach(([k, v]) => (selectionLevel[k] = {}));
+          .filter(([, v]) => v === null)
+          .forEach(([k]) => (selectionLevel[k] = {}));
       } else {
         if (subSelection === undefined) continue;
         let lookupField = fieldObjectMap[lookupType][field];
@@ -264,7 +272,7 @@ export class Query {
 class UsersQuery extends GraphtonBaseQuery {
   queryName = "users";
   rootType = "query";
-  returnType = "";
+  returnType = "User";
   /**
    * Execute the query and get the results
    */
@@ -276,7 +284,7 @@ applyMixins(UsersQuery, [GraphtonBaseQuery, GraphtonQueryReturnsObject]);
 class UsersOrderedQuery extends GraphtonBaseQuery {
   queryName = "usersOrdered";
   rootType = "query";
-  returnType = "";
+  returnType = "User";
   /**
    * Execute the query and get the results
    */
@@ -288,7 +296,7 @@ applyMixins(UsersOrderedQuery, [GraphtonBaseQuery, GraphtonQueryHasArguments, Gr
 class UserQuery extends GraphtonBaseQuery {
   queryName = "user";
   rootType = "query";
-  returnType = "";
+  returnType = "User";
   /**
    * Execute the query and get the results
    */
@@ -300,7 +308,6 @@ applyMixins(UserQuery, [GraphtonBaseQuery, GraphtonQueryHasArguments, GraphtonQu
 class UserExistsQuery extends GraphtonBaseQuery {
   queryName = "userExists";
   rootType = "query";
-  returnType = "";
   /**
    * Execute the query and get the results
    */
@@ -312,7 +319,6 @@ applyMixins(UserExistsQuery, [GraphtonBaseQuery, GraphtonQueryHasArguments]);
 class HealthCheckQuery extends GraphtonBaseQuery {
   queryName = "healthCheck";
   rootType = "query";
-  returnType = "";
   /**
    * Execute the query and get the results
    */
@@ -335,7 +341,7 @@ export class Mutation {
 class CreateUserMutation extends GraphtonBaseQuery {
   queryName = "createUser";
   rootType = "mutation";
-  returnType = "";
+  returnType = "User";
   /**
    * Execute the query and get the results
    */
@@ -347,7 +353,7 @@ applyMixins(CreateUserMutation, [GraphtonBaseQuery, GraphtonQueryHasArguments, G
 class UpdateUserMutation extends GraphtonBaseQuery {
   queryName = "updateUser";
   rootType = "mutation";
-  returnType = "";
+  returnType = "User";
   /**
    * Execute the query and get the results
    */
@@ -359,7 +365,7 @@ applyMixins(UpdateUserMutation, [GraphtonBaseQuery, GraphtonQueryHasArguments, G
 class DeleteUserMutation extends GraphtonBaseQuery {
   queryName = "deleteUser";
   rootType = "mutation";
-  returnType = "";
+  returnType = "User";
   /**
    * Execute the query and get the results
    */
@@ -377,7 +383,7 @@ export class Subscription {
 class PostAddedSubscription extends GraphtonBaseQuery {
   queryName = "postAdded";
   rootType = "subscription";
-  returnType = "";
+  returnType = "Post";
   /**
    * Execute the query and get the results
    */

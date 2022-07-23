@@ -10,7 +10,8 @@ export class GraphtonSettings {
   public static graphqlEndpoint: string = "";
 }
 
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import axios from "axios";
+import type { AxiosRequestConfig, AxiosResponse } from "axios";
 
 function applyMixins(derivedCtor: any, constructors: any[]) {
   constructors.forEach((baseCtor) => {
@@ -30,6 +31,12 @@ type ReturnObject = { [p: string]: string | ReturnObject };
 export abstract class GraphtonBaseQuery<QueryResponse> {
   public abstract readonly queryName: string;
   public abstract readonly rootType: RootType;
+
+  constructor() {
+    this.initGraphtonQueryReturnsObject();
+  }
+
+  protected initGraphtonQueryReturnsObject(): void {}
 
   /**
    * Get the return object format
@@ -95,8 +102,12 @@ export abstract class GraphtonQueryReturnsObject<
   FieldSelectorType extends FieldSelectorTypeFormat,
   ReturnType extends { [p: string]: unknown }
 > {
-  protected selectedFields: { root: Partial<FieldSelectorType> } = { root: {} };
-  protected abstract readonly returnType: keyof typeof fieldObjectMap;
+  protected selectedFields!: { root: Partial<FieldSelectorType> };
+  protected readonly returnType!: keyof typeof fieldObjectMap;
+
+  protected initGraphtonQueryReturnsObject(): void {
+    this.selectedFields = { root: {} };
+  }
 
   /**
    * Select fields that should be returned
@@ -115,8 +126,8 @@ export abstract class GraphtonQueryReturnsObject<
     for (let [field, subSelection] of Object.entries(fields)) {
       if (field === "_all") {
         Object.entries(fieldObjectMap[lookupType])
-          .filter(([k, v]) => v === null)
-          .forEach(([k, v]) => (selectionLevel[k] = {}));
+          .filter(([, v]) => v === null)
+          .forEach(([k]) => (selectionLevel[k] = {}));
       } else {
         if (subSelection === undefined) continue;
 
@@ -295,9 +306,8 @@ const fieldObjectMap: Record<string, Record<string, string | null>> = {
   Post: { id: null, author: "User", text: null, posted_at_date: null, posted_at_time: null, relatedPosts: "Post" },
 };
 export type UserOrderInput = {
-  _all?: {};
-  column?: UserSortColumn;
-  order?: SortOrder;
+  column: UserSortColumn;
+  order: SortOrder;
 };
 
 export class Role extends GraphtonBaseEnum {
@@ -361,20 +371,22 @@ export class UserSortColumn extends GraphtonBaseEnum {
 }
 
 export type UserFieldSelector = {
-  id: {};
-  username: {};
-  age: {};
-  role: {};
-  posts: PostFieldSelector;
-  friends: UserFieldSelector;
+  _all?: {};
+  id?: {};
+  username?: {};
+  age?: {};
+  role?: {};
+  posts?: PostFieldSelector;
+  friends?: UserFieldSelector;
 };
 export type PostFieldSelector = {
-  id: {};
-  author: UserFieldSelector;
-  text: {};
-  posted_at_date: {};
-  posted_at_time: {};
-  relatedPosts: PostFieldSelector;
+  _all?: {};
+  id?: {};
+  author?: UserFieldSelector;
+  text?: {};
+  posted_at_date?: {};
+  posted_at_time?: {};
+  relatedPosts?: PostFieldSelector;
 };
 
 // REGION: Queries
@@ -408,7 +420,7 @@ class UsersQuery
 {
   public readonly queryName = "users";
   public readonly rootType = "query";
-  protected readonly returnType = "";
+  protected readonly returnType = "User";
 
   /**
    * Execute the query and get the results
@@ -423,6 +435,7 @@ class UsersQuery
 interface UsersQuery
   extends GraphtonBaseQuery<UsersQueryResponse>,
     GraphtonQueryReturnsObject<UserFieldSelector, User> {
+  initGraphtonQueryReturnsObject(): void;
   toReturnString(): string;
 }
 applyMixins(UsersQuery, [GraphtonBaseQuery, GraphtonQueryReturnsObject]);
@@ -443,7 +456,7 @@ class UsersOrderedQuery
 {
   public readonly queryName = "usersOrdered";
   public readonly rootType = "query";
-  protected readonly returnType = "";
+  protected readonly returnType = "User";
 
   /**
    * Execute the query and get the results
@@ -459,6 +472,7 @@ interface UsersOrderedQuery
   extends GraphtonBaseQuery<UsersOrderedQueryResponse>,
     GraphtonQueryHasArguments<UsersOrderedQueryArguments>,
     GraphtonQueryReturnsObject<UserFieldSelector, User> {
+  initGraphtonQueryReturnsObject(): void;
   toReturnString(): string;
   toArgString(): string;
 }
@@ -480,7 +494,7 @@ class UserQuery
 {
   public readonly queryName = "user";
   public readonly rootType = "query";
-  protected readonly returnType = "";
+  protected readonly returnType = "User";
 
   /**
    * Execute the query and get the results
@@ -496,6 +510,7 @@ interface UserQuery
   extends GraphtonBaseQuery<UserQueryResponse>,
     GraphtonQueryHasArguments<UserQueryArguments>,
     GraphtonQueryReturnsObject<UserFieldSelector, User> {
+  initGraphtonQueryReturnsObject(): void;
   toReturnString(): string;
   toArgString(): string;
 }
@@ -517,7 +532,6 @@ class UserExistsQuery
 {
   public readonly queryName = "userExists";
   public readonly rootType = "query";
-  protected readonly returnType = "";
 
   /**
    * Execute the query and get the results
@@ -548,7 +562,6 @@ class HealthCheckQuery
 {
   public readonly queryName = "healthCheck";
   public readonly rootType = "query";
-  protected readonly returnType = "";
 
   /**
    * Execute the query and get the results
@@ -591,7 +604,7 @@ class CreateUserMutation
 {
   public readonly queryName = "createUser";
   public readonly rootType = "mutation";
-  protected readonly returnType = "";
+  protected readonly returnType = "User";
 
   /**
    * Execute the query and get the results
@@ -607,6 +620,7 @@ interface CreateUserMutation
   extends GraphtonBaseQuery<CreateUserMutationResponse>,
     GraphtonQueryHasArguments<CreateUserMutationArguments>,
     GraphtonQueryReturnsObject<UserFieldSelector, User> {
+  initGraphtonQueryReturnsObject(): void;
   toReturnString(): string;
   toArgString(): string;
 }
@@ -631,7 +645,7 @@ class UpdateUserMutation
 {
   public readonly queryName = "updateUser";
   public readonly rootType = "mutation";
-  protected readonly returnType = "";
+  protected readonly returnType = "User";
 
   /**
    * Execute the query and get the results
@@ -647,6 +661,7 @@ interface UpdateUserMutation
   extends GraphtonBaseQuery<UpdateUserMutationResponse>,
     GraphtonQueryHasArguments<UpdateUserMutationArguments>,
     GraphtonQueryReturnsObject<UserFieldSelector, User> {
+  initGraphtonQueryReturnsObject(): void;
   toReturnString(): string;
   toArgString(): string;
 }
@@ -668,7 +683,7 @@ class DeleteUserMutation
 {
   public readonly queryName = "deleteUser";
   public readonly rootType = "mutation";
-  protected readonly returnType = "";
+  protected readonly returnType = "User";
 
   /**
    * Execute the query and get the results
@@ -684,6 +699,7 @@ interface DeleteUserMutation
   extends GraphtonBaseQuery<DeleteUserMutationResponse>,
     GraphtonQueryHasArguments<DeleteUserMutationArguments>,
     GraphtonQueryReturnsObject<UserFieldSelector, User> {
+  initGraphtonQueryReturnsObject(): void;
   toReturnString(): string;
   toArgString(): string;
 }
@@ -708,7 +724,7 @@ class PostAddedSubscription
 {
   public readonly queryName = "postAdded";
   public readonly rootType = "subscription";
-  protected readonly returnType = "";
+  protected readonly returnType = "Post";
 
   /**
    * Execute the query and get the results
@@ -723,6 +739,7 @@ class PostAddedSubscription
 interface PostAddedSubscription
   extends GraphtonBaseQuery<PostAddedSubscriptionResponse>,
     GraphtonQueryReturnsObject<PostFieldSelector, Post> {
+  initGraphtonQueryReturnsObject(): void;
   toReturnString(): string;
 }
 applyMixins(PostAddedSubscription, [GraphtonBaseQuery, GraphtonQueryReturnsObject]);

@@ -13,6 +13,10 @@ import axios from "axios";
     });
 }
 export class GraphtonBaseQuery {
+    constructor() {
+        this.initGraphtonQueryReturnsObject();
+    }
+    initGraphtonQueryReturnsObject() { }
     /**
      * Get the return object format
      */
@@ -59,7 +63,11 @@ export class GraphtonBaseQuery {
     }
 }
 export class GraphtonQueryReturnsObject {
-    selectedFields = { root: {} };
+    selectedFields;
+    returnType;
+    initGraphtonQueryReturnsObject() {
+        this.selectedFields = { root: {} };
+    }
     /**
      * Select fields that should be returned
      */

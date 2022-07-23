@@ -162,9 +162,8 @@ export default class GenerateCommand {
     *generateInputObjectTypes(types) {
         for (const type of types) {
             yield `export type ${type.name} = {`;
-            yield `  _all?: {};`;
             for (const field of type.inputFields || []) {
-                yield `  ${field.name}?: ${this.typeToFieldType(field.type)};`;
+                yield `  ${field.name}: ${this.typeToFieldType(field.type)};`;
             }
             yield "};";
         }
@@ -187,12 +186,13 @@ export default class GenerateCommand {
                 switch (typeInfo?.childKind || "") {
                     case "ENUM":
                     case "SCALAR":
-                        return `${f.name}: {};`;
+                        return `${f.name}?: {};`;
                     default:
-                        return `${f.name}: ${typeInfo.name}FieldSelector;`;
+                        return `${f.name}?: ${typeInfo.name}FieldSelector;`;
                 }
             });
             yield `export type ${type.name}FieldSelector = {`;
+            yield `  _all?: {};`;
             yield `  ${fields.join("\n  ")}`;
             yield `};`;
         }
@@ -246,6 +246,7 @@ export default class GenerateCommand {
                 ArgumentType: argumentType,
                 RootType: rootType,
                 ReturnType: this.typeToFieldType(query.type),
+                ReturnTypeName: returnTypeInfo.name,
                 ExecutionFunctionName: executionFunctionName || "execute",
                 Implements: {
                     mutation: fillImplements("GraphtonMutation"),

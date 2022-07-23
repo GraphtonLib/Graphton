@@ -7,7 +7,7 @@ class X {
 class _t_QueryClassName_t_ extends GraphtonBaseQuery /*IF:AddExecutor*/ /*!implements!*/ /*Implements*/ /*ENDIF:AddExecutor*/ {
     queryName = '/*QueryName*/';
     rootType = '/*RootType*/';
-    returnType = '/*ReturnTypeName*/';
+    /*IF:ReturnsObject*/ returnType = '/*ReturnTypeName*/'; /*ENDIF:ReturnsObject*/
     /*IF:AddExecutor*/
     /**
      * Execute the query and get the results
