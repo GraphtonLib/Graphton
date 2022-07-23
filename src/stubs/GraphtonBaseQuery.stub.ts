@@ -27,6 +27,12 @@ export abstract class GraphtonBaseQuery<QueryResponse> {
     public abstract readonly queryName: string;
     public abstract readonly rootType: RootType;
 
+    constructor() {
+        this.initGraphtonQueryReturnsObject();
+    }
+
+    protected initGraphtonQueryReturnsObject(): void {}
+
     /**
      * Get the return object format
      */
@@ -82,8 +88,12 @@ export abstract class GraphtonBaseQuery<QueryResponse> {
 
 type FieldSelectorTypeFormat = { [key: string]: ({} | FieldSelectorTypeFormat); };
 export abstract class GraphtonQueryReturnsObject<FieldSelectorType extends FieldSelectorTypeFormat, ReturnType extends { [p: string]: unknown }> {
-    protected selectedFields: {root: Partial<FieldSelectorType>} = {root: {}};
-    protected abstract readonly returnType: keyof typeof fieldObjectMap;
+    protected selectedFields!: {root: Partial<FieldSelectorType>};
+    protected readonly returnType!: keyof typeof fieldObjectMap;
+
+    protected initGraphtonQueryReturnsObject(): void {
+        this.selectedFields = {root: {}};
+    }
 
     /**
      * Select fields that should be returned
