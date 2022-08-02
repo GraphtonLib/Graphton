@@ -28,7 +28,7 @@ A JS/TS generator that builds a GraphQL query builder for your API
 - [Reference](#reference)
     - [Note: abstraction](#note-abstraction)
     - [GraphtonBaseQuery](#graphtonbasequery)
-    - [setArgs](#setargs)
+        - [setArgs](#setargs)
         - [select](#select)
         - [deselect](#deselect)
         - [toQuery](#toquery)
@@ -252,7 +252,7 @@ That said, if you use the .ts variant of the generated output, tsc or your IDE c
 
 _GraphtonBaseQuery_ is abstract, the classes you will call are generated and extended from this base class.
 
-### setArgs
+#### setArgs
 
 _Only available if the query has arguments_
 
