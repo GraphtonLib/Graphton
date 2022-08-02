@@ -4,14 +4,13 @@ import * as fs from "fs";
 import { pascalCase } from "change-case";
 import axios from "axios";
 import { default as ts } from "typescript";
-const baseScalars = {
+const scalarMap = (scalarType) => ({
     Int: "number",
     Float: "number",
     String: "string",
     Boolean: "boolean",
     ID: "string",
-};
-const scalarMap = (scalarType) => baseScalars[scalarType] || scalarType;
+}[scalarType]);
 export default class GenerateCommand {
     gqlSchema = null;
     async generate(schemaUri, options) {
@@ -141,7 +140,7 @@ export default class GenerateCommand {
     }
     *generateScalarTypeAliases(types, overrides) {
         for (const type of types) {
-            yield `export type ${type.name} = ${overrides[type.name] || "string"};`;
+            yield `export type ${type.name} = ${overrides[type.name] || scalarMap(type.name) || "string"};`;
         }
     }
     *generateObjectTypes(types) {

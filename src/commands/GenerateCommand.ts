@@ -24,14 +24,14 @@ import {
 
 type OutContentSection = string[];
 
-const baseScalars: Record<string, string> = {
-  Int: "number",
-  Float: "number",
-  String: "string",
-  Boolean: "boolean",
-  ID: "string",
-};
-const scalarMap = (scalarType: string) => baseScalars[scalarType] || scalarType;
+const scalarMap = (scalarType: string) =>
+  ({
+    Int: "number",
+    Float: "number",
+    String: "string",
+    Boolean: "boolean",
+    ID: "string",
+  }[scalarType]);
 
 export default class GenerateCommand {
   private gqlSchema: IntrospectionSchema | null = null;
@@ -214,7 +214,7 @@ export default class GenerateCommand {
     overrides: Record<string, string>
   ): IterableIterator<string> {
     for (const type of types) {
-      yield `export type ${type.name} = ${overrides[type.name] || "string"};`;
+      yield `export type ${type.name} = ${overrides[type.name] || scalarMap(type.name) || "string"};`;
     }
   }
 
