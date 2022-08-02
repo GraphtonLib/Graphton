@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.3](https://github.com/GraphtonLib/Graphton/compare/v1.0.2...v1.0.3) (2022-08-02)
+
+
+### Bug Fixes
+
+* Generation of optional arguments vs optional returned values ([8bc3131](https://github.com/GraphtonLib/Graphton/commit/8bc3131f328da3765f7fdb683fddb025a31e40ca))
+
 ### [1.0.2](https://github.com/GraphtonLib/Graphton/compare/v1.0.1...v1.0.2) (2022-08-02)
 
 
