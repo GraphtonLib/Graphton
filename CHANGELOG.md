@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.1](https://github.com/GraphtonLib/Graphton/compare/v1.0.0...v1.0.1) (2022-08-02)
+
+
+### Bug Fixes
+
+* Scalars always being a string ([b390f52](https://github.com/GraphtonLib/Graphton/commit/b390f52e55fcaa8dfa2fab9c7f79e2e1a485268f))
+
 ## [1.0.0](https://github.com/GraphtonLib/Graphton/compare/v0.7.0...v1.0.0) (2022-07-23)
 
 
