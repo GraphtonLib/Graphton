@@ -4,24 +4,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [1.0.3](https://github.com/GraphtonLib/Graphton/compare/v1.0.2...v1.0.3) (2022-08-02)
 
-
-### Bug Fixes
-
-* Generation of optional arguments vs optional returned values ([8bc3131](https://github.com/GraphtonLib/Graphton/commit/8bc3131f328da3765f7fdb683fddb025a31e40ca))
-
-### [1.0.2](https://github.com/GraphtonLib/Graphton/compare/v1.0.1...v1.0.2) (2022-08-02)
-
-
-### Bug Fixes
-
-* Return values from enums are now strings instead of unparsed instances ([436547a](https://github.com/GraphtonLib/Graphton/commit/436547adbc5cfc4124ff6c881e2d0e7c6f80de87))
-
-### [1.0.1](https://github.com/GraphtonLib/Graphton/compare/v1.0.0...v1.0.1) (2022-08-02)
-
-
 ### Bug Fixes
 
 * Scalars always being a string ([b390f52](https://github.com/GraphtonLib/Graphton/commit/b390f52e55fcaa8dfa2fab9c7f79e2e1a485268f))
+* Return values from enums are now strings instead of unparsed instances ([436547a](https://github.com/GraphtonLib/Graphton/commit/436547adbc5cfc4124ff6c881e2d0e7c6f80de87))
+* Generation of optional arguments vs optional returned values ([8bc3131](https://github.com/GraphtonLib/Graphton/commit/8bc3131f328da3765f7fdb683fddb025a31e40ca))
 
 ## [1.0.0](https://github.com/GraphtonLib/Graphton/compare/v0.7.0...v1.0.0) (2022-07-23)
 
