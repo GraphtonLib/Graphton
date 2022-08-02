@@ -149,7 +149,7 @@ export default class GenerateCommand {
             fieldObjectMap[type.name] = {};
             yield `export type ${type.name} = {`;
             for (const field of type.fields || []) {
-                yield `  ${field.name}: ${this.typeToFieldType(field.type)};`;
+                yield `  ${field.name}: ${this.typeToFieldType(field.type, true)};`;
                 let typeInfo = this.returnTypeInfo(field.type);
                 fieldObjectMap[type.name][field.name] =
                     ["SCALAR", "ENUM"].indexOf(typeInfo.childKind) > -1 ? null : typeInfo.name;
@@ -169,10 +169,12 @@ export default class GenerateCommand {
     }
     *generateEnumTypes(enumTypes) {
         for (const enumType of enumTypes) {
+            let values = enumType.enumValues || [];
+            yield `export type ${enumType.name}EnumString = ${values.map((t) => `"${t.name}"`).join("|")};`;
             yield fillStub("Enum", {
                 EnumClassName: enumType.name,
-                PossibleValues: (enumType.enumValues || []).map((t) => `${t.name}:${enumType.name}.${t.name}`).join(","),
-                EnumValues: (enumType.enumValues || [])
+                PossibleValues: values.map((t) => `${t.name}:${enumType.name}.${t.name}`).join(","),
+                EnumValues: values
                     .map((t) => `static readonly ${t.name}: ${enumType.name} = new ${enumType.name}(${JSON.stringify(t.name)});`)
                     .join("\n    "),
             });
@@ -267,7 +269,7 @@ export default class GenerateCommand {
         }
         return { typed, untyped };
     }
-    typeToFieldType(typeRef) {
+    typeToFieldType(typeRef, enumStrings = false) {
         const typeInfo = this.returnTypeInfo(typeRef);
         if (!typeInfo) {
             return "unknown";
@@ -275,7 +277,11 @@ export default class GenerateCommand {
         let notNull = !typeInfo.notNull ? "|null|undefined" : "";
         let isListOf = typeInfo.isListOf ? "[]" : "";
         let listNotNull = typeInfo.isListOf && !typeInfo.listNotNull ? "|null|undefined" : "";
-        return `(${typeInfo.name}${notNull})${isListOf}${listNotNull}`;
+        let typeName = typeInfo.name;
+        if (enumStrings && typeInfo.childKind == "ENUM") {
+            typeName += "EnumString";
+        }
+        return `(${typeName}${notNull})${isListOf}${listNotNull}`;
     }
     returnTypeInfo(typeRef, returnTypeInfo) {
         returnTypeInfo = returnTypeInfo || {

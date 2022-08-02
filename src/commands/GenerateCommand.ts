@@ -224,7 +224,7 @@ export default class GenerateCommand {
       fieldObjectMap[type.name] = {};
       yield `export type ${type.name} = {`;
       for (const field of type.fields || []) {
-        yield `  ${field.name}: ${this.typeToFieldType(field.type)};`;
+        yield `  ${field.name}: ${this.typeToFieldType(field.type, true)};`;
 
         let typeInfo = this.returnTypeInfo(field.type);
         fieldObjectMap[type.name][field.name] =
@@ -250,10 +250,12 @@ export default class GenerateCommand {
 
   private *generateEnumTypes(enumTypes: IntrospectionEnumType[]): IterableIterator<string> {
     for (const enumType of enumTypes) {
+      let values = enumType.enumValues || [];
+      yield `export type ${enumType.name}EnumString = ${values.map((t) => `"${t.name}"`).join("|")};`;
       yield fillStub("Enum", {
         EnumClassName: enumType.name,
-        PossibleValues: (enumType.enumValues || []).map((t) => `${t.name}:${enumType.name}.${t.name}`).join(","),
-        EnumValues: (enumType.enumValues || [])
+        PossibleValues: values.map((t) => `${t.name}:${enumType.name}.${t.name}`).join(","),
+        EnumValues: values
           .map((t) => `static readonly ${t.name}: ${enumType.name} = new ${enumType.name}(${JSON.stringify(t.name)});`)
           .join("\n    "),
       });
@@ -374,7 +376,7 @@ export default class GenerateCommand {
     return { typed, untyped };
   }
 
-  private typeToFieldType(typeRef: IntrospectionTypeRef): string {
+  private typeToFieldType(typeRef: IntrospectionTypeRef, enumStrings: boolean = false): string {
     const typeInfo = this.returnTypeInfo(typeRef);
 
     if (!typeInfo) {
@@ -384,8 +386,12 @@ export default class GenerateCommand {
     let notNull = !typeInfo.notNull ? "|null|undefined" : "";
     let isListOf = typeInfo.isListOf ? "[]" : "";
     let listNotNull = typeInfo.isListOf && !typeInfo.listNotNull ? "|null|undefined" : "";
+    let typeName = typeInfo.name;
+    if (enumStrings && typeInfo.childKind == "ENUM") {
+      typeName += "EnumString";
+    }
 
-    return `(${typeInfo.name}${notNull})${isListOf}${listNotNull}`;
+    return `(${typeName}${notNull})${isListOf}${listNotNull}`;
   }
 
   private returnTypeInfo(typeRef: IntrospectionTypeRef, returnTypeInfo?: ReturnTypeInfo): ReturnTypeInfo {
