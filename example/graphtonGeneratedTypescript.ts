@@ -283,13 +283,13 @@ export type Date = any;
 export type Time = number;
 export type ID = string;
 export type String = string;
-export type Int = string;
-export type Boolean = string;
+export type Int = number;
+export type Boolean = boolean;
 export type User = {
   id: ID;
   username: String;
   age: Int | null | undefined;
-  role: Role;
+  role: RoleEnumString;
   posts: Post[];
   friends: User[];
 };
@@ -309,6 +309,7 @@ export type UserOrderInput = {
   column: UserSortColumn;
   order: SortOrder;
 };
+export type RoleEnumString = "ADMIN" | "USER" | "GUEST";
 
 export class Role extends GraphtonBaseEnum {
   static readonly ADMIN: Role = new Role("ADMIN");
@@ -329,6 +330,8 @@ export class Role extends GraphtonBaseEnum {
   }
 }
 
+export type SortOrderEnumString = "ASC" | "DESC";
+
 export class SortOrder extends GraphtonBaseEnum {
   static readonly ASC: SortOrder = new SortOrder("ASC");
   static readonly DESC: SortOrder = new SortOrder("DESC");
@@ -346,6 +349,8 @@ export class SortOrder extends GraphtonBaseEnum {
     return Object.values(SortOrder.possibleValues);
   }
 }
+
+export type UserSortColumnEnumString = "id" | "username" | "age";
 
 export class UserSortColumn extends GraphtonBaseEnum {
   static readonly id: UserSortColumn = new UserSortColumn("id");
