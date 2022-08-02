@@ -9,6 +9,7 @@ export default class GenerateCommand {
     private generateObjectTypeFieldSelectors;
     private generateQueryFactory;
     private argsToMethodParameters;
-    private typeToFieldType;
+    private typeToTsFieldType;
+    private typeToTsType;
     private returnTypeInfo;
 }

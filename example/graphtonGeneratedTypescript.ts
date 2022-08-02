@@ -288,7 +288,7 @@ export type Boolean = boolean;
 export type User = {
   id: ID;
   username: String;
-  age: Int | null | undefined;
+  age: Int | null;
   role: RoleEnumString;
   posts: Post[];
   friends: User[];
@@ -452,7 +452,7 @@ export interface UsersOrderedQueryResponse {
 }
 
 export interface UsersOrderedQueryArguments {
-  orderBy: UserOrderInput[] | null | undefined;
+  orderBy?: UserOrderInput[];
 }
 
 class UsersOrderedQuery
@@ -485,7 +485,7 @@ applyMixins(UsersOrderedQuery, [GraphtonBaseQuery, GraphtonQueryHasArguments, Gr
 
 export interface UserQueryResponse {
   data: {
-    user: User | null | undefined;
+    user: User | null;
   };
 }
 
@@ -600,7 +600,7 @@ export interface CreateUserMutationResponse {
 export interface CreateUserMutationArguments {
   username: String;
   role: Role;
-  age: Int | null | undefined;
+  age?: Int;
 }
 
 class CreateUserMutation
@@ -639,9 +639,9 @@ export interface UpdateUserMutationResponse {
 
 export interface UpdateUserMutationArguments {
   id: ID;
-  username: String | null | undefined;
-  role: Role | null | undefined;
-  age: Int | null | undefined;
+  username?: String;
+  role?: Role;
+  age?: Int;
 }
 
 class UpdateUserMutation

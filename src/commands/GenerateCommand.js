@@ -149,7 +149,7 @@ export default class GenerateCommand {
             fieldObjectMap[type.name] = {};
             yield `export type ${type.name} = {`;
             for (const field of type.fields || []) {
-                yield `  ${field.name}: ${this.typeToFieldType(field.type, true)};`;
+                yield `  ${field.name}: ${this.typeToTsType(field.type, true)};`;
                 let typeInfo = this.returnTypeInfo(field.type);
                 fieldObjectMap[type.name][field.name] =
                     ["SCALAR", "ENUM"].indexOf(typeInfo.childKind) > -1 ? null : typeInfo.name;
@@ -162,7 +162,7 @@ export default class GenerateCommand {
         for (const type of types) {
             yield `export type ${type.name} = {`;
             for (const field of type.inputFields || []) {
-                yield `  ${field.name}: ${this.typeToFieldType(field.type)};`;
+                yield `  ${field.name}${this.typeToTsFieldType(field.type)};`;
             }
             yield "};";
         }
@@ -246,7 +246,7 @@ export default class GenerateCommand {
                 ArgumentTypeFields: params.typed.join(";\n    "),
                 ArgumentType: argumentType,
                 RootType: rootType,
-                ReturnType: this.typeToFieldType(query.type),
+                ReturnType: this.typeToTsType(query.type),
                 ReturnTypeName: returnTypeInfo.name,
                 ExecutionFunctionName: executionFunctionName || "execute",
                 Implements: {
@@ -264,19 +264,33 @@ export default class GenerateCommand {
         const typed = [];
         const untyped = [];
         for (const arg of args) {
-            typed.push(`${arg.name}: ${this.typeToFieldType(arg.type)}${arg.defaultValue ? ` = ${JSON.stringify(arg.defaultValue)}` : ""}`);
+            typed.push(`${arg.name}${this.typeToTsFieldType(arg.type)}${arg.defaultValue ? ` = ${JSON.stringify(arg.defaultValue)}` : ""}`);
             untyped.push(arg.name);
         }
         return { typed, untyped };
     }
-    typeToFieldType(typeRef, enumStrings = false) {
+    typeToTsFieldType(typeRef, enumStrings = false) {
         const typeInfo = this.returnTypeInfo(typeRef);
         if (!typeInfo) {
             return "unknown";
         }
-        let notNull = !typeInfo.notNull ? "|null|undefined" : "";
+        let rootNotNull = (typeInfo.isListOf && !typeInfo.listNotNull) || (!typeInfo.isListOf && !typeInfo.notNull) ? "?" : "";
+        let notNull = !typeInfo.notNull && typeInfo.isListOf ? "|null" : "";
         let isListOf = typeInfo.isListOf ? "[]" : "";
-        let listNotNull = typeInfo.isListOf && !typeInfo.listNotNull ? "|null|undefined" : "";
+        let typeName = typeInfo.name;
+        if (enumStrings && typeInfo.childKind == "ENUM") {
+            typeName += "EnumString";
+        }
+        return `${rootNotNull}: (${typeName}${notNull})${isListOf}`;
+    }
+    typeToTsType(typeRef, enumStrings = false) {
+        const typeInfo = this.returnTypeInfo(typeRef);
+        if (!typeInfo) {
+            return "unknown";
+        }
+        let notNull = !typeInfo.notNull ? "|null" : "";
+        let isListOf = typeInfo.isListOf ? "[]" : "";
+        let listNotNull = typeInfo.isListOf && !typeInfo.listNotNull ? "|null" : "";
         let typeName = typeInfo.name;
         if (enumStrings && typeInfo.childKind == "ENUM") {
             typeName += "EnumString";
