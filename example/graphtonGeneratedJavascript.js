@@ -257,13 +257,19 @@ export class Query {
     return new UsersQuery();
   }
   static usersOrdered(queryArgs) {
-    return new UsersOrderedQuery().setArgs(queryArgs);
+    const inst = new UsersOrderedQuery();
+    if (typeof queryArgs !== "undefined") inst.setArgs(queryArgs);
+    return inst;
   }
   static user(queryArgs) {
-    return new UserQuery().setArgs(queryArgs);
+    const inst = new UserQuery();
+    if (typeof queryArgs !== "undefined") inst.setArgs(queryArgs);
+    return inst;
   }
   static userExists(queryArgs) {
-    return new UserExistsQuery().setArgs(queryArgs);
+    const inst = new UserExistsQuery();
+    if (typeof queryArgs !== "undefined") inst.setArgs(queryArgs);
+    return inst;
   }
   static healthCheck() {
     return new HealthCheckQuery();
@@ -329,13 +335,19 @@ class HealthCheckQuery extends GraphtonBaseQuery {
 // REGION: Mutations
 export class Mutation {
   static createUser(queryArgs) {
-    return new CreateUserMutation().setArgs(queryArgs);
+    const inst = new CreateUserMutation();
+    if (typeof queryArgs !== "undefined") inst.setArgs(queryArgs);
+    return inst;
   }
   static updateUser(queryArgs) {
-    return new UpdateUserMutation().setArgs(queryArgs);
+    const inst = new UpdateUserMutation();
+    if (typeof queryArgs !== "undefined") inst.setArgs(queryArgs);
+    return inst;
   }
   static deleteUser(queryArgs) {
-    return new DeleteUserMutation().setArgs(queryArgs);
+    const inst = new DeleteUserMutation();
+    if (typeof queryArgs !== "undefined") inst.setArgs(queryArgs);
+    return inst;
   }
 }
 class CreateUserMutation extends GraphtonBaseQuery {

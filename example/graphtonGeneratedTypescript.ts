@@ -399,14 +399,20 @@ export class Query {
   public static users() {
     return new UsersQuery();
   }
-  public static usersOrdered(queryArgs: UsersOrderedQueryArguments) {
-    return new UsersOrderedQuery().setArgs(queryArgs);
+  public static usersOrdered(queryArgs?: UsersOrderedQueryArguments) {
+    const inst = new UsersOrderedQuery();
+    if (typeof queryArgs !== "undefined") inst.setArgs(queryArgs);
+    return inst;
   }
-  public static user(queryArgs: UserQueryArguments) {
-    return new UserQuery().setArgs(queryArgs);
+  public static user(queryArgs?: UserQueryArguments) {
+    const inst = new UserQuery();
+    if (typeof queryArgs !== "undefined") inst.setArgs(queryArgs);
+    return inst;
   }
-  public static userExists(queryArgs: UserExistsQueryArguments) {
-    return new UserExistsQuery().setArgs(queryArgs);
+  public static userExists(queryArgs?: UserExistsQueryArguments) {
+    const inst = new UserExistsQuery();
+    if (typeof queryArgs !== "undefined") inst.setArgs(queryArgs);
+    return inst;
   }
   public static healthCheck() {
     return new HealthCheckQuery();
@@ -580,14 +586,20 @@ class HealthCheckQuery
 
 // REGION: Mutations
 export class Mutation {
-  public static createUser(queryArgs: CreateUserMutationArguments) {
-    return new CreateUserMutation().setArgs(queryArgs);
+  public static createUser(queryArgs?: CreateUserMutationArguments) {
+    const inst = new CreateUserMutation();
+    if (typeof queryArgs !== "undefined") inst.setArgs(queryArgs);
+    return inst;
   }
-  public static updateUser(queryArgs: UpdateUserMutationArguments) {
-    return new UpdateUserMutation().setArgs(queryArgs);
+  public static updateUser(queryArgs?: UpdateUserMutationArguments) {
+    const inst = new UpdateUserMutation();
+    if (typeof queryArgs !== "undefined") inst.setArgs(queryArgs);
+    return inst;
   }
-  public static deleteUser(queryArgs: DeleteUserMutationArguments) {
-    return new DeleteUserMutation().setArgs(queryArgs);
+  public static deleteUser(queryArgs?: DeleteUserMutationArguments) {
+    const inst = new DeleteUserMutation();
+    if (typeof queryArgs !== "undefined") inst.setArgs(queryArgs);
+    return inst;
   }
 }
 

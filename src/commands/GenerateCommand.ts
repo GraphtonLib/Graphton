@@ -297,8 +297,10 @@ export default class GenerateCommand {
         yield `    return new ${pascalCase(query.name)}${pascalCase(rootType)}();`;
         yield "  }";
       } else {
-        yield `  public static ${query.name}(queryArgs: ${pascalCase(query.name)}${pascalCase(rootType)}Arguments) {`;
-        yield `    return (new ${pascalCase(query.name)}${pascalCase(rootType)}()).setArgs(queryArgs);`;
+        yield `  public static ${query.name}(queryArgs?: ${pascalCase(query.name)}${pascalCase(rootType)}Arguments) {`;
+        yield `    const inst = new ${pascalCase(query.name)}${pascalCase(rootType)}()`;
+        yield `    if (typeof queryArgs !== 'undefined') inst.setArgs(queryArgs);`;
+        yield `    return inst;`;
         yield "  }";
       }
     }
