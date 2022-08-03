@@ -1,7 +1,7 @@
 {
   "name": "@graphtonlib/graphton",
   "description": "Generate a JS/TS query builder library from an (external) GraphQL introspection schema.",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "repository": {
     "type": "git",
     "url": "https://github.com/GraphtonLib/Graphton.git"
