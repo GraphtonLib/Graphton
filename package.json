@@ -43,7 +43,7 @@
     "standard-version": "^9.5.0"
   },
   "dependencies": {
-    "axios": "^0.27.2",
+    "axios": "^1.2.3",
     "change-case": "^4.1.2",
     "commander": "^9.4.0",
     "graphql": "^16.5.0",
