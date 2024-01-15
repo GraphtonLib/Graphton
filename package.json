@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.5.9",
-    "prettier": "^2.7.1",
+    "prettier": "^3.2.2",
     "standard-version": "^9.5.0"
   },
   "dependencies": {
