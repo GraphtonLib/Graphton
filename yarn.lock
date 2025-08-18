@@ -28,9 +28,11 @@
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/@types/minimist/-/minimist-1.2.2.tgz#ee771e2ba4b3dc5b372935d549fd9617bf345b8c"
 
-"@types/node@^20.5.9":
-  version "20.5.9"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.5.9.tgz#a70ec9d8fa0180a314c3ede0e20ea56ff71aed9a"
+"@types/node@^24.3.0":
+  version "24.3.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-24.3.0.tgz#89b09f45cb9a8ee69466f18ee5864e4c3eb84dec"
+  dependencies:
+    undici-types "~7.10.0"
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.1"
@@ -1192,6 +1194,10 @@ typescript@^5.0.4:
 uglify-js@^3.1.4:
   version "3.17.2"
   resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.17.2.tgz#f55f668b9a64b213977ae688703b6bbb7ca861c6"
+
+undici-types@~7.10.0:
+  version "7.10.0"
+  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-7.10.0.tgz#4ac2e058ce56b462b056e629cc6a02393d3ff350"
 
 upper-case-first@^2.0.2:
   version "2.0.2"
