@@ -36,6 +36,86 @@
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/@types/normalize-package-data/-/normalize-package-data-2.4.1.tgz#d3357479a0fdfdd5907fe67e17e0a85c906e1301"
 
+"@typescript/typescript-aix-ppc64@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-aix-ppc64/-/typescript-aix-ppc64-7.0.2.tgz#cdc7ce81d60f1e09034960ddfb1fb880d7a776b6"
+
+"@typescript/typescript-darwin-arm64@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-darwin-arm64/-/typescript-darwin-arm64-7.0.2.tgz#a55fdfcfa58df58d27db2237cde6a5c1e35a7235"
+
+"@typescript/typescript-darwin-x64@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-darwin-x64/-/typescript-darwin-x64-7.0.2.tgz#38d1c9172800a91d707bec64d2a370a016634db4"
+
+"@typescript/typescript-freebsd-arm64@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-freebsd-arm64/-/typescript-freebsd-arm64-7.0.2.tgz#f1ff8810030b35d2b5be0db6a2dc650460ea94fa"
+
+"@typescript/typescript-freebsd-x64@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-freebsd-x64/-/typescript-freebsd-x64-7.0.2.tgz#3d86b03f353c5b1ba95162eb6ce35533bfc294bd"
+
+"@typescript/typescript-linux-arm64@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-linux-arm64/-/typescript-linux-arm64-7.0.2.tgz#d9334d96d6dac6ff85da9c865588948de939e91f"
+
+"@typescript/typescript-linux-arm@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-linux-arm/-/typescript-linux-arm-7.0.2.tgz#ad94b41e1aee2a4dcc6a298c7b67c43345fde32e"
+
+"@typescript/typescript-linux-loong64@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-linux-loong64/-/typescript-linux-loong64-7.0.2.tgz#2965aee4fc873360139d893daafe6397a29138ad"
+
+"@typescript/typescript-linux-mips64el@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-linux-mips64el/-/typescript-linux-mips64el-7.0.2.tgz#1a887a311bed3a833f80bfd4a9ed37c271936cf0"
+
+"@typescript/typescript-linux-ppc64@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-linux-ppc64/-/typescript-linux-ppc64-7.0.2.tgz#8b63c9b2f445b393eb4e43ec21da225dade3577d"
+
+"@typescript/typescript-linux-riscv64@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-linux-riscv64/-/typescript-linux-riscv64-7.0.2.tgz#b6e8a35c289b3ea97a92a41d461aaeed0d3b36e1"
+
+"@typescript/typescript-linux-s390x@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-linux-s390x/-/typescript-linux-s390x-7.0.2.tgz#2ef96693be4861f6d17965427e5b009cbbed1a3e"
+
+"@typescript/typescript-linux-x64@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-linux-x64/-/typescript-linux-x64-7.0.2.tgz#73269cb0baba50aea0ca060445a6b88e583f1ce2"
+
+"@typescript/typescript-netbsd-arm64@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-netbsd-arm64/-/typescript-netbsd-arm64-7.0.2.tgz#3a3649f97fafa210b4e6e3798c15e06605c8a901"
+
+"@typescript/typescript-netbsd-x64@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-netbsd-x64/-/typescript-netbsd-x64-7.0.2.tgz#47ec59491a40c470d2807dc4d2b825528fd979ab"
+
+"@typescript/typescript-openbsd-arm64@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-openbsd-arm64/-/typescript-openbsd-arm64-7.0.2.tgz#796be8da0bd989d8a3fb96f2801e38a8365b4baf"
+
+"@typescript/typescript-openbsd-x64@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-openbsd-x64/-/typescript-openbsd-x64-7.0.2.tgz#d37fe2a729eb942c076c454ee7f1815faf7d560f"
+
+"@typescript/typescript-sunos-x64@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-sunos-x64/-/typescript-sunos-x64-7.0.2.tgz#aba8d3464c3565a7044789baba96916bd4ab2c88"
+
+"@typescript/typescript-win32-arm64@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-win32-arm64/-/typescript-win32-arm64-7.0.2.tgz#b9de50a17196383f62620b5f9d0a2f34ad3b60d7"
+
+"@typescript/typescript-win32-x64@7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@typescript/typescript-win32-x64/-/typescript-win32-x64-7.0.2.tgz#cf3b7b0d6ce5635daca4c8e01c189cdcde47ec3c"
+
 JSONStream@^1.0.4:
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/JSONStream/-/JSONStream-1.3.5.tgz#3208c1f08d3a4d99261ab64f92302bc15e111ca0"
@@ -1185,9 +1265,30 @@ typedarray@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
 
-typescript@^5.0.4:
-  version "5.2.2"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.2.2.tgz#5ebb5e5a5b75f085f22bc3f8460fba308310fa78"
+typescript@^7.0.2:
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-7.0.2.tgz#9ec773d7954a8c182c17cc5bbd575aa28bc51582"
+  optionalDependencies:
+    "@typescript/typescript-aix-ppc64" "7.0.2"
+    "@typescript/typescript-darwin-arm64" "7.0.2"
+    "@typescript/typescript-darwin-x64" "7.0.2"
+    "@typescript/typescript-freebsd-arm64" "7.0.2"
+    "@typescript/typescript-freebsd-x64" "7.0.2"
+    "@typescript/typescript-linux-arm" "7.0.2"
+    "@typescript/typescript-linux-arm64" "7.0.2"
+    "@typescript/typescript-linux-loong64" "7.0.2"
+    "@typescript/typescript-linux-mips64el" "7.0.2"
+    "@typescript/typescript-linux-ppc64" "7.0.2"
+    "@typescript/typescript-linux-riscv64" "7.0.2"
+    "@typescript/typescript-linux-s390x" "7.0.2"
+    "@typescript/typescript-linux-x64" "7.0.2"
+    "@typescript/typescript-netbsd-arm64" "7.0.2"
+    "@typescript/typescript-netbsd-x64" "7.0.2"
+    "@typescript/typescript-openbsd-arm64" "7.0.2"
+    "@typescript/typescript-openbsd-x64" "7.0.2"
+    "@typescript/typescript-sunos-x64" "7.0.2"
+    "@typescript/typescript-win32-arm64" "7.0.2"
+    "@typescript/typescript-win32-x64" "7.0.2"
 
 uglify-js@^3.1.4:
   version "3.17.2"

@@ -47,7 +47,7 @@
     "change-case": "^4.1.2",
     "commander": "^10.0.0",
     "graphql": "^16.5.0",
-    "typescript": "^5.0.4"
+    "typescript": "^7.0.2"
   },
   "resolutions": {
     "minimist": "^1.2.6"
